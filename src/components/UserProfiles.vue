@@ -14,8 +14,8 @@
           class="el-menu-demo"
           mode="horizontal"
           @select="handleSelect"
-          background-color="#242632"
-          text-color="#fff"
+          background-color="#181a20"
+          text-color="#eaecef"
           active-text-color="#f0b90b"
           style="margin-left: 30px"
         >
@@ -43,8 +43,8 @@
             class="el-menu-vertical-demo"
             @open="handleOpen"
             @close="handleClose"
-            background-color="#242632"
-            text-color="#fff"
+            background-color="#181a20"
+            text-color="#848e8c"
             active-text-color="#f0b90b"
             width="10px"
           >
@@ -70,7 +70,7 @@
               <i class="el-icon-menu"></i>
               <span slot="title">导航二</span>
             </el-menu-item>
-            <el-menu-item index="3" disabled>
+            <el-menu-item index="3">
               <i class="el-icon-document"></i>
               <span slot="title">导航三</span>
             </el-menu-item>
@@ -80,7 +80,23 @@
             </el-menu-item>
           </el-menu>
         </el-aside>
-        <el-main class="main"></el-main>
+        <el-main class="main">
+          <div class="user-avatar">
+            <div class="block">
+              <el-avatar shape="square" :size="50" :src="squareUrl"></el-avatar>
+            </div>
+            <div class="block" v-for="size in sizeList" :key="size">
+              <el-avatar
+                shape="square"
+                :size="size"
+                :src="squareUrl"
+              ></el-avatar>
+            </div>
+          </div>
+          <div class="main-content">
+            <p>这是一条测试信息</p>
+          </div>
+        </el-main>
       </el-container>
     </el-container>
   </div>
@@ -96,13 +112,12 @@ export default {
 
 <style scoped>
 .common-layout {
-  padding: 20px;
-  background-color: #f0f0f0;
+  background-color: #eaecef;
 }
 
 .header {
-  background-color: #242632;
-  color: white;
+  background-color: #181a20;
+  color: #eaecef;
   height: 8vh;
   text-align: center;
   border-radius: 12px 12px 0 0;
@@ -110,17 +125,20 @@ export default {
 }
 
 .aside {
-  background-color: #242632;
-  color: white;
-  height: 84vh;
+  background-color: #181a20;
+  color: #eaecef;
+  height: 89vh;
   border-radius: 0 0 0 12px;
 }
 
 .main {
-  background-color: #242632;
+  background-color: #181a20;
   padding: 10px;
-  height: 84vh;
+  height: 89vh;
   border-radius: 0 0 12px 0;
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
 .content-container {
   flex: 1;
@@ -133,5 +151,22 @@ export default {
   height: auto;
   margin-top: 8px;
   margin-left: 15px;
+}
+.main-content {
+  position: relative;
+  border: 1px solid #2b3139;
+  padding: 20px; /* 增加边框与内容之间的间距 */
+  width: 56%;
+  height: 20%;
+  top: 18%;
+  left: -10%;
+  border-radius: 12px;
+  color: #eaecef;
+}
+.user-avatar {
+  position: relative;
+  top: 3%;
+  left: -5%;
+
 }
 </style>
