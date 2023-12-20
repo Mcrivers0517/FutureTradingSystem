@@ -39,7 +39,7 @@
       <el-container class="content-container">
         <el-aside class="aside" width="200px">
           <el-menu
-            default-active="2"
+            default-active=""
             class="el-menu-vertical-demo"
             @open="handleOpen"
             @close="handleClose"
@@ -83,18 +83,22 @@
         <el-main class="main">
           <div class="user-avatar">
             <div class="block">
-              <el-avatar shape="square" :size="50" :src="squareUrl"></el-avatar>
-            </div>
-            <div class="block" v-for="size in sizeList" :key="size">
-              <el-avatar
-                shape="square"
-                :size="size"
-                :src="squareUrl"
-              ></el-avatar>
+              <el-avatar shape="square" :size="65" :src="squareUrl"></el-avatar>
             </div>
           </div>
-          <div class="main-content">
+          <div class="user-info">
+            <div class="user-name">
+              <span>这里是用户名</span>
+            </div>
+            <div class="user-id">
+              <span>这里是用户id</span>
+            </div>
+          </div>
+          <div class="main-content" id="main-content-1">
             <p>这是一条测试信息</p>
+          </div>
+          <div class="main-content" id="main-content-2">
+            <p>这是一条测试信息2</p>
           </div>
         </el-main>
       </el-container>
@@ -138,6 +142,7 @@ export default {
   border-radius: 0 0 12px 0;
   display: flex;
   justify-content: center;
+  flex-direction: column;
   position: relative;
 }
 .content-container {
@@ -152,21 +157,43 @@ export default {
   margin-top: 8px;
   margin-left: 15px;
 }
-.main-content {
+#main-content-1 {
   position: relative;
   border: 1px solid #2b3139;
   padding: 20px; /* 增加边框与内容之间的间距 */
   width: 56%;
   height: 20%;
-  top: 18%;
-  left: -10%;
+  top: 3%;
+  left: 10%;
+  border-radius: 12px;
+  color: #eaecef;
+}
+#main-content-2 {
+  position: relative;
+  border: 1px solid #2b3139;
+  padding: 20px; /* 增加边框与内容之间的间距 */
+  width: 56%;
+  height: 40%;
+  top: 8%;
+  left: 10%;
   border-radius: 12px;
   color: #eaecef;
 }
 .user-avatar {
-  position: relative;
-  top: 3%;
-  left: -5%;
-
+  position: absolute;
+  top: 5%;
+  left: 12%;
+}
+.user-info {
+  position: absolute;
+  top: 6%;
+  left: 20%;
+  color: #eaecef;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.user-id {
+  margin-top: 8px;
 }
 </style>
