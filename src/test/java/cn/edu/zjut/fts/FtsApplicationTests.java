@@ -1,10 +1,10 @@
-package com.example.futuretradingsystemspringboot;
+package cn.edu.zjut.fts;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class FutureTradingSystemSpringbootApplicationTests {
+class FtsApplicationTests {
 
 	@Test
 	void contextLoads() {
