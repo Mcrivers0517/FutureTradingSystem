@@ -3,9 +3,7 @@ package cn.edu.zjut.fts.controller;
 import cn.edu.zjut.fts.entity.User;
 import cn.edu.zjut.fts.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,15 +20,35 @@ public class UserController {
         System.out.println(list);
         return list;
     }
-//插入用户信息用于实现注册
-     @PostMapping("/user")
-    public String insert(User user){
-    int i = userMapper.insert(user);
-    if(i>0){
-        return "插入成功";
-    }else{
-        return "插入失败";
+
+@PostMapping("/user")
+public String insert(@RequestParam("username") String username,
+                     @RequestParam("password") String password,
+                     @RequestParam("confirmPassword") String confirmPassword) {
+    try {
+        // 检查两次输入的密码是否相同
+        if (!password.equals(confirmPassword)) {
+            return "两次输入的密码不一致";
+        }
+
+        // 创建 User 对象并设置属性
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+
+        // 直接保存用户信息到数据库
+        int result = userMapper.insert(user);
+        if (result > 0) {
+            return "注册成功";
+        } else {
+            return "注册失败";
+        }
+    } catch (Exception e) {
+        // 适当处理异常（记录或返回有意义的错误消息）
+        return "注册过程中发生错误";
     }
 }
+
+
 }
 
