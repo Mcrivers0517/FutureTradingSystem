@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     return {
@@ -66,10 +67,27 @@ export default {
     };
   },
   methods: {
-    login() {
+    async login() {
       if (this.username === "" || this.password === "") {
         alert("用户名和密码不能为空，请填写完整！");
       }
+      axios
+        .post("localhost:5000/login", {
+          username: this.username,
+          password: this.password,
+        })
+        .then((response) => {
+          const result = response.data;
+
+          if (result.success) {
+            this.$router.push("/user-home");
+          } else {
+            alert("登录失败：" + result.message);
+          }
+        })
+        .catch((error) => {
+          console.error("登录请求失败", error);
+        });
     },
   },
 };
