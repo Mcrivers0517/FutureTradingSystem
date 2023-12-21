@@ -33,27 +33,32 @@
         <el-main class="main">
           <div class="user-avatar">
             <div class="block">
-              <el-avatar shape="square" :size="65" :src="defaultAvatar"></el-avatar>
+              <el-avatar
+                shape="square"
+                :size="65"
+                :src="avatarUrl"
+                class="custom-avatar"
+              ></el-avatar>
             </div>
           </div>
           <div class="user-info">
             <div class="user-name">
-              <span>Mcrivers</span>
+              <span>{{username}}</span>
             </div>
             <div class="user-id">
-              <span>202103150618</span>
+              <span>{{userid}}</span>
             </div>
           </div>
           <div class="main-content" id="main-content-1">
             <div class="assets-container">
               <span class="assets">总资产估值</span>
               <div class="assets-values">
-                <span class="assets-value">429.1181194</span>
+                <span class="assets-value">{{totalAssets}}</span>
                 <span class="assets-currency">RMB</span>
               </div>
               <div class="profit-and-loss">
                 <span class="profit-and-loss-title">今日盈亏</span>
-                <span class="profit-and-loss-value">+4.67%(1.55%)</span>
+                <span class="profit-and-loss-value">{{dailyProfitLoss}}</span>
               </div>
             </div>
           </div>
@@ -61,25 +66,26 @@
             <div>
               <span class="posi">持仓情况</span>
               <el-table
-                :data="tableData"
+                :data="PositionData"
                 class="posi-table"
                 :cell-style="tableRowClassName"
               >
-                <el-table-column prop="type" label="品种" :width="80"> </el-table-column>
-                <el-table-column prop="buy/sell" label="买卖">
+                <el-table-column prop="type" label="品种" :width="80">
+                </el-table-column>
+                <el-table-column prop="BuyOrSell" label="买卖">
                 </el-table-column>
                 <el-table-column prop="Position" label="持仓">
                 </el-table-column>
-                <el-table-column prop="Floating Profit/Loss" label="浮动盈亏">
+                <el-table-column prop="FloatingProfitOrLoss" label="浮动盈亏">
                 </el-table-column>
-                <el-table-column prop="Profit/Loss Ratio" label="盈亏比率">
+                <el-table-column prop="ProfitOrLossRatio" label="盈亏比率">
                 </el-table-column>
-                <el-table-column prop="Average Opening Price" label="开仓均价">
+                <el-table-column prop="AverageOpeningPrice" label="开仓均价">
                 </el-table-column>
-                <el-table-column prop="Current Price" label="现价">
+                <el-table-column prop="CurrentPrice" label="现价">
                 </el-table-column>
                 <el-table-column
-                  prop="Latest Transaction Time"
+                  prop="LatestTransactionTime"
                   label="最新成交时间"
                   :width="175"
                 >
@@ -94,47 +100,59 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     return {
-      tableData: [
-        {
-          type: "A",
-          "buy/sell": "Buy",
-          Position: 100,
-          "Floating Profit/Loss": 150.25,
-          "Profit/Loss Ratio": 0.075,
-          "Average Opening Price": 50.75,
-          "Current Price": 52.0,
-          "Latest Transaction Time": "2023-12-19 14:30:45",
-        },
-        {
-          type: "B",
-          "buy/sell": "Sell",
-          Position: 20000,
-          "Floating Profit/Loss": -500.8,
-          "Profit/Loss Ratio": -0.025,
-          "Average Opening Price": 1.1205,
-          "Current Price": 1.118,
-          "Latest Transaction Time": "2023-12-19 15:45:20",
-        },
-        {
-          type: "C",
-          "buy/sell": "Buy",
-          Position: 500,
-          "Floating Profit/Loss": 75.4,
-          "Profit/Loss Ratio": 0.03,
-          "Average Opening Price": 150.8,
-          "Current Price": 152.0,
-          "Latest Transaction Time": "2023-12-19 16:15:10",
-        },
-      ],
-      defaultAvatar:"../assets/default-avatar.png",
+      PositionData: [],
+      avatarUrl: require("@/assets/default-avatar.png"),
+      username: "defaultName",
+      userid: "defaultId",
+      totalAssets: "totalAssets",
+      dailyProfitLoss: "dailyProfitLoss",
     };
+  },
+  created()
+  {
+    this.getPositions();
+    this.getUserInfo();
   },
   methods: {
     tableRowClassName() {
       return "background: #181a20";
+    },
+    async getPositions() {
+      try {
+        const response = await axios.get("localhost:5000/getPositions");
+        const responseData = response.data;
+        const tableData = responseData.Position;
+        const PositionData = tableData.map((data) => ({
+          type: data.type, //期货品种
+          BuyOrSell: data.BuyOrSell, //买/卖
+          Position: data.Position, //持仓
+          FloatingProfitOrLoss: data.FloatingProfitOrLoss, //浮动盈亏
+          ProfitOrLossRatio: data.ProfitOrLossRatio, //盈亏比率
+          AverageOpeningPrice: data.AverageOpeningPrice, //开仓均价
+          CurrentPrice: data.CurrentPrice, //现价
+          LatestTransactionTime: data.LatestTransactionTime, //最新成交时间
+        }));
+        this.PositionData = PositionData;
+      } catch (error) {
+        console.error("Data Acquisition Failure:", error);
+      }
+    },
+    async getUserInfo() {
+      try {
+        const response = await axios.get("localhost:5000/getUserInfo");
+        const responseData = response.data;
+        this.avatarUrl = responseData.avatarUrl;//用户头像url
+        this.username = responseData.username;//用户名
+        this.userid = responseData.userid;//用户id
+        this.totalAssets = responseData.totalAssets;//用户总资产
+        this.dailyProfitLoss = response.dailyProfitLoss;//今日盈亏
+      } catch (error) {
+        console.error("Data Acquisition Failure:", error);
+      }
     },
   },
 };
@@ -293,5 +311,8 @@ export default {
   font-weight: 600;
   margin-left: 1%;
   color: #f6465d;
+}
+.custom-avatar {
+  border-radius: 10px;
 }
 </style>
