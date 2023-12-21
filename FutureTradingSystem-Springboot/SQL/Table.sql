@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS user,PositionTable,Delegate;
+DROP TABLE IF EXISTS User,PositionTable,DelegateTable;
 
 #建立用户表
 CREATE TABLE IF NOT EXISTS User(
