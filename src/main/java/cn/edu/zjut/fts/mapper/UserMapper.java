@@ -14,11 +14,11 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select * from user")
     public List<User> selectall();
-
+    //插入操作，用于注册实现
     @Insert("insert into user values (#{id},#{username},#{password},#{avatarUrl})")
     public int insert(User user);
 
-
+    //查询操作，用于登录逻辑实现
     @Select("SELECT * FROM user WHERE username = #{username}")
     User selectByUsername(@Param("username") String username);
 
