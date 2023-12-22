@@ -43,22 +43,22 @@
           </div>
           <div class="user-info">
             <div class="user-name">
-              <span>{{username}}</span>
+              <span>{{ username }}</span>
             </div>
             <div class="user-id">
-              <span>{{userid}}</span>
+              <span>{{ userid }}</span>
             </div>
           </div>
           <div class="main-content" id="main-content-1">
             <div class="assets-container">
               <span class="assets">总资产估值</span>
               <div class="assets-values">
-                <span class="assets-value">{{totalAssets}}</span>
+                <span class="assets-value">{{ totalAssets }}</span>
                 <span class="assets-currency">RMB</span>
               </div>
               <div class="profit-and-loss">
                 <span class="profit-and-loss-title">今日盈亏</span>
-                <span class="profit-and-loss-value">{{dailyProfitLoss}}</span>
+                <span class="profit-and-loss-value">{{ dailyProfitLoss }}</span>
               </div>
             </div>
           </div>
@@ -72,7 +72,7 @@
               >
                 <el-table-column prop="type" label="品种" :width="80">
                 </el-table-column>
-                <el-table-column prop="BuyOrSell" label="买卖">
+                <el-table-column prop="BuyOrSell" label="买/卖">
                 </el-table-column>
                 <el-table-column prop="Position" label="持仓">
                 </el-table-column>
@@ -104,7 +104,38 @@ import axios from "axios";
 export default {
   data() {
     return {
-      PositionData: [],
+      PositionData: [
+        // {
+        //   type: "商品A",
+        //   BuyOrSell: "买入",
+        //   Position: 100,
+        //   FloatingProfitOrLoss: 50.25,
+        //   ProfitOrLossRatio: "5%",
+        //   AverageOpeningPrice: 98.75,
+        //   CurrentPrice: 103.0,
+        //   LatestTransactionTime: "2023-01-05 09:45:00",
+        // },
+        // {
+        //   type: "商品B",
+        //   BuyOrSell: "卖出",
+        //   Position: 50,
+        //   FloatingProfitOrLoss: -25.8,
+        //   ProfitOrLossRatio: "-2%",
+        //   AverageOpeningPrice: 105.5,
+        //   CurrentPrice: 103.25,
+        //   LatestTransactionTime: "2023-01-05 14:20:00",
+        // },
+        // {
+        //   type: "商品C",
+        //   BuyOrSell: "买入",
+        //   Position: 75,
+        //   FloatingProfitOrLoss: 30.1,
+        //   ProfitOrLossRatio: "3.5%",
+        //   AverageOpeningPrice: 55.0,
+        //   CurrentPrice: 57.1,
+        //   LatestTransactionTime: "2023-01-06 10:15:00",
+        // },
+      ],
       avatarUrl: require("@/assets/default-avatar.png"),
       username: "defaultName",
       userid: "defaultId",
@@ -112,8 +143,7 @@ export default {
       dailyProfitLoss: "dailyProfitLoss",
     };
   },
-  created()
-  {
+  created() {
     this.getPositions();
     this.getUserInfo();
   },
@@ -145,11 +175,11 @@ export default {
       try {
         const response = await axios.get("localhost:5000/getUserInfo");
         const responseData = response.data;
-        this.avatarUrl = responseData.avatarUrl;//用户头像url
-        this.username = responseData.username;//用户名
-        this.userid = responseData.userid;//用户id
-        this.totalAssets = responseData.totalAssets;//用户总资产
-        this.dailyProfitLoss = response.dailyProfitLoss;//今日盈亏
+        this.avatarUrl = responseData.avatarUrl; //用户头像url
+        this.username = responseData.username; //用户名
+        this.userid = responseData.userid; //用户id
+        this.totalAssets = responseData.totalAssets; //用户总资产
+        this.dailyProfitLoss = response.dailyProfitLoss; //今日盈亏
       } catch (error) {
         console.error("Data Acquisition Failure:", error);
       }
