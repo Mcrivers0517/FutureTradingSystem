@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS PositionTable(
     /*开仓价格*/F_price INT,
     /*现在价格*/N_price INT,
     /*成交时间*/N_time DATETIME,
+    /*交割日期*/Delivery DATETIME,
     /*username作为外键*/FOREIGN KEY PositionTable(username) REFERENCES User(username)
 );
 
