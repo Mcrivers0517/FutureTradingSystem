@@ -94,6 +94,8 @@ export default {
 </script>
 
 <style scoped>
+
+/* eslint-disable*/
 .common-layout {
   background-color: #eaecef;
 }
@@ -154,7 +156,7 @@ export default {
   color: #eaecef;
   border: 1px solid #2b3139;
 }
-/deep/.el-input__inner:focus {
+/deep/.el-input__inner:hover {
   border-color: #f0b90b;
 }
 .submit-button {
