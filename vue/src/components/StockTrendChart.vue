@@ -13,6 +13,7 @@
           class="el-menu-demo"
           mode="horizontal"
           background-color="#181a20"
+          @select="handleSelect_2"
           text-color="#eaecef"
           active-text-color="#f0b90b"
           style="margin-left: 30px"
@@ -284,6 +285,20 @@ export default {
       .addEventListener("wheel", this.handleMouseWheel);
   },
   methods: {
+    handleSelect_2(index) {
+      // 处理菜单项点击事件，你可以在这里进行路由跳转
+      if (index === "1") {
+        this.$router.push("/"); // 跳转到主页
+      } else if (index === "2-1") {
+        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
+      } else if (index === "2-2") {
+        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
+      } else if (index === "3") {
+        this.$router.push("/MarketQuotes"); // 跳转到行情页
+      } else if (index === "4") {
+        this.$router.push("/message-center"); // 跳转到消息中心页
+      }
+    },
     async cancelOrder(orderId) {
       try {
         const response = await axios.post("http://localhost:5000/cancelOrder", {

@@ -111,13 +111,32 @@ export default {
       ],
     };
   },
+  methods: {
+    handleSelect(index) {
+      // 处理菜单项点击事件，你可以在这里进行路由跳转
+      if (index === "1") {
+        this.$router.push("/"); // 跳转到主页
+      } else if (index === "2-1") {
+        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
+      } else if (index === "2-2") {
+        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
+      } else if (index === "3") {
+        this.$router.push("/MarketQuotes"); // 跳转到行情页
+      } else if (index === "4") {
+        this.$router.push("/message-center"); // 跳转到消息中心页
+      }
+    },
+    tableRowClassName() {
+      return "background: #181a20; height: 80px";
+    },
+  },
 };
 </script>
 
 <style scoped>
 /* 你之前提供的样式 */
 .common-layout {
-  background-color: #2767c6;
+  background-color: #181a20;
   border-radius: 12px 12px 12px 12px;
 }
 
