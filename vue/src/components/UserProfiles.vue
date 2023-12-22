@@ -223,6 +223,7 @@ export default {
 .content-container {
   flex: 1;
 }
+/*取消菜单下方的白线（边界线）*/
 .el-menu {
   border: 0 !important;
 }
