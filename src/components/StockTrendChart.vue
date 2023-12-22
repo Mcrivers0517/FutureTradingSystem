@@ -40,7 +40,7 @@
             ></div>
           </div>
         </el-main>
-        <el-footer class="footer" height="95vh">
+        <el-footer class="footer" height="125vh">
           <el-container>
             <el-main class="deal">
               <div class="trend">
@@ -67,7 +67,11 @@
                   style="margin-top: 10px"
                 ></el-input>
                 <div class="submit-button">
-                  <el-button type="primary" native-type="submit" id="buyButton"
+                  <el-button
+                    type="primary"
+                    native-type="submit"
+                    @click="buy"
+                    id="buyButton"
                     >买入</el-button
                   >
                 </div>
@@ -99,7 +103,7 @@
                   <el-button
                     type="primary"
                     native-type="submit"
-                    width="80px"
+                    @click="sell"
                     id="sellButton"
                     >卖出</el-button
                   >
@@ -112,7 +116,7 @@
               ><el-container>
                 <el-header
                   ><el-menu
-                    default-active="1"
+                    :default-active="activeIndex"
                     class="order-type"
                     mode="horizontal"
                     @select="handleSelect"
@@ -126,23 +130,67 @@
                 </el-header>
                 <el-main
                   ><el-table
-                    :data="PositionData"
+                    :data="CurrentOrderData"
                     class="posi-table"
                     :cell-style="tableRowClassName"
+                    height="430"
+                    v-if="activeIndex === '1'"
                   >
                     <el-table-column prop="type" label="品种">
                     </el-table-column>
                     <el-table-column prop="Date" label="日期">
                     </el-table-column>
-                    <el-table-column prop="BuyOrSell" label="买/卖">
+                    <el-table-column prop="Attribute" label="属性">
                     </el-table-column>
                     <el-table-column prop="Price" label="价格">
                     </el-table-column>
+                    <el-table-column prop="Status" label="状态">
+                    </el-table-column>
                     <el-table-column prop="Quantity" label="数量">
                     </el-table-column>
-                    <el-table-column prop="Amount" label="金额">
+                    <el-table-column label="金额">
+                      <template slot-scope="scope">
+                        {{ scope.row.Price * scope.row.Quantity }}
+                      </template>
                     </el-table-column>
-                    <el-table-column prop="Delete" label="撤单" :width="60">
+                    <el-table-column label="撤单" :width="60">
+                      <el-button
+                        class="revoke"
+                        @click="cancelOrder(row.id)"
+                        icon="el-icon-delete-solid"
+                      ></el-button>
+                    </el-table-column>
+                  </el-table>
+                  <el-table
+                    :data="HistoricalOrderData"
+                    class="posi-table"
+                    :cell-style="tableRowClassName"
+                    height="430"
+                    v-if="activeIndex === '2'"
+                  >
+                    <el-table-column prop="type" label="品种">
+                    </el-table-column>
+                    <el-table-column prop="Date" label="日期">
+                    </el-table-column>
+                    <el-table-column prop="Attribute" label="属性">
+                    </el-table-column>
+                    <el-table-column prop="Price" label="价格">
+                    </el-table-column>
+                    <el-table-column prop="Status" label="状态">
+                    </el-table-column>
+                    <el-table-column prop="Quantity" label="数量">
+                    </el-table-column>
+                    <el-table-column label="金额">
+                      <template slot-scope="scope">
+                        {{ scope.row.Price * scope.row.Quantity }}
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="删除" :width="60">
+                      <el-button
+                        class="delete"
+                        @click="deleteOrder(row.id)"
+                        icon="el-icon-delete-solid"
+                      ></el-button>
                     </el-table-column>
                   </el-table>
                 </el-main> </el-container
@@ -155,38 +203,61 @@
 </template>
 
 <script>
-// import axios from "axios";
+import axios from "axios";
 export default {
   data() {
     return {
-      PositionData: [
-        {
-          type: "商品A",
-          Date: "2023-01-05",
-          BuyOrSell: "买入",
-          Price: 100.5,
-          Quantity: 10,
-          Amount: 1005.0,
-          Delete: "撤单",
-        },
-        {
-          type: "商品B",
-          Date: "2023-01-06",
-          BuyOrSell: "卖出",
-          Price: 98.75,
-          Quantity: 8,
-          Amount: 790.0,
-          Delete: "撤单",
-        },
-        {
-          type: "商品C",
-          Date: "2023-01-07",
-          BuyOrSell: "买入",
-          Price: 55.25,
-          Quantity: 15,
-          Amount: 828.75,
-          Delete: "撤单",
-        },
+      CurrentOrderData: [
+        // {
+        //   type: "商品A",
+        //   Date: "2023-01-05",
+        //   Attribute: "买平",
+        //   Status: "未成交",
+        //   Price: 100.5,
+        //   Quantity: 10,
+        // },
+        // {
+        //   type: "商品B",
+        //   Date: "2023-01-06",
+        //   Attribute: "卖平",
+        //   Status: "未成交",
+        //   Price: 98.75,
+        //   Quantity: 8,
+        // },
+        // {
+        //   type: "商品C",
+        //   Date: "2023-01-07",
+        //   Attribute: "买开",
+        //   Status: "未成交",
+        //   Price: 55.25,
+        //   Quantity: 15,
+        // },
+      ],
+      HistoricalOrderData: [
+        // {
+        //   type: "商品D",
+        //   Date: "2023-05-10",
+        //   Attribute: "卖平",
+        //   Status: "已成交",
+        //   Price: 150.25,
+        //   Quantity: 5,
+        // },
+        // {
+        //   type: "商品E",
+        //   Date: "2023-04-15",
+        //   Attribute: "买开",
+        //   Status: "已成交",
+        //   Price: 120.75,
+        //   Quantity: 12,
+        // },
+        // {
+        //   type: "商品F",
+        //   Date: "2023-03-20",
+        //   Attribute: "卖开",
+        //   Status: "已成交",
+        //   Price: 200.0,
+        //   Quantity: 7,
+        // },
       ],
       myChart: {},
       buyPrice: null,
@@ -195,15 +266,186 @@ export default {
       sellQuantity: null,
       buyAmount: null,
       sellAmount: null,
+      activeIndex: "1",
+      priceUpdateInterval: null,
+      chartData: {
+        times: [],
+        prices: [],
+      },
     };
   },
   mounted() {
+    this.getCurrentPositions();
+    this.getHistoricalPositions();
+    this.startPriceDataFetch();
     this.drawChart();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
   },
   methods: {
+    async cancelOrder(orderId) {
+      try {
+        const response = await axios.post("http://localhost:5000/cancelOrder", {
+          orderId,
+        });
+        if (response.data.success) {
+          // 从 CurrentOrderData 中移除对应的订单
+          this.CurrentOrderData = this.CurrentOrderData.filter(
+            (order) => order.id !== orderId
+          );
+        } else {
+          // 处理失败情况
+          console.error("Cancel order failed:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error during cancel operation:", error);
+      }
+    },
+    async deleteOrder(orderId) {
+      try {
+        const response = await axios.post("http://localhost:5000/deleteOrder", {
+          orderId,
+        });
+        if (response.data.success) {
+          // 从 HistoricalOrderData 中移除对应的订单
+          this.HistoricalOrderData = this.HistoricalOrderData.filter(
+            (order) => order.id !== orderId
+          );
+        } else {
+          // 处理失败情况
+          console.error("Delete order failed:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error during delete operation:", error);
+      }
+    },
+    async buy() {
+      try {
+        const payload = {
+          price: this.buyPrice,
+          quantity: this.buyQuantity,
+          amount: this.BuyAmount,
+        };
+        const response = await axios.post("http://localhost:5000/buy", payload);
+        console.log("Buy response:", response.data);
+      } catch (error) {
+        console.error("Error during buy operation:", error);
+      }
+    },
+
+    async sell() {
+      try {
+        const payload = {
+          price: this.sellPrice,
+          quantity: this.sellQuantity,
+          amount: this.SellAmount,
+        };
+        const response = await axios.post(
+          "http://localhost:5000/sell",
+          payload
+        );
+        console.log("Sell response:", response.data);
+      } catch (error) {
+        console.error("Error during sell operation:", error);
+      }
+    },
+    async fetchAndProcessPriceData() {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/getFuturesPrice"
+        );
+        const responseData = response.data;
+        this.chartData.times = responseData.map((d) => this.formatTime(d.time));
+        this.chartData.prices = responseData.map((d) => d.price);
+        this.updateChart();
+      } catch (error) {
+        console.error("Error fetching and processing price data:", error);
+      }
+    },
+    updateChart() {
+      if (!this.myChart) {
+        this.drawChart();
+      }
+
+      let option = {
+        xAxis: {
+          type: "category",
+          data: this.chartData.times,
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: "#1e2227",
+            },
+          },
+        },
+        series: [
+          {
+            name: "价格",
+            type: "line",
+            data: this.chartData.prices,
+          },
+        ],
+      };
+
+      this.myChart.setOption(option);
+    },
+    formatTime(timeString) {
+      const time = new Date(timeString);
+      return `${time.getHours()}:${time
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    },
+    startPriceDataFetch() {
+      this.fetchPriceData(); // 初始获取一次数据
+      this.priceUpdateInterval = setInterval(this.fetchPriceData, 60000); // 每分钟更新一次
+    },
+    async getCurrentPositions() {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/getCurrentPositions"
+        );
+        const responseData = response.data;
+        const CurrentPositionData = responseData.map((data) => ({
+          type: data.type,
+          Date: data.Date,
+          Attribute: data.Attribute,
+          Price: data.Price,
+          Status: data.Status,
+          Quantity: data.Quantity,
+          // 其他需要的字段
+        }));
+        this.CurrentPositionData = CurrentPositionData;
+      } catch (error) {
+        console.error("Error getting current positions:", error);
+      }
+    },
+
+    async getHistoricalPositions() {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/getHistoricalPositions"
+        );
+        const responseData = response.data;
+        const HistoricalPositionData = responseData.map((data) => ({
+          type: data.type,
+          Date: data.Date,
+          Attribute: data.Attribute,
+          Price: data.Price,
+          Status: data.Status,
+          Quantity: data.Quantity,
+          // 其他需要的字段
+        }));
+        this.HistoricalPositionData = HistoricalPositionData;
+      } catch (error) {
+        console.error("Error getting historical positions:", error);
+      }
+    },
+
+    handleSelect(key) {
+      this.activeIndex = key;
+    },
     tableRowClassName() {
       return "background: #181a20";
     },
@@ -242,40 +484,12 @@ export default {
 
       this.myChart.setOption(option);
     },
-    //随机产生的时间数据，仅作前端测试所用
     drawChart() {
       let myChart = this.$echarts.init(
         document.getElementById("price-trend-chart")
       );
       this.myChart = myChart;
-      function generateRandomHour() {
-        const times = [];
-        for (let hour = 0; hour < 24; hour++) {
-          for (let minute = 0; minute < 60; minute++) {
-            const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
-            const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
-            times.push(`${hourStr}:${minuteStr}`);
-          }
-        }
-        return times;
-      }
-      //随机产生的期货价格数据，仅作前端测试所用
-      function generateStockData() {
-        const data = [];
-        let price = 800;
-        for (let i = 0; i < 24 * 60; i++) {
-          const change = Math.random() * 100 - 50;
-          price += change;
 
-          // 确保价格不低于零
-          if (price < 10) {
-            price = 50;
-          }
-
-          data.push(Math.round(price * 100) / 100);
-        }
-        return data;
-      }
       let option = {
         title: {},
         tooltip: {
@@ -287,7 +501,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: generateRandomHour(),
+          data: [], // 初始为空
           splitLine: {
             show: true,
             lineStyle: {
@@ -295,35 +509,118 @@ export default {
             },
           },
         },
-        yAxis: [
-          {
-            type: "value",
-            name: "价格",
-            position: "right", // 将Y轴移动到右侧
-            axisLine: {
-              lineStyle: {},
-            },
-            splitLine: {
-              show: true,
-              lineStyle: {
-                color: "#1e2227",
-              },
+        yAxis: {
+          type: "value",
+          name: "价格",
+          position: "right",
+          axisLine: {
+            lineStyle: {},
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: "#1e2227",
             },
           },
-        ],
+        },
         series: [
           {
             name: "价格",
             type: "line",
-            data: generateStockData(),
+            data: [], // 初始为空
           },
         ],
       };
+
       myChart.setOption(option);
     },
-    formatTooltip(val) {
-      return val + "%";
-    },
+    // drawChart() {
+    //   let myChart = this.$echarts.init(
+    //     document.getElementById("price-trend-chart")
+    //   );
+    //   this.myChart = myChart;
+    //   //随机产生的时间数据，仅供前端测试所用
+    //   function generateRandomHour() {
+    //     const times = [];
+    //     for (let hour = 0; hour < 24; hour++) {
+    //       for (let minute = 0; minute < 60; minute++) {
+    //         const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
+    //         const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
+    //         times.push(`${hourStr}:${minuteStr}`);
+    //       }
+    //     }
+    //     return times;
+    //   }
+    //   //随机产生的期货价格数据，仅供前端测试所用
+    //   function generateStockData() {
+    //     const data = [];
+    //     let price = 800;
+    //     for (let i = 0; i < 24 * 60; i++) {
+    //       const change = Math.random() * 100 - 50;
+    //       price += change;
+
+    //       // 确保价格不低于零
+    //       if (price < 10) {
+    //         price = 50;
+    //       }
+
+    //       data.push(Math.round(price * 100) / 100);
+    //     }
+    //     return data;
+    //   }
+    //   let option = {
+    //     title: {},
+    //     tooltip: {
+    //       trigger: "axis",
+    //     },
+    //     legend: {
+    //       data: ["价格"],
+    //       show: false,
+    //     },
+    //     xAxis: {
+    //       type: "category",
+    //       data: generateRandomHour(),
+    //       splitLine: {
+    //         show: true,
+    //         lineStyle: {
+    //           color: "#1e2227",
+    //         },
+    //       },
+    //     },
+    //     yAxis: [
+    //       {
+    //         type: "value",
+    //         name: "价格",
+    //         position: "right", // 将Y轴移动到右侧
+    //         axisLine: {
+    //           lineStyle: {},
+    //         },
+    //         splitLine: {
+    //           show: true,
+    //           lineStyle: {
+    //             color: "#1e2227",
+    //           },
+    //         },
+    //       },
+    //     ],
+    //     series: [
+    //       {
+    //         name: "价格",
+    //         type: "line",
+    //         data: generateStockData(),
+    //       },
+    //     ],
+    //   };
+    //   myChart.setOption(option);
+    // },
+    // formatTooltip(val) {
+    //   return val + "%";
+    // },
+  },
+  beforeDestroy() {
+    if (this.priceUpdateInterval) {
+      clearInterval(this.priceUpdateInterval); // 清除定时器
+    }
   },
   computed: {
     BuyAmount() {
@@ -543,5 +840,15 @@ export default {
 }
 .order-type {
   height: 10px;
+}
+.el-button.delete {
+  background-color: #181a20;
+  color: #848e9c;
+  border: none;
+}
+.el-button.revoke {
+  background-color: #181a20;
+  color: #848e9c;
+  border: none;
 }
 </style>
