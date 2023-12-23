@@ -37,6 +37,8 @@
                 style="border-color: red"
               ></el-input>
               <div class="submit-button">
+                <input type="submit" style="display: none" />
+                <!--该文本框用来实现回车提交-->
                 <el-button
                   type="primary"
                   native-type="submit"
@@ -47,7 +49,9 @@
             </form>
             <div class="register-link">
               <span class="register-link-text">
-                未有账户？<router-link to="/register">点击注册</router-link>
+                <router-link to="/register" class="register-link"
+                  >没有账户？点击注册</router-link
+                >
               </span>
             </div>
           </div>
@@ -69,8 +73,11 @@ export default {
   methods: {
     async login() {
       if (this.username === "" || this.password === "") {
-        alert("用户名和密码不能为空，请填写完整！");
-      }
+        alert("用户名或密码不能为空，请填写完整！");
+      } 
+      // else {
+      //   this.$router.push("/");
+      // }
       axios
         .post("localhost:5000/login", {
           username: this.username,
@@ -80,7 +87,7 @@ export default {
           const result = response.data;
 
           if (result.success) {
-            this.$router.push("/user-home");
+            this.$router.push("/");
           } else {
             alert("登录失败：" + result.message);
           }
@@ -94,7 +101,6 @@ export default {
 </script>
 
 <style scoped>
-
 /* eslint-disable*/
 .common-layout {
   background-color: #eaecef;
@@ -159,6 +165,9 @@ export default {
 /deep/.el-input__inner:hover {
   border-color: #f0b90b;
 }
+/deep/.el-input__inner:focus {
+  border-color: #f0b90b;
+}
 .submit-button {
   margin-top: 20px;
   height: 42px;
@@ -186,5 +195,9 @@ span.register-link-text {
 span:hover.register-link-text {
   text-decoration: underline;
   cursor: pointer;
+}
+.register-link {
+  color: white !important; /* 设置链接文本颜色为白色 */
+  text-decoration: none; /* 移除下划线 */
 }
 </style>
