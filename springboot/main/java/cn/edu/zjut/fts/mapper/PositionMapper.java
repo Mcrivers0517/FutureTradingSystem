@@ -12,9 +12,10 @@ public interface PositionMapper extends BaseMapper<Position> {
     @Select("select * from positiontable")
     public List<Position> selectall();
 
-    @Insert("insert into positiontable(id, username, BS, pos, c_Pro, r_Pro, f_Price, n_Price, n_Time,Delivery) " +
-            "values(#{id}, #{username}, #{BS}, #{pos}, #{c_Pro}, #{r_Pro}, #{f_Price}, #{n_Price}, #{n_Time},#{Delivery)")
+    @Insert("insert into positiontable(id, username, bs, pos, C_Pro, R_Pro, F_Price, N_Price, N_Time, Delivery) " +
+            "values(#{id}, #{username}, #{bs}, #{pos}, #{C_Pro}, #{R_Pro}, #{F_Price}, #{N_Price}, #{N_Time}, #{Delivery})")
     int insertPosition(Position position);
+
 
 
 }
