@@ -10,7 +10,7 @@
           />
         </div>
         <el-menu
-          :default-active="activeIndex2"
+          default-active="3"
           class="el-menu-demo"
           mode="horizontal"
           @select="handleSelect"
@@ -36,6 +36,7 @@
             class="futures-table"
             :cell-style="tableRowClassName"
             :default-sort="{ prop: 'CurrentPrice', order: 'descending' }"
+            @row-click="handleRowClick"
           >
             <el-table-column prop="type" label="品种" :width="80" sortable>
             </el-table-column>
@@ -79,7 +80,7 @@ export default {
     return {
       MarketData: [
         {
-          type: "商品A",
+          type: "A",
           BuyOrSell: "买入",
           Position: 100,
           FloatingProfitOrLoss: 50.25,
@@ -89,7 +90,7 @@ export default {
           LatestTransactionTime: "2023-01-05 09:45:00",
         },
         {
-          type: "商品B",
+          type: "B",
           BuyOrSell: "卖出",
           Position: 50,
           FloatingProfitOrLoss: -25.8,
@@ -99,7 +100,7 @@ export default {
           LatestTransactionTime: "2023-01-05 14:20:00",
         },
         {
-          type: "商品C",
+          type: "C",
           BuyOrSell: "买入",
           Position: 75,
           FloatingProfitOrLoss: 30.1,
@@ -124,6 +125,16 @@ export default {
         this.$router.push("/MarketQuotes"); // 跳转到行情页
       } else if (index === "4") {
         this.$router.push("/message-center"); // 跳转到消息中心页
+      }
+    },
+    handleRowClick(row) {
+      // 处理行点击事件，你可以在这里进行路由跳转
+      if (row.type == 'A') {
+        this.$router.push("/StockTrendChart");
+      } else if (row.type == 'B') {
+        this.$router.push("/StockTrendChart");
+      } else if (row.type == 'C') {
+        this.$router.push("/StockTrendChart");
       }
     },
     tableRowClassName() {

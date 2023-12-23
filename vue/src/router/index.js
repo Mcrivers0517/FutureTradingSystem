@@ -1,10 +1,10 @@
 import Vue from "vue";
 import VueRouter from 'vue-router';
-import UserProfiles from '../components/UserProfiles.vue';
-import LoginFile from '../components/LoginFile.vue';
-import MarketQuotes from '../components/MarketQuotes.vue';
-import RegisterFile from '../components/RegisterFile.vue';
-import StockTrendChart from '../components/StockTrendChart.vue';
+import UserProfiles from '../pages/UserProfiles.vue';
+import LoginFile from '../pages/LoginFile.vue';
+import MarketQuotes from '../pages/MarketQuotes.vue';
+import RegisterFile from '../pages/RegisterFile.vue';
+import StockTrendChart from '../pages/StockTrendChart.vue';
 
 Vue.use(VueRouter);
 

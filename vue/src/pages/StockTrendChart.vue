@@ -27,6 +27,15 @@
           <el-menu-item index="3">行情</el-menu-item>
           <el-menu-item index="4">消息中心</el-menu-item>
         </el-menu>
+        <div class="logout-button">
+          <el-button
+            type="primary"
+            native-type="submit"
+            @click="logout"
+            id="logoutButton"
+            >退出账号</el-button
+          >
+        </div>
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
@@ -285,6 +294,9 @@ export default {
       .addEventListener("wheel", this.handleMouseWheel);
   },
   methods: {
+    logout() {
+      this.$router.push("/Login");
+    },
     handleSelect_2(index) {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
       if (index === "1") {
@@ -628,9 +640,9 @@ export default {
     //   };
     //   myChart.setOption(option);
     // },
-    // formatTooltip(val) {
-    //   return val + "%";
-    // },
+    formatTooltip(val) {
+      return val + "%";
+    },
   },
   beforeDestroy() {
     if (this.priceUpdateInterval) {
@@ -865,5 +877,24 @@ export default {
   background-color: #181a20;
   color: #848e9c;
   border: none;
+}
+.logout-button {
+  margin-top: 15px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  margin-left: 115vh;
+}
+#logoutButton.el-button--primary {
+  background: #fcd535;
+  border-color: #fcd535;
+  color: #181a20;
+  border-radius: 4px;
+}
+#logoutButton.el-button--primary:hover {
+  background: #e5c333;
+  border-color: #e5c333;
+  color: #181a20;
+  border-radius: 4px;
 }
 </style>
