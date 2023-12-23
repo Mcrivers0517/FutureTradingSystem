@@ -278,24 +278,75 @@ export default {
       sellAmount: null,
       activeIndex: "1",
       priceUpdateInterval: null,
-      times: null,
-      price: null,
-      tradeVolume: null,
       chartData: {
         times: [],
-        prices: [],
+        price: [],
         tradeVolume: [],
       },
+      timerId: null,
     };
   },
   mounted() {
     // this.getCurrentPositions();
     // this.getHistoricalPositions();
     // this.startPriceDataFetch();
+    // 以下三行是在前端测试图表时用来随机初始化chartData的
+    this.chartData.times = this.generateRandomHour();
+    this.chartData.price = this.generateStockData();
+    this.chartData.tradeVolume = this.generateTradeVolumeData();
     this.drawChart();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
+    this.timerId = setInterval(() => {
+      // 生成新的价格和交易量数据
+      let newPrice =
+        Math.round(
+          (this.chartData.price[this.chartData.price.length - 1] +
+            Math.random() * 100 -
+            50) *
+            100
+        ) / 100;
+      if (newPrice < 10) {
+        newPrice = 50;
+      }
+      const newVolume = Math.round(Math.random() * 1000 * 100) / 100;
+
+      console.log(this.chartData.price);
+      // 更新数据
+      this.chartData.price.push(newPrice);
+      this.chartData.tradeVolume.push(newVolume);
+
+      // 获取 this.chartData.times 的最后一项时间
+      const lastTime = this.chartData.times[this.chartData.times.length - 1];
+
+      // 将最后一项时间转换成小时和分钟
+      const [hour, minute] = lastTime.split(":").map(Number);
+
+      // 生成接下来的分钟，假设你希望生成 1 分钟的间隔
+      let nextMinute = minute + 1;
+      let nextHour = hour;
+
+      if (nextMinute === 60) {
+        nextMinute = 0;
+        nextHour += 1;
+
+        if (nextHour === 24) {
+          nextHour = 0;
+        }
+      }
+
+      // 格式化新的时间
+      const newTime = `${nextHour < 10 ? "0" : ""}${nextHour}:${
+        nextMinute < 10 ? "0" : ""
+      }${nextMinute}`;
+
+      // 将新的时间添加到 this.chartData.times 中
+      this.chartData.times.push(newTime);
+
+      // 更新图表
+      this.updateChart();
+    }, 1000); // 1秒钟执行一次
   },
   methods: {
     logout() {
@@ -392,7 +443,7 @@ export default {
         );
         const responseData = response.data;
         this.chartData.times = responseData.map((d) => this.formatTime(d.time));
-        this.chartData.prices = responseData.map((d) => d.price);
+        this.chartData.price = responseData.map((d) => d.price);
         this.chartData.tradeVolume = responseData.map((d) => d.volume);
         this.updateChart();
       } catch (error) {
@@ -440,7 +491,7 @@ export default {
           {
             name: "价格",
             type: "line",
-            data: this.chartData.prices,
+            data: this.chartData.price,
             lineStyle: {
               color: "#f0b90b",
             },
@@ -468,14 +519,19 @@ export default {
             data: this.chartData.tradeVolume,
             yAxisIndex: 1, // 使用右侧的Y轴
             itemStyle: {
-              color: function (params) {
-                // 判断价格上涨还是下跌，根据条件返回不同的颜色
-                if (params.data > params.dataIndex > 0) {
+              color: (params) => {
+                const dataIndex = params.dataIndex;
+                // 访问Vue组件上下文，通过箭头函数
+                const priceData = this.chartData.price;
+                if (
+                  dataIndex > 0 &&
+                  priceData[dataIndex] > priceData[dataIndex - 1]
+                ) {
                   return "#ff707e"; // 价格上涨，柱子设置为红色
                 } else {
                   return "#32d993"; // 价格下跌，柱子设置为绿色
                 }
-              },
+              }, // 设置数据点的颜色
             },
           },
         ],
@@ -578,55 +634,51 @@ export default {
 
       this.myChart.setOption(option);
     },
+    //随机产生的时间数据，仅供前端测试所用
+    generateRandomHour() {
+      const times = [];
+      for (let hour = 0; hour < 24; hour++) {
+        for (let minute = 0; minute < 60; minute++) {
+          const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
+          const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
+          times.push(`${hourStr}:${minuteStr}`);
+        }
+      }
+      return times;
+    },
+    //随机产生的期货价格数据，仅供前端测试所用
+    generateStockData() {
+      const data = [];
+      let price = 800;
+      for (let i = 0; i < 24 * 60; i++) {
+        const change = Math.random() * 100 - 50;
+        price += change;
+
+        // 确保价格不低于零
+        if (price < 10) {
+          price = 50;
+        }
+
+        data.push(Math.round(price * 100) / 100);
+      }
+      return data;
+    },
+    //随机产生的交易量数据，仅供前端测试所用
+    generateTradeVolumeData() {
+      const data = [];
+      for (let i = 0; i < 24 * 60; i++) {
+        const volume = Math.random() * 1000; // 随机生成交易量，你可以根据需要调整范围
+        data.push(Math.round(volume * 100) / 100);
+      }
+      return data;
+    },
     drawChart() {
       let myChart = this.$echarts.init(
-        document.getElementById("price-trend-chart")
+        document.getElementById("price-trend-chart") //
       );
       this.myChart = myChart;
-      // //随机产生的时间数据，仅供前端测试所用
-      // function generateRandomHour() {
-      //   const times = [];
-      //   for (let hour = 0; hour < 24; hour++) {
-      //     for (let minute = 0; minute < 60; minute++) {
-      //       const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
-      //       const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
-      //       times.push(`${hourStr}:${minuteStr}`);
-      //     }
-      //   }
-      //   return times;
-      // }
-      // //随机产生的期货价格数据，仅供前端测试所用
-      // function generateStockData() {
-      //   const data = [];
-      //   let price = 800;
-      //   for (let i = 0; i < 24 * 60; i++) {
-      //     const change = Math.random() * 100 - 50;
-      //     price += change;
 
-      //     // 确保价格不低于零
-      //     if (price < 10) {
-      //       price = 50;
-      //     }
-
-      //     data.push(Math.round(price * 100) / 100);
-      //   }
-      //   return data;
-      // }
-      // //随机产生的交易量数据，仅供前端测试所用
-      // function generateTradeVolumeData() {
-      //   const data = [];
-      //   for (let i = 0; i < 24 * 60; i++) {
-      //     const volume = Math.random() * 1000; // 随机生成交易量，你可以根据需要调整范围
-      //     data.push(Math.round(volume * 100) / 100);
-      //   }
-      //   return data;
-      // }
-
-      // this.chartData.times = generateRandomHour();
-      // this.chartData.price = generateStockData();
-      // this.chartData.tradeVolume = generateTradeVolumeData();
-
-      let price = this.chartData.price;
+      // let price = this.chartData.price;
 
       // console.log(this.times);
 
@@ -717,10 +769,10 @@ export default {
             data: this.chartData.tradeVolume, // 新编写的交易量数据生成函数
             symbol: "none",
             itemStyle: {
-              color: function (params) {
+              color: (params) => {
                 const dataIndex = params.dataIndex;
-                // 判断价格上涨还是下跌，根据条件返回不同的颜色
-                const priceData = price;
+                // 访问Vue组件上下文，通过箭头函数
+                const priceData = this.chartData.price;
                 if (
                   dataIndex > 0 &&
                   priceData[dataIndex] > priceData[dataIndex - 1]
@@ -761,6 +813,7 @@ export default {
           },
         ],
       };
+      console.log(option);
       myChart.setOption(option);
     },
     formatTooltip(val) {
