@@ -25,4 +25,6 @@ public class Position {
     private int N_Price;
     private Date N_Time;
     private Date Delivery;
+
+
 }

@@ -5,7 +5,6 @@ import cn.edu.zjut.fts.mapper.PositionMapper;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,6 +33,7 @@ public class PositionController {
         position.setR_Pro(0.00);
         position.setN_Price(position.getF_Price());
 
+
         // 处理 Delivery 的逻辑
         LocalDateTime nTime = position.getN_Time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         int dayOfMonth = nTime.getDayOfMonth();
@@ -51,5 +51,7 @@ public class PositionController {
         System.out.println(position);
         return positionMapper.insertPosition(position);
     }
+
+
 
 }
