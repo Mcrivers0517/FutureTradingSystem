@@ -46,6 +46,7 @@
                 placeholder="Repassword"
               ></el-input>
               <div class="submit-button">
+                <input type="submit" style="display: none" />
                 <el-button
                   type="primary"
                   native-type="submit"
@@ -90,7 +91,7 @@ export default {
           const result = response.data;
 
           if (result.success) {
-            this.$router.push("/login");
+            this.$router.push("/Login");
           } else {
             alert("注册失败：" + result.message);
           }
@@ -164,6 +165,9 @@ export default {
   font-family: PingFangSC-Regular, PingFang SC;
   color: #eaecef;
   border: 1px solid #2b3139;
+}
+/deep/.el-input__inner:hover {
+  border-color: #f0b90b;
 }
 /deep/.el-input__inner:focus {
   border-color: #f0b90b;
