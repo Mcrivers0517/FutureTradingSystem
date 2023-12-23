@@ -13,7 +13,7 @@
           class="el-menu-demo"
           mode="horizontal"
           background-color="#181a20"
-          @select="handleSelect_2"
+          @select="handleMenu"
           text-color="#eaecef"
           active-text-color="#f0b90b"
           style="margin-left: 30px"
@@ -80,7 +80,7 @@
                   <el-button
                     type="primary"
                     native-type="submit"
-                    @click="buy"
+                    @click="transaction"
                     id="buyButton"
                     >买入</el-button
                   >
@@ -113,7 +113,7 @@
                   <el-button
                     type="primary"
                     native-type="submit"
-                    @click="sell"
+                    @click="transaction"
                     id="sellButton"
                     >卖出</el-button
                   >
@@ -269,7 +269,7 @@ export default {
         //   Quantity: 7,
         // },
       ],
-      myChart: {},
+      myChart: null,
       buyPrice: null,
       buyQuantity: null,
       sellPrice: null,
@@ -283,76 +283,91 @@ export default {
         price: [],
         tradeVolume: [],
       },
+      chartSecondData: {
+        times: [],
+        price: [],
+        tradeVolume: [],
+      },
       timerId: null,
     };
   },
   mounted() {
-    // this.getCurrentPositions();
-    // this.getHistoricalPositions();
-    // this.startPriceDataFetch();
-    // 以下三行是在前端测试图表时用来随机初始化chartData的
-    this.chartData.times = this.generateRandomHour();
-    this.chartData.price = this.generateStockData();
-    this.chartData.tradeVolume = this.generateTradeVolumeData();
-    this.drawChart();
+    this.getCurrentPositions();
+    this.getHistoricalPositions();
+    this.startPriceDataFetch();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
-    this.timerId = setInterval(() => {
-      // 生成新的价格和交易量数据
-      let newPrice =
-        Math.round(
-          (this.chartData.price[this.chartData.price.length - 1] +
-            Math.random() * 100 -
-            50) *
-            100
-        ) / 100;
-      if (newPrice < 10) {
-        newPrice = 50;
-      }
-      const newVolume = Math.round(Math.random() * 1000 * 100) / 100;
 
-      console.log(this.chartData.price);
-      // 更新数据
-      this.chartData.price.push(newPrice);
-      this.chartData.tradeVolume.push(newVolume);
+    // 以下mounted()内容仅用作前端测试，项目运行时应注释
 
-      // 获取 this.chartData.times 的最后一项时间
-      const lastTime = this.chartData.times[this.chartData.times.length - 1];
+    // this.chartData.times = this.generateRandomHour();
+    // this.chartData.price = this.generateStockData();
+    // this.chartData.tradeVolume = this.generateTradeVolumeData();
+    // this.drawChart();
 
-      // 将最后一项时间转换成小时和分钟
-      const [hour, minute] = lastTime.split(":").map(Number);
+    // let currentSecond = 0;
+    // let accumulatedVolume = 0; // 累计交易量
 
-      // 生成接下来的分钟，假设你希望生成 1 分钟的间隔
-      let nextMinute = minute + 1;
-      let nextHour = hour;
+    // this.timerId = setInterval(() => {
+    //   // 生成新的价格
+    //   let newPrice =
+    //     Math.round(
+    //       (this.chartData.price[this.chartData.price.length - 1] +
+    //         Math.random() * 100 -
+    //         50) *
+    //         100
+    //     ) / 100;
+    //   if (newPrice < 10) {
+    //     newPrice = 50;
+    //   }
 
-      if (nextMinute === 60) {
-        nextMinute = 0;
-        nextHour += 1;
+    //   // 生成新的交易量并累加
+    //   let newVolume = Math.round(Math.random() * 20 * 100) / 100;
+    //   accumulatedVolume += newVolume;
 
-        if (nextHour === 24) {
-          nextHour = 0;
-        }
-      }
+    //   // 每秒更新价格，每分钟更新时间和价格点
+    //   if (currentSecond < 59) {
+    //     // 替换当前分钟的最后一个价格
+    //     this.chartData.price[this.chartData.price.length - 1] = newPrice;
+    //     this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+    //       accumulatedVolume;
+    //     currentSecond++;
+    //   } else {
+    //     // 一分钟结束，更新时间标签和价格点
+    //     const newTime = this.getNextMinute(
+    //       this.chartData.times[this.chartData.times.length - 1]
+    //     );
+    //     this.chartData.times.push(newTime);
+    //     this.chartData.price.push(newPrice);
+    //     this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
 
-      // 格式化新的时间
-      const newTime = `${nextHour < 10 ? "0" : ""}${nextHour}:${
-        nextMinute < 10 ? "0" : ""
-      }${nextMinute}`;
+    //     // 重置秒数和累计交易量
+    //     currentSecond = 0;
+    //     accumulatedVolume = 0;
+    //   }
 
-      // 将新的时间添加到 this.chartData.times 中
-      this.chartData.times.push(newTime);
-
-      // 更新图表
-      this.updateChart();
-    }, 1000); // 1秒钟执行一次
+    //   // 更新图表
+    //   this.updateChart();
+    // }, 1000);
   },
   methods: {
+    getNextMinute(currentTime) {
+      const [hour, minute, second] = currentTime.split(":").map(Number);
+      let nextMinute = minute + 1;
+      let nextHour = hour;
+      if (nextMinute === 60) {
+        nextMinute = 0;
+        nextHour = nextHour === 23 ? 0 : nextHour + 1;
+      }
+      return `${nextHour.toString().padStart(2, "0")}:${nextMinute
+        .toString()
+        .padStart(2, "0")}`;
+    },
     logout() {
       this.$router.push("/Login");
     },
-    handleSelect_2(index) {
+    handleMenu(index) {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
       if (index === "1") {
         this.$router.push("/"); // 跳转到主页
@@ -404,47 +419,51 @@ export default {
         console.error("Error during delete operation:", error);
       }
     },
-    // 购买操作接口
-    async buy() {
-      try {
-        const payload = {
-          price: this.buyPrice,
-          quantity: this.buyQuantity,
-          amount: this.BuyAmount,
-        };
-        const response = await axios.post("http://localhost:5000/buy", payload);
-        console.log("Buy response:", response.data);
-      } catch (error) {
-        console.error("Error during buy operation:", error);
-      }
-    },
-    // 出售操作接口
-    async sell() {
-      try {
-        const payload = {
-          price: this.sellPrice,
-          quantity: this.sellQuantity,
-          amount: this.SellAmount,
-        };
-        const response = await axios.post(
-          "http://localhost:5000/sell",
-          payload
-        );
-        console.log("Sell response:", response.data);
-      } catch (error) {
-        console.error("Error during sell operation:", error);
+    // 交易接口
+    async transaction(event) {
+      const elementId = event.target.id;
+      if (elementId == "buyButton") {
+        try {
+          const payload = {
+            price: this.buyPrice,
+            quantity: this.buyQuantity,
+            amount: this.BuyAmount,
+          };
+          const response = await axios.post(
+            "http://localhost:5000/buy",
+            payload
+          );
+          console.log("Buy response:", response.data);
+        } catch (error) {
+          console.error("Error during buy operation:", error);
+        }
+      } else {
+        try {
+          const payload = {
+            price: this.sellPrice,
+            quantity: this.sellQuantity,
+            amount: this.SellAmount,
+          };
+          const response = await axios.post(
+            "http://localhost:5000/sell",
+            payload
+          );
+          console.log("Sell response:", response.data);
+        } catch (error) {
+          console.error("Error during sell operation:", error);
+        }
       }
     },
     // 获取价格和交易量接口
-    async fetchAndProcessPriceData() {
+    async fetchAndProcessData() {
       try {
         const response = await axios.get(
-          "http://localhost:5000/getFuturesPrice"
+          "http://localhost:5000/getFuturesData"
         );
         const responseData = response.data;
-        this.chartData.times = responseData.map((d) => this.formatTime(d.time));
-        this.chartData.price = responseData.map((d) => d.price);
-        this.chartData.tradeVolume = responseData.map((d) => d.volume);
+        this.chartSecondData.times.push(responseData.time);
+        this.chartSecondData.price.push(responseData.price);
+        this.chartSecondData.tradeVolume.push(responseData.volume);
         this.updateChart();
       } catch (error) {
         console.error("Error fetching and processing price data:", error);
@@ -548,8 +567,53 @@ export default {
         .padStart(2, "0")}`;
     },
     startPriceDataFetch() {
-      this.fetchAndProcessPriceData(); // 初始获取一次数据
-      this.priceUpdateInterval = setInterval(this.fetchPriceData, 1000); // 每分钟更新一次
+      this.fetchAndProcessData(); // 初始获取一次数据
+      // this.priceUpdateInterval = setInterval(this.fetchAndProcessData, 1000); // 每秒钟更新一次
+
+      let currentSecond = 0;
+      let accumulatedVolume = 0; // 累计交易量
+
+      this.timerId = setInterval(() => {
+        // 获取新的价格
+        this.fetchAndProcessData();
+
+        let newPrice =
+          this.chartSecondData.price[this.chartSecondData.price.length - 1];
+
+        // 获取新的交易量并累加
+        let newVolume =
+          this.chartSecondData.tradeVolume[
+            this.chartSecondData.tradeVolume.length - 1
+          ];
+        accumulatedVolume += newVolume;
+
+        // 每秒更新价格，每分钟更新时间和价格点
+        if (currentSecond < 59) {
+          // 替换当前分钟的最后一个价格
+          this.chartData.price[this.chartData.price.length - 1] = newPrice;
+          this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+            accumulatedVolume;
+          currentSecond++;
+        } else {
+          // 一分钟结束，更新时间标签和价格点
+          const newTime = this.getNextMinute(
+            this.chartSecondData.times[this.chartSecondData.times.length - 1]
+          );
+          this.chartData.times.push(newTime);
+          this.chartData.price.push(newPrice);
+          this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
+
+          // 重置秒数和累计交易量
+          currentSecond = 0;
+          accumulatedVolume = 0;
+          this.chartSecondData.times = [];
+          this.chartSecondData.price = [];
+          this.chartSecondData.tradeVolume = [];
+        }
+
+        // 更新图表
+        this.updateChart();
+      }, 1000);
     },
     async getCurrentPositions() {
       try {
