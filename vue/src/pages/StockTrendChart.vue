@@ -1006,7 +1006,9 @@ export default {
   height: 42px;
   display: flex;
   justify-content: center;
-  margin-left: 115vh;
+  position: absolute;
+  right: 0; /* 使用 right 属性将元素右对齐 */
+  margin-right: 30px;
 }
 #logoutButton.el-button--primary {
   background: #fcd535;

@@ -157,8 +157,8 @@ export default {
     this.getUserInfo();
   },
   methods: {
-    logout(){
-        this.$router.push("/Login");
+    logout() {
+      this.$router.push("/Login");
     },
     handleSelect(index) {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
@@ -375,7 +375,9 @@ export default {
   height: 42px;
   display: flex;
   justify-content: center;
-  margin-left: 115vh;
+  position: absolute;
+  right: 0; /* 使用 right 属性将元素右对齐 */
+  margin-right: 30px;
 }
 .el-button--primary {
   background: #fcd535;

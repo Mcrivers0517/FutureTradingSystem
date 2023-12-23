@@ -28,6 +28,15 @@
           <el-menu-item index="3">行情</el-menu-item>
           <el-menu-item index="4">消息中心</el-menu-item>
         </el-menu>
+        <div class="logout-button">
+          <el-button
+            type="primary"
+            native-type="submit"
+            @click="logout"
+            id="logoutButton"
+            >退出账号</el-button
+          >
+        </div>
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
@@ -113,6 +122,9 @@ export default {
     };
   },
   methods: {
+    logout() {
+      this.$router.push("/Login");
+    },
     handleSelect(index) {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
       if (index === "1") {
@@ -203,5 +215,26 @@ export default {
 .el-table--group::after,
 .el-table::before {
   background-color: #2b3139;
+}
+.logout-button {
+  margin-top: 15px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 0; /* 使用 right 属性将元素右对齐 */
+  margin-right: 30px;
+}
+.el-button--primary {
+  background: #fcd535;
+  border-color: #fcd535;
+  color: #181a20;
+  border-radius: 4px;
+}
+.el-button--primary:hover {
+  background: #e5c333;
+  border-color: #e5c333;
+  color: #181a20;
+  border-radius: 4px;
 }
 </style>
