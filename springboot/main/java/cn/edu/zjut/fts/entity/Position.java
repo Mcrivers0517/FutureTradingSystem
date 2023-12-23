@@ -17,12 +17,12 @@ public class Position {
 
     private String id;
     private String username;
-    private String BS;
+    private String bs;
     private int pos;
-    private int c_Pro;
-    private double r_Pro;
-    private int f_Price;
-    private int n_Price;
-    private Date n_Time;
+    private int C_Pro;
+    private double R_Pro;
+    private int F_Price;
+    private int N_Price;
+    private Date N_Time;
     private Date Delivery;
 }

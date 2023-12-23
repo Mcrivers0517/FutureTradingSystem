@@ -4,10 +4,12 @@ import cn.edu.zjut.fts.entity.Position;
 import cn.edu.zjut.fts.mapper.PositionMapper;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Api(tags = "持仓模块")
@@ -24,23 +26,29 @@ public class PositionController {
         return list;
     }
 
+
     @PostMapping("/insertPosition")
     public int insertPosition(@RequestBody Position position) {
         // 设置默认值
         position.setC_Pro(0);
-        position.setR_Pro(0);
+        position.setR_Pro(0.00);
         position.setN_Price(position.getF_Price());
 
-        // 设置 Delivery 默认值为 20200720
-        Date defaultDelivery = new Date(120, 6, 20); // 注意月份是从0开始计算的，所以6表示7月
-        position.setDelivery(defaultDelivery);
+        // 处理 Delivery 的逻辑
+        LocalDateTime nTime = position.getN_Time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        int dayOfMonth = nTime.getDayOfMonth();
 
-        // 如果 n_Time 大于 20200720，将 Delivery 设置为 20200820
-        if (position.getN_Time().after(defaultDelivery)) {
-            Date updatedDelivery = new Date(120, 7, 20); // 8月
-            position.setDelivery(updatedDelivery);
+        if (dayOfMonth < 20) {
+            // 如果 N_Time 的日期小于 20，设置 Delivery 为同月的第 20 天
+            LocalDate deliveryDate = nTime.withDayOfMonth(20).toLocalDate();
+            position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        } else {
+            // 如果 N_Time 的日期大于等于 20，设置 Delivery 为下一个月的第 20 天
+            LocalDate deliveryDate = nTime.plusMonths(1).withDayOfMonth(20).toLocalDate();
+            position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         }
 
+        System.out.println(position);
         return positionMapper.insertPosition(position);
     }
 
