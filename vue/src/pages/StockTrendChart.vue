@@ -13,6 +13,7 @@
           class="el-menu-demo"
           mode="horizontal"
           background-color="#181a20"
+          @select="handleSelect_2"
           text-color="#eaecef"
           active-text-color="#f0b90b"
           style="margin-left: 30px"
@@ -26,6 +27,15 @@
           <el-menu-item index="3">行情</el-menu-item>
           <el-menu-item index="4">消息中心</el-menu-item>
         </el-menu>
+        <div class="logout-button">
+          <el-button
+            type="primary"
+            native-type="submit"
+            @click="logout"
+            id="logoutButton"
+            >退出账号</el-button
+          >
+        </div>
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
@@ -268,22 +278,44 @@ export default {
       sellAmount: null,
       activeIndex: "1",
       priceUpdateInterval: null,
+      times: null,
+      price: null,
+      tradeVolume: null,
       chartData: {
         times: [],
         prices: [],
+        tradeVolume: [],
       },
     };
   },
   mounted() {
-    this.getCurrentPositions();
-    this.getHistoricalPositions();
-    this.startPriceDataFetch();
+    // this.getCurrentPositions();
+    // this.getHistoricalPositions();
+    // this.startPriceDataFetch();
     this.drawChart();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
   },
   methods: {
+    logout() {
+      this.$router.push("/Login");
+    },
+    handleSelect_2(index) {
+      // 处理菜单项点击事件，你可以在这里进行路由跳转
+      if (index === "1") {
+        this.$router.push("/"); // 跳转到主页
+      } else if (index === "2-1") {
+        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
+      } else if (index === "2-2") {
+        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
+      } else if (index === "3") {
+        this.$router.push("/MarketQuotes"); // 跳转到行情页
+      } else if (index === "4") {
+        this.$router.push("/message-center"); // 跳转到消息中心页
+      }
+    },
+    // 撤销订单接口
     async cancelOrder(orderId) {
       try {
         const response = await axios.post("http://localhost:5000/cancelOrder", {
@@ -302,6 +334,7 @@ export default {
         console.error("Error during cancel operation:", error);
       }
     },
+    // 删除订单接口
     async deleteOrder(orderId) {
       try {
         const response = await axios.post("http://localhost:5000/deleteOrder", {
@@ -320,6 +353,7 @@ export default {
         console.error("Error during delete operation:", error);
       }
     },
+    // 购买操作接口
     async buy() {
       try {
         const payload = {
@@ -333,7 +367,7 @@ export default {
         console.error("Error during buy operation:", error);
       }
     },
-
+    // 出售操作接口
     async sell() {
       try {
         const payload = {
@@ -350,6 +384,7 @@ export default {
         console.error("Error during sell operation:", error);
       }
     },
+    // 获取价格和交易量接口
     async fetchAndProcessPriceData() {
       try {
         const response = await axios.get(
@@ -358,6 +393,7 @@ export default {
         const responseData = response.data;
         this.chartData.times = responseData.map((d) => this.formatTime(d.time));
         this.chartData.prices = responseData.map((d) => d.price);
+        this.chartData.tradeVolume = responseData.map((d) => d.volume);
         this.updateChart();
       } catch (error) {
         console.error("Error fetching and processing price data:", error);
@@ -379,17 +415,75 @@ export default {
             },
           },
         },
+        yAxis: [
+          {
+            type: "value",
+            name: "价格",
+            position: "right", // 将Y轴移动到右侧
+            axisLine: {
+              lineStyle: {
+                color: "#b7bdc6", // 设置坐标轴线的颜色为蓝色
+              },
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: "#1e2227",
+              },
+            },
+          },
+        ],
+        tooltip: {
+          trigger: "axis",
+        },
         series: [
           {
             name: "价格",
             type: "line",
             data: this.chartData.prices,
+            lineStyle: {
+              color: "#f0b90b",
+            },
+            symbol: "none",
+            itemStyle: {
+              color: "#f0b90b", // 设置数据点的颜色
+            },
+            areaStyle: {
+              color: {
+                type: "linear",
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  { offset: 0.5, color: "rgba(131, 105, 20, 1)" }, // 起始颜色
+                  { offset: 1, color: "rgba(0, 0, 0, 0)" }, // 结束颜色
+                ],
+              },
+            },
+          },
+          {
+            name: "交易量",
+            type: "bar",
+            data: this.chartData.tradeVolume,
+            yAxisIndex: 1, // 使用右侧的Y轴
+            itemStyle: {
+              color: function (params) {
+                // 判断价格上涨还是下跌，根据条件返回不同的颜色
+                if (params.data > params.dataIndex > 0) {
+                  return "#ff707e"; // 价格上涨，柱子设置为红色
+                } else {
+                  return "#32d993"; // 价格下跌，柱子设置为绿色
+                }
+              },
+            },
           },
         ],
       };
 
       this.myChart.setOption(option);
     },
+
     formatTime(timeString) {
       const time = new Date(timeString);
       return `${time.getHours()}:${time
@@ -398,8 +492,8 @@ export default {
         .padStart(2, "0")}`;
     },
     startPriceDataFetch() {
-      this.fetchPriceData(); // 初始获取一次数据
-      this.priceUpdateInterval = setInterval(this.fetchPriceData, 60000); // 每分钟更新一次
+      this.fetchAndProcessPriceData(); // 初始获取一次数据
+      this.priceUpdateInterval = setInterval(this.fetchPriceData, 1000); // 每分钟更新一次
     },
     async getCurrentPositions() {
       try {
@@ -489,6 +583,52 @@ export default {
         document.getElementById("price-trend-chart")
       );
       this.myChart = myChart;
+      // //随机产生的时间数据，仅供前端测试所用
+      // function generateRandomHour() {
+      //   const times = [];
+      //   for (let hour = 0; hour < 24; hour++) {
+      //     for (let minute = 0; minute < 60; minute++) {
+      //       const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
+      //       const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
+      //       times.push(`${hourStr}:${minuteStr}`);
+      //     }
+      //   }
+      //   return times;
+      // }
+      // //随机产生的期货价格数据，仅供前端测试所用
+      // function generateStockData() {
+      //   const data = [];
+      //   let price = 800;
+      //   for (let i = 0; i < 24 * 60; i++) {
+      //     const change = Math.random() * 100 - 50;
+      //     price += change;
+
+      //     // 确保价格不低于零
+      //     if (price < 10) {
+      //       price = 50;
+      //     }
+
+      //     data.push(Math.round(price * 100) / 100);
+      //   }
+      //   return data;
+      // }
+      // //随机产生的交易量数据，仅供前端测试所用
+      // function generateTradeVolumeData() {
+      //   const data = [];
+      //   for (let i = 0; i < 24 * 60; i++) {
+      //     const volume = Math.random() * 1000; // 随机生成交易量，你可以根据需要调整范围
+      //     data.push(Math.round(volume * 100) / 100);
+      //   }
+      //   return data;
+      // }
+
+      // this.chartData.times = generateRandomHour();
+      // this.chartData.price = generateStockData();
+      // this.chartData.tradeVolume = generateTradeVolumeData();
+
+      let price = this.chartData.price;
+
+      // console.log(this.times);
 
       let option = {
         title: {},
@@ -496,25 +636,19 @@ export default {
           trigger: "axis",
         },
         legend: {
-          data: ["价格"],
-          show: false,
+          data: ["价格", "交易量"],
+          show: true,
+          textStyle: {
+            color: "#b7bdc6", // 设置图例项文本的颜色
+          },
         },
         xAxis: {
           type: "category",
-          data: [], // 初始为空
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: "#1e2227",
-            },
-          },
-        },
-        yAxis: {
-          type: "value",
-          name: "价格",
-          position: "right",
+          data: this.chartData.times,
           axisLine: {
-            lineStyle: {},
+            lineStyle: {
+              color: "#b7bdc6", // 设置坐标轴线的颜色
+            },
           },
           splitLine: {
             show: true,
@@ -523,99 +657,115 @@ export default {
             },
           },
         },
+        yAxis: [
+          {
+            type: "value",
+            name: "价格",
+            position: "right", // 将Y轴移动到右侧
+            axisLine: {
+              lineStyle: { color: "#b7bdc6" },
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                color: "#1e2227",
+              },
+            },
+          },
+          {
+            type: "value",
+            name: "交易量",
+            position: "left", // 将交易量Y轴显示在左侧
+            axisLine: {
+              lineStyle: { color: "#b7bdc6" }, // 设置交易量Y轴的颜色
+            },
+            splitLine: {
+              show: false, // 可根据需要决定是否显示网格线
+            },
+            max: 5000,
+          },
+        ],
         series: [
           {
             name: "价格",
             type: "line",
-            data: [], // 初始为空
+            data: this.chartData.price,
+            lineStyle: {
+              color: "#f0b90b",
+            },
+            symbol: "none",
+            itemStyle: {
+              color: "#f0b90b", // 设置数据点的颜色
+            },
+            areaStyle: {
+              color: {
+                type: "linear",
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  { offset: 0.5, color: "rgba(131, 105, 20, 1)" }, // 起始颜色
+                  { offset: 1, color: "rgba(0, 0, 0, 0)" }, // 结束颜色
+                ],
+              },
+            },
+          },
+          {
+            name: "交易量",
+            type: "bar",
+            data: this.chartData.tradeVolume, // 新编写的交易量数据生成函数
+            symbol: "none",
+            itemStyle: {
+              color: function (params) {
+                const dataIndex = params.dataIndex;
+                // 判断价格上涨还是下跌，根据条件返回不同的颜色
+                const priceData = price;
+                if (
+                  dataIndex > 0 &&
+                  priceData[dataIndex] > priceData[dataIndex - 1]
+                ) {
+                  return "#ff707e"; // 价格上涨，柱子设置为红色
+                } else {
+                  return "#32d993"; // 价格下跌，柱子设置为绿色
+                }
+              }, // 设置数据点的颜色
+            },
+            yAxisIndex: 1, // 使用右侧的Y轴
+          },
+        ],
+        dataZoom: [
+          {
+            type: "slider",
+            show: true,
+            start: 80, // 设置默认显示范围的起始位置，0 表示从第一个数据开始
+            end: 100, // 设置默认显示范围的结束位置，50 表示显示前50%的数据
+            backgroundColor: "#181a20", // 修改背景颜色
+            // dataBackgroundColor: '#fff', // 修改数据背景颜色
+            handleColor: "#eaecef", // 修改手柄颜色
+            handleSize: 50, // 滑动条控制块的大小
+            dataBackground: {
+              //数据阴影的样式。
+              lineStyle: { color: "#f0b90b" }, //阴影的线条样式
+              areaStyle: { color: "rgba(131, 105, 20, 1)" }, //阴影的填充样式
+            },
+            selectedDataBackground: {
+              //选中部分数据阴影的样式
+              lineStyle: { color: "#f0b90b" }, //选中部分阴影的线条样式
+              areaStyle: { color: "rgba(131, 105, 20, 1)" }, //选中部分阴影的填充样式
+            },
+            fillerColor: "rgba(131, 105, 20, 0.3)",
+            moveHandleStyle: {
+              color: "#eaecef",
+            }, //移动手柄的样式配置
           },
         ],
       };
-
       myChart.setOption(option);
     },
-    // drawChart() {
-    //   let myChart = this.$echarts.init(
-    //     document.getElementById("price-trend-chart")
-    //   );
-    //   this.myChart = myChart;
-    //   //随机产生的时间数据，仅供前端测试所用
-    //   function generateRandomHour() {
-    //     const times = [];
-    //     for (let hour = 0; hour < 24; hour++) {
-    //       for (let minute = 0; minute < 60; minute++) {
-    //         const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
-    //         const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
-    //         times.push(`${hourStr}:${minuteStr}`);
-    //       }
-    //     }
-    //     return times;
-    //   }
-    //   //随机产生的期货价格数据，仅供前端测试所用
-    //   function generateStockData() {
-    //     const data = [];
-    //     let price = 800;
-    //     for (let i = 0; i < 24 * 60; i++) {
-    //       const change = Math.random() * 100 - 50;
-    //       price += change;
-
-    //       // 确保价格不低于零
-    //       if (price < 10) {
-    //         price = 50;
-    //       }
-
-    //       data.push(Math.round(price * 100) / 100);
-    //     }
-    //     return data;
-    //   }
-    //   let option = {
-    //     title: {},
-    //     tooltip: {
-    //       trigger: "axis",
-    //     },
-    //     legend: {
-    //       data: ["价格"],
-    //       show: false,
-    //     },
-    //     xAxis: {
-    //       type: "category",
-    //       data: generateRandomHour(),
-    //       splitLine: {
-    //         show: true,
-    //         lineStyle: {
-    //           color: "#1e2227",
-    //         },
-    //       },
-    //     },
-    //     yAxis: [
-    //       {
-    //         type: "value",
-    //         name: "价格",
-    //         position: "right", // 将Y轴移动到右侧
-    //         axisLine: {
-    //           lineStyle: {},
-    //         },
-    //         splitLine: {
-    //           show: true,
-    //           lineStyle: {
-    //             color: "#1e2227",
-    //           },
-    //         },
-    //       },
-    //     ],
-    //     series: [
-    //       {
-    //         name: "价格",
-    //         type: "line",
-    //         data: generateStockData(),
-    //       },
-    //     ],
-    //   };
-    //   myChart.setOption(option);
-    // },
-    // formatTooltip(val) {
-    //   return val + "%";
-    // },
+    formatTooltip(val) {
+      return val + "%";
+    },
   },
   beforeDestroy() {
     if (this.priceUpdateInterval) {
@@ -850,5 +1000,26 @@ export default {
   background-color: #181a20;
   color: #848e9c;
   border: none;
+}
+.logout-button {
+  margin-top: 15px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 0; /* 使用 right 属性将元素右对齐 */
+  margin-right: 30px;
+}
+#logoutButton.el-button--primary {
+  background: #fcd535;
+  border-color: #fcd535;
+  color: #181a20;
+  border-radius: 4px;
+}
+#logoutButton.el-button--primary:hover {
+  background: #e5c333;
+  border-color: #e5c333;
+  color: #181a20;
+  border-radius: 4px;
 }
 </style>

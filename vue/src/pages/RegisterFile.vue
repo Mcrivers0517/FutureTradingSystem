@@ -12,11 +12,11 @@
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
-          <div class="login-container">
-            <div class="login-text-container">
-              <span class="login-text">登录</span>
+          <div class="register-container">
+            <div class="register-text-container">
+              <span class="register-text">注册</span>
             </div>
-            <form @submit.prevent="login">
+            <form @submit.prevent="register">
               <div style="margin-bottom: 5px; font-size: 15px">
                 <label for="username">请输入您的邮箱/手机号码</label>
               </div>
@@ -34,22 +34,27 @@
                 v-model="password"
                 type="password"
                 placeholder="Password"
-                style="border-color: red"
+                style="margin-bottom: 20px"
+              ></el-input>
+              <div style="margin-bottom: 5px; font-size: 15px">
+                <label for="password">请再次输入您的密码</label>
+              </div>
+              <el-input
+                id="repassword"
+                v-model="repassword"
+                type="password"
+                placeholder="Repassword"
               ></el-input>
               <div class="submit-button">
+                <input type="submit" style="display: none" />
                 <el-button
                   type="primary"
                   native-type="submit"
-                  style="width: 100%"
-                  >登录</el-button
+                  style="width: 100%; margin-top: 10px; height: 42px"
+                  >注册</el-button
                 >
               </div>
             </form>
-            <div class="register-link">
-              <span class="register-link-text">
-                未有账户？<router-link to="/register">点击注册</router-link>
-              </span>
-            </div>
           </div>
         </el-main>
       </el-container>
@@ -64,29 +69,35 @@ export default {
     return {
       username: "",
       password: "",
+      repassword: "",
+      showErrorMessage: false, // 控制错误提示显示
     };
   },
   methods: {
-    async login() {
-      if (this.username === "" || this.password === "") {
-        alert("用户名和密码不能为空，请填写完整！");
+    register() {
+      if (this.password !== this.repassword) {
+        alert("两次输入的密码不相同，请重新输入。");
+        return;
       }
+
+      const userData = {
+        username: this.username,
+        password: this.password,
+      };
+
       axios
-        .post("localhost:5000/login", {
-          username: this.username,
-          password: this.password,
-        })
+        .post("localhost:5000/register", userData)
         .then((response) => {
           const result = response.data;
 
           if (result.success) {
-            this.$router.push("/user-home");
+            this.$router.push("/Login");
           } else {
-            alert("登录失败：" + result.message);
+            alert("注册失败：" + result.message);
           }
         })
         .catch((error) => {
-          console.error("登录请求失败", error);
+          console.error("注册请求失败", error);
         });
     },
   },
@@ -94,8 +105,6 @@ export default {
 </script>
 
 <style scoped>
-
-/* eslint-disable*/
 .common-layout {
   background-color: #eaecef;
 }
@@ -129,9 +138,10 @@ export default {
   margin-top: 8px;
   margin-left: 15px;
 }
-.login-container {
+
+.register-container {
   width: 480px; /* 调整容器宽度 */
-  height: 360px;
+  height: 420px;
   padding: 20px;
   background-color: #181a20;
   border-radius: 12px;
@@ -140,11 +150,11 @@ export default {
   color: #eaecef; /* 文本颜色为白色 */
 }
 
-.login-text {
+.register-text {
   font-size: 25px;
   font-weight: 600;
 }
-.login-text-container {
+.register-text-container {
   margin-bottom: 30px;
 }
 /deep/.el-input__inner {
@@ -157,6 +167,9 @@ export default {
   border: 1px solid #2b3139;
 }
 /deep/.el-input__inner:hover {
+  border-color: #f0b90b;
+}
+/deep/.el-input__inner:focus {
   border-color: #f0b90b;
 }
 .submit-button {
@@ -177,14 +190,5 @@ export default {
   color: #181a20;
   border-radius: 8px;
 }
-.register-link {
-  margin-top: 13px;
-}
-span.register-link-text {
-  text-decoration: none;
-}
-span:hover.register-link-text {
-  text-decoration: underline;
-  cursor: pointer;
-}
 </style>
+

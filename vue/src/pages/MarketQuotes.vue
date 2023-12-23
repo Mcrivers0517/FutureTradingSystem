@@ -10,7 +10,7 @@
           />
         </div>
         <el-menu
-          :default-active="activeIndex2"
+          default-active="3"
           class="el-menu-demo"
           mode="horizontal"
           @select="handleSelect"
@@ -28,6 +28,15 @@
           <el-menu-item index="3">行情</el-menu-item>
           <el-menu-item index="4">消息中心</el-menu-item>
         </el-menu>
+        <div class="logout-button">
+          <el-button
+            type="primary"
+            native-type="submit"
+            @click="logout"
+            id="logoutButton"
+            >退出账号</el-button
+          >
+        </div>
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
@@ -36,6 +45,7 @@
             class="futures-table"
             :cell-style="tableRowClassName"
             :default-sort="{ prop: 'CurrentPrice', order: 'descending' }"
+            @row-click="handleRowClick"
           >
             <el-table-column prop="type" label="品种" :width="80" sortable>
             </el-table-column>
@@ -79,7 +89,7 @@ export default {
     return {
       MarketData: [
         {
-          type: "商品A",
+          type: "A",
           BuyOrSell: "买入",
           Position: 100,
           FloatingProfitOrLoss: 50.25,
@@ -89,7 +99,7 @@ export default {
           LatestTransactionTime: "2023-01-05 09:45:00",
         },
         {
-          type: "商品B",
+          type: "B",
           BuyOrSell: "卖出",
           Position: 50,
           FloatingProfitOrLoss: -25.8,
@@ -99,7 +109,7 @@ export default {
           LatestTransactionTime: "2023-01-05 14:20:00",
         },
         {
-          type: "商品C",
+          type: "C",
           BuyOrSell: "买入",
           Position: 75,
           FloatingProfitOrLoss: 30.1,
@@ -111,13 +121,45 @@ export default {
       ],
     };
   },
+  methods: {
+    logout() {
+      this.$router.push("/Login");
+    },
+    handleSelect(index) {
+      // 处理菜单项点击事件，你可以在这里进行路由跳转
+      if (index === "1") {
+        this.$router.push("/"); // 跳转到主页
+      } else if (index === "2-1") {
+        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
+      } else if (index === "2-2") {
+        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
+      } else if (index === "3") {
+        this.$router.push("/MarketQuotes"); // 跳转到行情页
+      } else if (index === "4") {
+        this.$router.push("/message-center"); // 跳转到消息中心页
+      }
+    },
+    handleRowClick(row) {
+      // 处理行点击事件，你可以在这里进行路由跳转
+      if (row.type == "A") {
+        this.$router.push("/StockTrendChart");
+      } else if (row.type == "B") {
+        this.$router.push("/StockTrendChart");
+      } else if (row.type == "C") {
+        this.$router.push("/StockTrendChart");
+      }
+    },
+    tableRowClassName() {
+      return "background: #181a20; height: 80px";
+    },
+  },
 };
 </script>
 
 <style scoped>
 /* 你之前提供的样式 */
 .common-layout {
-  background-color: #2767c6;
+  background-color: #181a20;
   border-radius: 12px 12px 12px 12px;
 }
 
@@ -174,7 +216,25 @@ export default {
 .el-table::before {
   background-color: #2b3139;
 }
-.el-table tbody tr:hover > td {
-  background-color: red;
+.logout-button {
+  margin-top: 15px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  right: 0; /* 使用 right 属性将元素右对齐 */
+  margin-right: 30px;
+}
+.el-button--primary {
+  background: #fcd535;
+  border-color: #fcd535;
+  color: #181a20;
+  border-radius: 4px;
+}
+.el-button--primary:hover {
+  background: #e5c333;
+  border-color: #e5c333;
+  color: #181a20;
+  border-radius: 4px;
 }
 </style>

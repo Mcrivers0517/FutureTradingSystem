@@ -12,11 +12,11 @@
       </el-header>
       <el-container class="content-container">
         <el-main class="main">
-          <div class="register-container">
-            <div class="register-text-container">
-              <span class="register-text">注册</span>
+          <div class="login-container">
+            <div class="login-text-container">
+              <span class="login-text">登录</span>
             </div>
-            <form @submit.prevent="register">
+            <form @submit.prevent="login">
               <div style="margin-bottom: 5px; font-size: 15px">
                 <label for="username">请输入您的邮箱/手机号码</label>
               </div>
@@ -34,26 +34,26 @@
                 v-model="password"
                 type="password"
                 placeholder="Password"
-                style="margin-bottom: 20px"
-              ></el-input>
-              <div style="margin-bottom: 5px; font-size: 15px">
-                <label for="password">请再次输入您的密码</label>
-              </div>
-              <el-input
-                id="repassword"
-                v-model="repassword"
-                type="password"
-                placeholder="Repassword"
+                style="border-color: red"
               ></el-input>
               <div class="submit-button">
+                <input type="submit" style="display: none" />
+                <!--该文本框用来实现回车提交-->
                 <el-button
                   type="primary"
                   native-type="submit"
-                  style="width: 100%; margin-top: 10px; height: 42px"
-                  >注册</el-button
+                  style="width: 100%"
+                  >登录</el-button
                 >
               </div>
             </form>
+            <div class="register-link">
+              <span class="register-link-text">
+                <router-link to="/register" class="register-link"
+                  >没有账户？点击注册</router-link
+                >
+              </span>
+            </div>
           </div>
         </el-main>
       </el-container>
@@ -68,35 +68,32 @@ export default {
     return {
       username: "",
       password: "",
-      repassword: "",
-      showErrorMessage: false, // 控制错误提示显示
     };
   },
   methods: {
-    register() {
-      if (this.password !== this.repassword) {
-        alert("两次输入的密码不相同，请重新输入。");
-        return;
-      }
-
-      const userData = {
-        username: this.username,
-        password: this.password,
-      };
-
+    async login() {
+      if (this.username === "" || this.password === "") {
+        alert("用户名或密码不能为空，请填写完整！");
+      } 
+      // else {
+      //   this.$router.push("/");
+      // }
       axios
-        .post("localhost:5000/register", userData)
+        .post("localhost:5000/login", {
+          username: this.username,
+          password: this.password,
+        })
         .then((response) => {
           const result = response.data;
 
           if (result.success) {
-            this.$router.push("/login");
+            this.$router.push("/");
           } else {
-            alert("注册失败：" + result.message);
+            alert("登录失败：" + result.message);
           }
         })
         .catch((error) => {
-          console.error("注册请求失败", error);
+          console.error("登录请求失败", error);
         });
     },
   },
@@ -104,6 +101,7 @@ export default {
 </script>
 
 <style scoped>
+/* eslint-disable*/
 .common-layout {
   background-color: #eaecef;
 }
@@ -137,10 +135,9 @@ export default {
   margin-top: 8px;
   margin-left: 15px;
 }
-
-.register-container {
+.login-container {
   width: 480px; /* 调整容器宽度 */
-  height: 420px;
+  height: 360px;
   padding: 20px;
   background-color: #181a20;
   border-radius: 12px;
@@ -149,11 +146,11 @@ export default {
   color: #eaecef; /* 文本颜色为白色 */
 }
 
-.register-text {
+.login-text {
   font-size: 25px;
   font-weight: 600;
 }
-.register-text-container {
+.login-text-container {
   margin-bottom: 30px;
 }
 /deep/.el-input__inner {
@@ -164,6 +161,9 @@ export default {
   font-family: PingFangSC-Regular, PingFang SC;
   color: #eaecef;
   border: 1px solid #2b3139;
+}
+/deep/.el-input__inner:hover {
+  border-color: #f0b90b;
 }
 /deep/.el-input__inner:focus {
   border-color: #f0b90b;
@@ -186,5 +186,18 @@ export default {
   color: #181a20;
   border-radius: 8px;
 }
+.register-link {
+  margin-top: 13px;
+}
+span.register-link-text {
+  text-decoration: none;
+}
+span:hover.register-link-text {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.register-link {
+  color: white !important; /* 设置链接文本颜色为白色 */
+  text-decoration: none; /* 移除下划线 */
+}
 </style>
-
