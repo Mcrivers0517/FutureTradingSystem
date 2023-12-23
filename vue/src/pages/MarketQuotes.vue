@@ -129,11 +129,11 @@ export default {
     },
     handleRowClick(row) {
       // 处理行点击事件，你可以在这里进行路由跳转
-      if (row.type == 'A') {
+      if (row.type == "A") {
         this.$router.push("/StockTrendChart");
-      } else if (row.type == 'B') {
+      } else if (row.type == "B") {
         this.$router.push("/StockTrendChart");
-      } else if (row.type == 'C') {
+      } else if (row.type == "C") {
         this.$router.push("/StockTrendChart");
       }
     },
@@ -203,8 +203,5 @@ export default {
 .el-table--group::after,
 .el-table::before {
   background-color: #2b3139;
-}
-.el-table tbody tr:hover > td {
-  background-color: red;
 }
 </style>
