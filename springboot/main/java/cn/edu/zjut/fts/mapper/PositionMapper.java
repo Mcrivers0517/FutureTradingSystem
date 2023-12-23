@@ -16,4 +16,5 @@ public interface PositionMapper extends BaseMapper<Position> {
             "values(#{id}, #{username}, #{BS}, #{pos}, #{c_Pro}, #{r_Pro}, #{f_Price}, #{n_Price}, #{n_Time},#{Delivery)")
     int insertPosition(Position position);
 
+
 }

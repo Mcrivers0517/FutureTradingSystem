@@ -26,6 +26,22 @@ public class PositionController {
 
     @PostMapping("/insertPosition")
     public int insertPosition(@RequestBody Position position) {
+        // 设置默认值
+        position.setC_Pro(0);
+        position.setR_Pro(0);
+        position.setN_Price(position.getF_Price());
+
+        // 设置 Delivery 默认值为 20200720
+        Date defaultDelivery = new Date(120, 6, 20); // 注意月份是从0开始计算的，所以6表示7月
+        position.setDelivery(defaultDelivery);
+
+        // 如果 n_Time 大于 20200720，将 Delivery 设置为 20200820
+        if (position.getN_Time().after(defaultDelivery)) {
+            Date updatedDelivery = new Date(120, 7, 20); // 8月
+            position.setDelivery(updatedDelivery);
+        }
+
         return positionMapper.insertPosition(position);
     }
+
 }
