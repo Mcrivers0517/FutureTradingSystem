@@ -18,6 +18,6 @@ INSERT INTO transactiontable (id, username, bs, price, premium, pro,time) VALUES
 
 -- 插入委托记录数据
 INSERT INTO DelegateTable (id, username, att, status, num, D_price, D_time) VALUES
-('A001', 'user1', 'Buy', 1, 50, 105, '2023-01-01 11:55:00'),
-('B001', 'user2', 'Sell', 0, 30, 145, '2023-01-02 14:25:00'),
-('C001', 'user3', 'Buy', 1, 25, 205, '2023-01-03 10:40:00');
+('A001', 'user1', 'Buy', '已成', 50, 105, '2023-01-01 11:55:00'),
+('B001', 'user2', 'Sell','已委', 30, 145, '2023-01-02 14:25:00'),
+('C001', 'user3', 'Buy','已成', 25, 205, '2023-01-03 10:40:00');

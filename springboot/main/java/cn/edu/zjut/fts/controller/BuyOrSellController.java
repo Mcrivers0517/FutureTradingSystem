@@ -12,7 +12,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.sql.Timestamp;
 
-@Api(tags = "购买或卖出模块")
+@Api(tags = "买卖模块")
 @RestController
 public class BuyOrSellController {
 
@@ -40,7 +40,6 @@ public class BuyOrSellController {
         int pos = request.getPos();
         int F_price = request.getF_Price();
 
-
         //0.获取id种类第Q_id行的Q_price数据
         int Q_id =0;
         int Q_price =0;
@@ -50,58 +49,31 @@ public class BuyOrSellController {
         System.out.println("Q_id:"+Q_id);
         System.out.println("Q_price:"+Q_price);
 
-        // 1. 插入持仓数据
-        Position position =new Position();
-        position.setId(id);
-        position.setUsername(username);
-        position.setBs(bs);
-        position.setPos(pos);
-        position.setF_Price(F_price);
-        position.setN_Time(request.getN_Time());
-        position.setC_Pro(0);
-        position.setR_Pro(0.00);
-        position.setN_Price(position.getF_Price());
-
-        // 处理 Delivery 的逻辑
-        LocalDateTime nTime = request.getN_Time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-        int dayOfMonth = nTime.getDayOfMonth();
-
-        if (dayOfMonth < 20) {
-            // 如果 N_Time 的日期小于 20，设置 Delivery 为同月的第 20 天
-            LocalDate deliveryDate = nTime.withDayOfMonth(20).toLocalDate();
-            position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        } else {
-            // 如果 N_Time 的日期大于等于 20，设置 Delivery 为下一个月的第 20 天
-            LocalDate deliveryDate = nTime.plusMonths(1).withDayOfMonth(20).toLocalDate();
-            position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        }
-
-        positionMapper.insertPosition(position);
-        System.out.println("持仓数据"+position);
 
 
-        // 2. 插入委托数据
-        boolean f_tran =false;
+
+        // 1. 插入委托数据
+        String f_tran ="";
         Delegate delegate = new Delegate();
         delegate.setId(id);
         delegate.setAtt(bs+"开");
         delegate.setUsername(username);
         delegate.setD_Price(F_price);
         delegate.setNum(pos);
-        delegate.setD_Time(new Timestamp(request.getN_Time().getTime()));
+        delegate.setD_time(new Timestamp(request.getN_Time().getTime()));
         if(F_price<Q_price) {
-            delegate.setStatus(false);}
+            delegate.setStatus("已委");}
         else {
-            delegate.setStatus(true);
-            f_tran =true;
+            delegate.setStatus("已成");
+            f_tran =delegate.getStatus();
         }
         delegateMapper.insertDelegate(delegate);
         System.out.println("委托数据"+delegate);
 
 
-        // 3. 插入成交记录数据
-        Transaction transaction = new Transaction();
-        if(f_tran ==true) {
+        if(f_tran.equals("已成")) {
+            // 2. 插入成交记录数据
+            Transaction transaction = new Transaction();
             transaction.setId(id);
             transaction.setUsername(username);
             transaction.setBs(bs + "开");
@@ -111,6 +83,35 @@ public class BuyOrSellController {
             transaction.setTime(new Timestamp(request.getN_Time().getTime()));
             transactionMapper.insertTransaction(transaction);
             System.out.println("成交记录:"+transaction);
+
+            // 3. 插入持仓数据
+            Position position =new Position();
+            position.setId(id);
+            position.setUsername(username);
+            position.setBs(bs);
+            position.setPos(pos);
+            position.setF_Price(F_price);
+            position.setN_Time(request.getN_Time());
+            position.setC_Pro(0);
+            position.setR_Pro(0.00);
+            position.setN_Price(position.getF_Price());
+
+            // 处理 Delivery 的逻辑
+            LocalDateTime nTime = request.getN_Time().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            int dayOfMonth = nTime.getDayOfMonth();
+
+            if (dayOfMonth < 20) {
+                // 如果 N_Time 的日期小于 20，设置 Delivery 为同月的第 20 天
+                LocalDate deliveryDate = nTime.withDayOfMonth(20).toLocalDate();
+                position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            } else {
+                // 如果 N_Time 的日期大于等于 20，设置 Delivery 为下一个月的第 20 天
+                LocalDate deliveryDate = nTime.plusMonths(1).withDayOfMonth(20).toLocalDate();
+                position.setDelivery(Date.from(deliveryDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            }
+
+            positionMapper.insertPosition(position);
+            System.out.println("持仓数据"+position);
         }
         return ;
     }

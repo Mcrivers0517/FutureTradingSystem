@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS DelegateTable(
     /*品种*/id VARCHAR(10),
     /*持仓人*/username VARCHAR(100) ,
     /*属性*/att VARCHAR(10),
-    /*状态*/status TINYINT(1),
+    /*状态*/status VARCHAR(10),
     /*委托数量*/num INT,
     /*委托价格*/D_price INT,
     /*委托时间*/D_time DATETIME
