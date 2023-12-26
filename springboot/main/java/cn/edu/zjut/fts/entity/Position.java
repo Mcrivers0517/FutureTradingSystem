@@ -1,6 +1,7 @@
 package cn.edu.zjut.fts.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class Position {
     private int pos;
     private int C_Pro;
     private double R_Pro;
+    @JsonProperty("F_Price")
     private int F_Price;
     private int N_Price;
     private Date N_Time;

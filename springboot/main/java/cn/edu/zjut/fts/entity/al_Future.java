@@ -7,14 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
-import java.util.Date;
+
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("a_futures")
-public class a_Future {
+@TableName("al_futures")
+public class al_Future {
     private Long date;
     private Time time;
     private int price;

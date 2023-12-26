@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS TransactionTable(
     /*品种*/id VARCHAR(10),
     /*持仓人*/username VARCHAR(100) ,
     /*买或卖,开或平*/bs VARCHAR(10),
+    /*数量*/num INT,
     /*成交价格*/price INT,
     /*手续费*/premium INT,
     /*利润*/pro INT,

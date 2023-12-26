@@ -6,6 +6,8 @@ import cn.edu.zjut.fts.mapper.*;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,29 +29,43 @@ public class BuyOrSellController {
     @Autowired
     private a_futuresMapper a_futuresMapper;
     @Autowired
+    private ag_futuresMapper ag_futuresMapper;
+    @Autowired
+    private al_futuresMapper al_futuresMapper;
+    @Autowired
     private alMapper alMapper;
     @Autowired
     private agMapper agMapper;
 
     @PostMapping("/BuyOrSell")
     public void buyOrSell(@RequestBody  Position request) {
+        System.out.println(request);
         String id = request.getId();
-        System.out.println(id);
         String username = request.getUsername();
         String bs = request.getBs();
         int pos = request.getPos();
         int F_price = request.getF_Price();
+        System.out.println(F_price);
+
 
         //0.获取id种类第Q_id行的Q_price数据
         int Q_id =0;
         int Q_price =0;
-        if(id.equals("a")){Q_id = aMapper.geta_Last_Read_PositionId();Q_price =a_futuresMapper.selectPriceByLastReadPositionId(Q_id);}
-        if(id.equals("ag")){Q_id = agMapper.getag_Last_Read_PositionId();}
-        if(id.equals("al")){Q_id = alMapper.getal_Last_Read_PositionId();}
+        long t_date=0;
+        Time t_time = null;
+        if(id.equals("a")){Q_id = aMapper.geta_Last_Read_PositionId();Q_price =a_futuresMapper. selecta_PriceByLastReadPositionId(Q_id);t_date=a_futuresMapper.selecta_dateByLastReadPositionId(Q_id);t_time=a_futuresMapper.selecta_timeByLastReadPositionId(Q_id);}
+        if(id.equals("ag")){Q_id = agMapper.getag_Last_Read_PositionId();Q_price =ag_futuresMapper.selectag_PriceByLastReadPositionId(Q_id);t_date=ag_futuresMapper.selectag_dateByLastReadPositionId(Q_id);t_time=ag_futuresMapper.selectag_timeByLastReadPositionId(Q_id);}
+        if(id.equals("al")){Q_id = alMapper.getal_Last_Read_PositionId();Q_price =al_futuresMapper. selectal_PriceByLastReadPositionId(Q_id);t_date=al_futuresMapper.selectal_dateByLastReadPositionId(Q_id);t_time=al_futuresMapper.selectal_timeByLastReadPositionId(Q_id);}
+        // 将long类型的日期转换为java.sql.Date
+        Date switce_date = new Date(t_date);
+        java.sql.Date sqlDate = new java.sql.Date(switce_date.getTime());
+        // 将Time类型的时间转换为java.sql.Time
+        java.sql.Time sqlTime = new java.sql.Time(t_time.getTime());
+        // 使用java.sql.Timestamp将日期和时间组合在一起
+        Timestamp combinedDateTime = new Timestamp(sqlDate.getTime() + sqlTime.getTime());
+        request.setN_Time(combinedDateTime);
         System.out.println("Q_id:"+Q_id);
         System.out.println("Q_price:"+Q_price);
-
-
 
 
         // 1. 插入委托数据
@@ -61,22 +77,19 @@ public class BuyOrSellController {
         delegate.setD_Price(F_price);
         delegate.setNum(pos);
         delegate.setD_time(new Timestamp(request.getN_Time().getTime()));
-        if(F_price<Q_price) {
-            delegate.setStatus("已委");}
-        else {
-            delegate.setStatus("已成");
-            f_tran =delegate.getStatus();
-        }
+        int f_decide =0;
+        if(bs.equals("买")&F_price<Q_price){delegate.setStatus("已委");f_decide =1;}
+        if(bs.equals("卖")&F_price>Q_price){delegate.setStatus("已委");f_decide=1;}
+        if(f_decide==0){delegate.setStatus("已成");f_tran =delegate.getStatus();}
         delegateMapper.insertDelegate(delegate);
         System.out.println("委托数据"+delegate);
-
-
         if(f_tran.equals("已成")) {
             // 2. 插入成交记录数据
             Transaction transaction = new Transaction();
             transaction.setId(id);
             transaction.setUsername(username);
             transaction.setBs(bs + "开");
+            transaction.setNum(pos);
             transaction.setPrice(F_price);
             transaction.setPremium(25);
             transaction.setPro(F_price - 25);
@@ -113,6 +126,5 @@ public class BuyOrSellController {
             positionMapper.insertPosition(position);
             System.out.println("持仓数据"+position);
         }
-        return ;
     }
 }
