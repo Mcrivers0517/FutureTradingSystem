@@ -292,68 +292,68 @@ export default {
     };
   },
   mounted() {
-    this.getCurrentPositions();
-    this.getHistoricalPositions();
-    this.startPriceDataFetch();
+    // this.getCurrentOrders();
+    // this.getHistoricalOrders();
+    // this.startPriceDataFetch();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
 
     // 以下mounted()内容仅用作前端测试，项目运行时应注释
 
-    // this.chartData.times = this.generateRandomHour();
-    // this.chartData.price = this.generateStockData();
-    // this.chartData.tradeVolume = this.generateTradeVolumeData();
-    // this.drawChart();
+    this.chartData.times = this.generateRandomHour();
+    this.chartData.price = this.generateStockData();
+    this.chartData.tradeVolume = this.generateTradeVolumeData();
+    this.drawChart();
 
-    // let currentSecond = 0;
-    // let accumulatedVolume = 0; // 累计交易量
+    let currentSecond = 0;
+    let accumulatedVolume = 0; // 累计交易量
 
-    // this.timerId = setInterval(() => {
-    //   // 生成新的价格
-    //   let newPrice =
-    //     Math.round(
-    //       (this.chartData.price[this.chartData.price.length - 1] +
-    //         Math.random() * 100 -
-    //         50) *
-    //         100
-    //     ) / 100;
-    //   if (newPrice < 10) {
-    //     newPrice = 50;
-    //   }
+    this.timerId = setInterval(() => {
+      // 生成新的价格
+      let newPrice =
+        Math.round(
+          (this.chartData.price[this.chartData.price.length - 1] +
+            Math.random() * 100 -
+            50) *
+            100
+        ) / 100;
+      if (newPrice < 10) {
+        newPrice = 50;
+      }
 
-    //   // 生成新的交易量并累加
-    //   let newVolume = Math.round(Math.random() * 20 * 100) / 100;
-    //   accumulatedVolume += newVolume;
+      // 生成新的交易量并累加
+      let newVolume = Math.round(Math.random() * 20 * 100) / 100;
+      accumulatedVolume += newVolume;
 
-    //   // 每秒更新价格，每分钟更新时间和价格点
-    //   if (currentSecond < 59) {
-    //     // 替换当前分钟的最后一个价格
-    //     this.chartData.price[this.chartData.price.length - 1] = newPrice;
-    //     this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
-    //       accumulatedVolume;
-    //     currentSecond++;
-    //   } else {
-    //     // 一分钟结束，更新时间标签和价格点
-    //     const newTime = this.getNextMinute(
-    //       this.chartData.times[this.chartData.times.length - 1]
-    //     );
-    //     this.chartData.times.push(newTime);
-    //     this.chartData.price.push(newPrice);
-    //     this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
+      // 每秒更新价格，每分钟更新时间和价格点
+      if (currentSecond < 59) {
+        // 替换当前分钟的最后一个价格
+        this.chartData.price[this.chartData.price.length - 1] = newPrice;
+        this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+          accumulatedVolume;
+        currentSecond++;
+      } else {
+        // 一分钟结束，更新时间标签和价格点
+        const newTime = this.getNextMinute(
+          this.chartData.times[this.chartData.times.length - 1]
+        );
+        this.chartData.times.push(newTime);
+        this.chartData.price.push(newPrice);
+        this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
 
-    //     // 重置秒数和累计交易量
-    //     currentSecond = 0;
-    //     accumulatedVolume = 0;
-    //   }
+        // 重置秒数和累计交易量
+        currentSecond = 0;
+        accumulatedVolume = 0;
+      }
 
-    //   // 更新图表
-    //   this.updateChart();
-    // }, 1000);
+      // 更新图表
+      this.updateChart();
+    }, 1000);
   },
   methods: {
     getNextMinute(currentTime) {
-      const [hour, minute, second] = currentTime.split(":").map(Number);
+      const [hour, minute] = currentTime.split(":").map(Number);
       let nextMinute = minute + 1;
       let nextHour = hour;
       if (nextMinute === 60) {
@@ -615,10 +615,10 @@ export default {
         this.updateChart();
       }, 1000);
     },
-    async getCurrentPositions() {
+    async getCurrentOrders() {
       try {
         const response = await axios.get(
-          "http://localhost:5000/getCurrentPositions"
+          "http://localhost:5000/getCurrentOrders"
         );
         const responseData = response.data;
         const CurrentPositionData = responseData.map((data) => ({
@@ -636,10 +636,10 @@ export default {
       }
     },
 
-    async getHistoricalPositions() {
+    async getHistoricalOrders() {
       try {
         const response = await axios.get(
-          "http://localhost:5000/getHistoricalPositions"
+          "http://localhost:5000/getHistoricalOrders"
         );
         const responseData = response.data;
         const HistoricalPositionData = responseData.map((data) => ({

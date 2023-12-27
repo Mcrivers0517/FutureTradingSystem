@@ -74,20 +74,25 @@ export default {
     async login() {
       if (this.username === "" || this.password === "") {
         alert("用户名或密码不能为空，请填写完整！");
-      } 
+      }
+      const request = {
+        username: this.username,
+        password: this.password,
+      };
+      // console.log(request);
       // else {
       //   this.$router.push("/");
       // }
       axios
-        .post("localhost:5000/login", {
-          username: this.username,
-          password: this.password,
+        .post("http://localhost:5000/login", {
+          request
         })
         .then((response) => {
           const result = response.data;
 
-          if (result.success) {
+          if (result) {
             this.$router.push("/");
+            console.log(result);
           } else {
             alert("登录失败：" + result.message);
           }
