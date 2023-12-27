@@ -2,10 +2,7 @@ package cn.edu.zjut.fts.mapper;
 
 import cn.edu.zjut.fts.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 @Mapper
@@ -18,9 +15,10 @@ public interface UserMapper extends BaseMapper<User> {
     @Insert("insert into user values (#{id},#{username},#{password},#{avatarUrl})")
     public int insert(User user);
 
+
     //查询操作，用于登录逻辑实现
-    @Select("SELECT * FROM user WHERE username = #{username}")
-    User selectByUsername(@Param("username") String username);
+    @Select("SELECT * FROM user WHERE username = #{username} and password=#{password}")
+    Boolean selectByUsername(User user);
 
 
 }

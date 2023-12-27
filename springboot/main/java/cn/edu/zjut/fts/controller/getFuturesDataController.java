@@ -7,8 +7,11 @@ import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -154,12 +157,15 @@ public class getFuturesDataController {
         }
         //4.更新持仓表
         List <Position> positionList =positionMapper.selectall();
+        DecimalFormat df = new DecimalFormat("#.##");
         for(Position position:positionList){
             int C_pro = (q_price -position.getF_Price())*position.getPos();
             double R_pro = ((q_price - position.getF_Price()) / position.getF_Price()) * 100.0;
+            R_pro = Double.parseDouble(df.format(R_pro)); // 格式化为两位小数
             int N_price = q_price;
             System.out.println(R_pro);
-            positionMapper.updatePosition(C_pro,R_pro,N_price);
+
+            positionMapper.updatePosition(C_pro, R_pro, N_price);
         }
         return future;
     }
