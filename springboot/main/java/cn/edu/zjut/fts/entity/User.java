@@ -13,11 +13,12 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("user")
-public class User {
+public class User
+{
 
     private int id;
-    private  String username;
-    private  String password;
+    private String username;
+    private String password;
     private String avatarUrl;
 
 }

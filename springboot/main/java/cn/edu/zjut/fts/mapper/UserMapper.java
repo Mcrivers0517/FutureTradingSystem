@@ -21,8 +21,8 @@ public interface UserMapper extends BaseMapper<User>
 
     //查询操作，用于登录逻辑实现
     @Select("SELECT * FROM user WHERE username = #{username} ")
-    Boolean selectByUsername(User user);
+    User selectByUsername(User user);
 
-    @Select("SELECT password FROM user WHERE username = #{username}")
-    String selectpasswordByUsername(User user);
+//    @Select("SELECT password FROM user WHERE username = #{username}")
+//    String selectPasswordByUsername(User user);
 }

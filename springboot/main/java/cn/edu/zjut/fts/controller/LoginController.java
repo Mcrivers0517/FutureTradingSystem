@@ -4,6 +4,7 @@ import cn.edu.zjut.fts.entity.User;
 
 import cn.edu.zjut.fts.mapper.UserMapper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,38 +25,26 @@ public class LoginController
     @PostMapping("/login")
     public LoginResponse login(@RequestBody User request)
     {
-        System.out.println(request);
-        String q_password = request.getPassword();
-        String message = "";
-//        loginresult result = new loginresult();
-        Boolean success = userMapper.selectByUsername(request);
-        if (success == null)
+        String password = request.getPassword();
+        User selectUser = userMapper.selectByUsername(request);
+        Boolean isSuccess = false;
+        System.out.println("selectUser:" + selectUser);
+
+        if (selectUser != null && password.equals(selectUser.getPassword()))
         {
-            success = false;
-            message = "用户名不存在";
-        }
-        else
-        {
-            if (q_password.equals(userMapper.selectpasswordByUsername(request)))
-            {
-                message = "登录成功";
-            }
-            else
-            {
-                success = false;
-                message = "密码错误";
-            }
+            isSuccess = true;
         }
 
-        return new LoginResponse(success, message);
+        return new LoginResponse(isSuccess);
     }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     class LoginResponse
     {
-        private boolean success;
-        private String message;
+        @JsonProperty("isSuccess")
+        private boolean isSuccess;
     }
 
 }

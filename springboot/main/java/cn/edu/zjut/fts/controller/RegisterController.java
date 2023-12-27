@@ -2,13 +2,19 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.User;
 import cn.edu.zjut.fts.mapper.UserMapper;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 @Api("注册模块")
 @CrossOrigin
 @RestController
-public class RegisterController {
+public class RegisterController
+{
     @Autowired
     private UserMapper userMapper;
 
@@ -21,34 +27,27 @@ public class RegisterController {
 //        return list;
 //    }
 
-@PostMapping("/register")
-public String insert(@RequestParam("username") String username,
-                     @RequestParam("password") String password,
-                     @RequestParam("confirmPassword") String confirmPassword) {
-    try {
-        // 检查两次输入的密码是否相同
-        if (!password.equals(confirmPassword)) {
-            return "两次输入的密码不一致";
+    @PostMapping("/register")
+    public RegisterResponse insert(@RequestBody User Request)
+    {
+        try
+        {
+            userMapper.insert(Request);
+            return new RegisterResponse(true);
         }
-
-        // 创建 User 对象并设置属性
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
-
-        // 直接保存用户信息到数据库
-        int result = userMapper.insert(user);
-        if (result > 0) {
-            return "注册成功";
-        } else {
-            return "注册失败";
+        catch (Exception e)
+        {
+            return new RegisterResponse(false);
         }
-    } catch (Exception e) {
-        // 适当处理异常（记录或返回有意义的错误消息）
-        return "注册过程中发生错误";
     }
-}
 
-
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    class RegisterResponse
+    {
+        @JsonProperty("isSuccess")
+        private boolean isSuccess;
+    }
 }
 
