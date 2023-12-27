@@ -15,6 +15,7 @@ import java.util.Date;
 import java.sql.Timestamp;
 
 @Api(tags = "买卖模块")
+@CrossOrigin
 @RestController
 public class BuyOrSellController {
 

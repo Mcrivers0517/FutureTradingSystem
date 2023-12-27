@@ -1,35 +1,62 @@
 package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.User;
+
 import cn.edu.zjut.fts.mapper.UserMapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
+import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@Api("登录模块")
 @RestController
-public class LoginController {
+@CrossOrigin
+public class LoginController
+{
 
     @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/login")
-    public Result login(@RequestBody User request) {
-        Result result = new Result();
+    public LoginResponse login(@RequestBody User request)
+    {
+        System.out.println(request);
+        String q_password = request.getPassword();
+        String message = "";
+//        loginresult result = new loginresult();
         Boolean success = userMapper.selectByUsername(request);
-        result.setSuccess(success);
-        return result;
-    }
-
-    // 定义一个用于包装返回结果的类
-    private static class Result {
-        private Boolean success;
-
-        public Boolean getSuccess() {
-            return success;
+        if (success == null)
+        {
+            success = false;
+            message = "用户名不存在";
+        }
+        else
+        {
+            if (q_password.equals(userMapper.selectpasswordByUsername(request)))
+            {
+                message = "登录成功";
+            }
+            else
+            {
+                success = false;
+                message = "密码错误";
+            }
         }
 
-        public void setSuccess(Boolean success) {
-            this.success = success;
-        }
+        return new LoginResponse(success, message);
     }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    class LoginResponse
+    {
+        private boolean success;
+        private String message;
+    }
+
 }
+

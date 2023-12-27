@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Api(tags = "获取当前订单模块")
+@CrossOrigin
 @RestController
 public class getCurrentOrdersController {
 

@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 @Api(tags = "更新数据模块")
+@CrossOrigin
 @RestController
 public class getFuturesDataController {
 
@@ -160,7 +161,7 @@ public class getFuturesDataController {
         DecimalFormat df = new DecimalFormat("#.##");
         for(Position position:positionList){
             int C_pro = (q_price -position.getF_Price())*position.getPos();
-            double R_pro = ((q_price - position.getF_Price()) / position.getF_Price()) * 100.0;
+            double R_pro = ((q_price - position.getF_Price()) / position.getF_Price());
             R_pro = Double.parseDouble(df.format(R_pro)); // 格式化为两位小数
             int N_price = q_price;
             System.out.println(R_pro);

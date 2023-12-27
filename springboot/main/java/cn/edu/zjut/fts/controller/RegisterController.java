@@ -2,9 +2,11 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.User;
 import cn.edu.zjut.fts.mapper.UserMapper;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+@Api("注册模块")
+@CrossOrigin
 @RestController
 public class RegisterController {
     @Autowired
