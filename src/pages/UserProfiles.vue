@@ -41,14 +41,16 @@
       <el-container class="content-container">
         <el-main class="main">
           <div class="user-avatar">
-            <div class="block">
-              <el-avatar
-                shape="square"
-                :size="65"
-                :src="avatarUrl"
-                class="custom-avatar"
-              ></el-avatar>
-            </div>
+            <el-upload
+              class="avatar-uploader"
+              action="http://localhost:5000/uploadAvatar"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :data="{ username: this.username }"
+            >
+              <img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
           </div>
           <div class="user-info">
             <div class="user-name">
@@ -113,41 +115,11 @@ import axios from "axios";
 export default {
   data() {
     return {
-      PositionData: [
-        // {
-        //   type: "商品A",
-        //   BuyOrSell: "买入",
-        //   Position: 100,
-        //   FloatingProfitOrLoss: 50.25,
-        //   ProfitOrLossRatio: "5%",
-        //   AverageOpeningPrice: 98.75,
-        //   CurrentPrice: 103.0,
-        //   LatestTransactionTime: "2023-01-05 09:45:00",
-        // },
-        // {
-        //   type: "商品B",
-        //   BuyOrSell: "卖出",
-        //   Position: 50,
-        //   FloatingProfitOrLoss: -25.8,
-        //   ProfitOrLossRatio: "-2%",
-        //   AverageOpeningPrice: 105.5,
-        //   CurrentPrice: 103.25,
-        //   LatestTransactionTime: "2023-01-05 14:20:00",
-        // },
-        // {
-        //   type: "商品C",
-        //   BuyOrSell: "买入",
-        //   Position: 75,
-        //   FloatingProfitOrLoss: 30.1,
-        //   ProfitOrLossRatio: "3.5%",
-        //   AverageOpeningPrice: 55.0,
-        //   CurrentPrice: 57.1,
-        //   LatestTransactionTime: "2023-01-06 10:15:00",
-        // },
-      ],
-      avatarUrl: require("@/assets/default-avatar.png"),
-      username: "defaultName",
-      userid: "defaultId",
+      PositionData: [],
+      //avatarUrl: require("@/assets/default-avatar.png"),
+      avatarUrl: '',
+      username: this.$route.query.username,
+      userid: this.$route.query.userID,
       totalAssets: "totalAssets",
       dailyProfitLoss: "dailyProfitLoss",
     };
@@ -155,6 +127,7 @@ export default {
   created() {
     this.getPositions();
     this.getUserInfo();
+    this.fetchAvatar();
   },
   methods: {
     logout() {
@@ -207,6 +180,28 @@ export default {
       } catch (error) {
         console.error("Data Acquisition Failure:", error);
       }
+    },
+    handleAvatarSuccess(res, file) {
+      this.avatarUrl = URL.createObjectURL(file.raw);
+    },
+    fetchAvatar() {
+      // 发送请求到后端获取图像
+      axios
+        .post(
+          "/getUserAvatar",
+          { username: this.username},
+          { responseType: "arraybuffer" }
+        )
+        .then((response) => {
+          const imageBlob = new Blob([response.data], {
+            type: response.headers["content-type"],
+          });
+          const imageUrl = URL.createObjectURL(imageBlob);
+          this.avatarUrl = imageUrl;
+        })
+        .catch((error) => {
+          console.error("Error fetching avatar:", error);
+        });
     },
   },
 };
@@ -390,5 +385,28 @@ export default {
   border-color: #e5c333;
   color: #181a20;
   border-radius: 4px;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  text-align: center;
+}
+.avatar {
+  width: 70px;
+  height: 70px;
+  display: block;
 }
 </style>
