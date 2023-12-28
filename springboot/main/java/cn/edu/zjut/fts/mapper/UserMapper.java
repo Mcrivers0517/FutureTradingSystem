@@ -23,6 +23,9 @@ public interface UserMapper extends BaseMapper<User>
     @Select("SELECT * FROM user WHERE username = #{username} ")
     User selectByUsername(User user);
 
-//    @Select("SELECT password FROM user WHERE username = #{username}")
-//    String selectPasswordByUsername(User user);
+    @Update("UPDATE user SET avatarUrl = #{avatarUrl} WHERE username = #{username}")
+    int updateAvatarUrlByUsername(@Param("username") String username, @Param("avatarUrl") String avatarUrl);
+
+    @Select("SELECT avatarUrl FROM user WHERE username = #{username}")
+    String getAvatarUrlByUsername(@Param("username") String username);
 }

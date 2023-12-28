@@ -28,14 +28,16 @@ public class LoginController
         String password = request.getPassword();
         User selectUser = userMapper.selectByUsername(request);
         Boolean isSuccess = false;
+        int userID = -1;
         System.out.println("selectUser:" + selectUser);
 
         if (selectUser != null && password.equals(selectUser.getPassword()))
         {
             isSuccess = true;
+            userID = selectUser.getId();
         }
 
-        return new LoginResponse(isSuccess);
+        return new LoginResponse(isSuccess, userID);
     }
 
     @Data
@@ -45,6 +47,7 @@ public class LoginController
     {
         @JsonProperty("isSuccess")
         private boolean isSuccess;
+        private int userID;
     }
 
 }
