@@ -79,22 +79,22 @@ export default {
         username: this.username,
         password: this.password,
       };
-      // console.log(request);
+      console.log(request);
       // else {
       //   this.$router.push("/");
       // }
       axios
-        .post("http://localhost:5000/login", {
-          request
-        })
+        .post("http://localhost:5000/login", request)
         .then((response) => {
           const result = response.data;
 
-          if (result) {
-            this.$router.push("/");
+          if (result.isSuccess) {
+            alert("登录成功");
+            this.$router.push(`/?username=${request.username}&userID=${result.userID}`);
             console.log(result);
           } else {
-            alert("登录失败：" + result.message);
+            alert("用户名或密码错误，请重新输入");
+            console.log(result);
           }
         })
         .catch((error) => {

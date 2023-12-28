@@ -80,20 +80,21 @@ export default {
         return;
       }
 
-      const userData = {
+      const request = {
         username: this.username,
         password: this.password,
       };
 
       axios
-        .post("localhost:5000/register", userData)
+        .post("http://localhost:5000/register", request)
         .then((response) => {
           const result = response.data;
-
-          if (result.success) {
+          console.log(result);
+          if (result.isSuccess) {
+            alert("注册成功，请返回登录界面登录");
             this.$router.push("/Login");
           } else {
-            alert("注册失败：" + result.message);
+            alert("注册失败：该用户名已存在");
           }
         })
         .catch((error) => {
