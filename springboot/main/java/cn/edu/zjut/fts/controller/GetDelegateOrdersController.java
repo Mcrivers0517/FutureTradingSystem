@@ -10,7 +10,8 @@ import java.util.List;
 @Api(tags = "获取委托订单模块")
 @CrossOrigin
 @RestController
-public class getDelegateOrdersController {
+public class GetDelegateOrdersController
+{
 
     @Autowired
     private DelegateMapper DelegateMapper;

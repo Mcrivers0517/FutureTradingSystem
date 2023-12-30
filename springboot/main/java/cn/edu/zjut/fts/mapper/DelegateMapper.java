@@ -12,21 +12,21 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     @Select("select * from delegatetable")
     public List<Delegate> selectall();
 
-    @Insert("insert into DelegateTable(id, username, att, status,num, D_Price,D_time) " +
-            "values(#{id}, #{username}, #{att}, #{status},#{num}, #{D_Price}, #{D_time})")
+    @Insert("insert into DelegateTable(id, username, att, status,num, delegatePrice,delegateTime) " +
+            "values(#{id}, #{username}, #{att}, #{status},#{num}, #{delegatePrice}, #{delegateTime})")
     int insertDelegate(Delegate delegate);
 
-    @Select("select status from DelegateTable where id = #{id} and username = #{username} and D_time = #{D_time}")
+    @Select("select status from DelegateTable where id = #{id} and username = #{username} and delegateTime = #{delegateTime}")
     String selectstatus(Delegate delegate);
 
-    @Update("update DelegateTable set status = '已撤' where id = #{id} and username = #{username} and D_time = #{D_time}")
+    @Update("update DelegateTable set status = '已撤' where id = #{id} and username = #{username} and delegateTime = #{delegateTime}")
     Boolean updatestatus(Delegate delegate);
 
-    @Select("select * from DelegateTable where status = '已委' and id = #{q_id} and username = #{q_username}")
-    List<Delegate> selectDelegatesToUpdate(@Param("q_id") String id, @Param("q_username") String username);
+    @Select("select * from DelegateTable where status = '已委' and futureName = #{futureName} and username = #{username}")
+    List<Delegate> selectDelegatesToUpdate(@Param("futureName") String futureName, @Param("username") String username);
 
 
-    @Update("update DelegateTable set status = '已成' where id = #{id} and username = #{username} and D_time = #{D_time}")
+    @Update("update DelegateTable set status = '已成' where futureName = #{futureName} and username = #{username} and delegateTime = #{delegateTime}")
     Boolean updateDelegateStatusToDone(Delegate delegate);
 
 

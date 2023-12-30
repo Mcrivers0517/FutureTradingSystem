@@ -14,14 +14,15 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("delegatetable")
-public class Delegate {
-    private String id;
+public class Delegate
+{
+    private String futureName;
     private String username;
     private String att;
     private String status;
     private int num;
-    private int D_Price;
+    private int delegatePrice;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private Date D_time;
+    private Date delegateTime;
 
 }

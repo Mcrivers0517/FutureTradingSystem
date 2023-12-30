@@ -6,12 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Time;
+
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("ag_last_read_position")
-
-public class ag {
-    private int ag_last_position_id;
+@TableName("ag_futures")
+public class AgFuture
+{
+    private Long date;
+    private Time time;
+    private int price;
+    private int Volume;
 }

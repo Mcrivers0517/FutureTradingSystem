@@ -6,14 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
+import java.util.Date;
 
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Future {
-    private Long date;
+public class Future
+{
+    private Date date;
     private Time time;
     private int price;
     private int Volume;

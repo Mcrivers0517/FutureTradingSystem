@@ -14,19 +14,20 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("positiontable")
-public class Position {
+public class Position
+{
 
-    private String id;
+    private String futureName;
     private String username;
     private String bs;
-    private int pos;
-    private int C_Pro;
-    private double R_Pro;
-    @JsonProperty("F_Price")
-    private int F_Price;
-    private int N_Price;
-    private Date N_Time;
-    private Date Delivery;
+    private int amount;
+    private int floatingProfitAndLoss;
+    private double profitLossRatio;
+    @JsonProperty("openPrice")
+    private int openPrice;
+    private int currentPrice;
+    private Date currentTime;
+    private Date deliveryDate;
 
 
 }

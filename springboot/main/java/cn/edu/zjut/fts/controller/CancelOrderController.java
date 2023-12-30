@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "撤销委托订单模块")
 @CrossOrigin
 @RestController
-public class cancelOrderController {
+public class CancelOrderController
+{
 
     @Autowired
     private DelegateMapper delegateMapper;

@@ -14,13 +14,14 @@ import java.util.Date;
 @AllArgsConstructor
 @TableName("transaction")
 
-public class Transaction {
-    private String id;
+public class Transaction
+{
+    private String futureName;
     private String username;
     private String bs;
     private int num;
     private int price;
     private int premium;
-    private int pro;
+    private int profit;
     private Date time;
 }

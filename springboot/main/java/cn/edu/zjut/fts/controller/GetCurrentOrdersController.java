@@ -10,7 +10,8 @@ import java.util.List;
 @Api(tags = "获取当前订单模块")
 @CrossOrigin
 @RestController
-public class getCurrentOrdersController {
+public class GetCurrentOrdersController
+{
 
     @Autowired
     private PositionMapper positionMapper;

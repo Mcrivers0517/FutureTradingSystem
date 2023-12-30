@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 
 @CrossOrigin
 @RestController
-public class avatarUploadController
+public class AvatarUploadController
 {
     @Autowired
     private UserMapper userMapper;
