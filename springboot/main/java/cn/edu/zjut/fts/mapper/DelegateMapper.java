@@ -25,8 +25,8 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     @Update("update Delegate set status = '已撤' where delegateid = #{delegateid}")
     boolean updateStatus(@Param("delegateId") int delegateid);
 
-    @Select("select * from Delegate where status = '已委' and futureid = #{futureid} and userid = #{userid}")
-    List<Delegate> selectDelegatesByFutureAndUser(@Param("futureid") int futureid, @Param("userid") int userid);
+    @Select("select * from Delegate where status = '已委' and futureid = #{futureid}")
+    List<Delegate> selectDelegatesByFutureAndUser(@Param("futureid") int currentIndex);
 
 
     @Update("update Delegate set status = '已成' where delegateid = #{delegateid}")

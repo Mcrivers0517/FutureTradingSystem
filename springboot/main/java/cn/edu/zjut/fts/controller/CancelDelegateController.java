@@ -1,6 +1,5 @@
 package cn.edu.zjut.fts.controller;
 
-import cn.edu.zjut.fts.entity.Delegate;
 import cn.edu.zjut.fts.mapper.*;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;

@@ -34,5 +34,5 @@ public interface PositionMapper extends BaseMapper<Position>
 
 
     @Select("select * from position where futureId = #{futureId} and userId = #{userId}")
-    Position selectByFutureName(@Param("futureId") int futureId, @Param("userId") int userId);
+    Position selectByFutureName(@Param("futureId") int currentIndex);
 }

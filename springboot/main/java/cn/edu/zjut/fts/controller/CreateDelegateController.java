@@ -25,17 +25,7 @@ public class CreateDelegateController
 {
 
     @Autowired
-    private PositionMapper positionMapper;
-    @Autowired
     private DelegateMapper delegateMapper;
-    @Autowired
-    private TransactionMapper transactionMapper;
-    @Autowired
-    private AuFuturesMapper AuFuturesMapper;
-    @Autowired
-    private AgFuturesMapper AgFuturesMapper;
-    @Autowired
-    private AlFuturesMapper AlFuturesMapper;
 
     @PostMapping("/BuyOrSell")
     public void buyOrSell(@RequestBody DelegateRequest request)
