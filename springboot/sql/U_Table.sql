@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS DelegateTable(
     /*持仓人*/username VARCHAR(100) ,
     /*属性*/att VARCHAR(10),
     /*状态*/status VARCHAR(10),
-    /*委托数量*/num INT,
+    /*委托数量*/amount INT,
     /*委托价格*/delegatePrice INT,
     /*委托时间*/delegateTime DATETIME
 );

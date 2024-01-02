@@ -9,27 +9,31 @@ import java.util.List;
 @Mapper
 public interface DelegateMapper extends BaseMapper<Delegate>{
 
-    @Select("select * from delegatetable")
-    public List<Delegate> selectall();
+    @Select("select * from delegate where status = '已委'")
+    List<Delegate> selectCurrentDelegate();
 
-    @Insert("insert into DelegateTable(id, username, att, status,num, delegatePrice,delegateTime) " +
-            "values(#{id}, #{username}, #{att}, #{status},#{num}, #{delegatePrice}, #{delegateTime})")
+    @Select("select * from delegate where status = '已成'")
+    List<Delegate> selectHistoricalDelegate();
+
+    @Insert("insert into Delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime) " +
+            "values(#{userid}, #{futureid}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime})")
     int insertDelegate(Delegate delegate);
 
-    @Select("select status from DelegateTable where id = #{id} and username = #{username} and delegateTime = #{delegateTime}")
-    String selectstatus(Delegate delegate);
+    @Select("select status from Delegate where delegateid = #{delegateid}")
+    String selectStatus(@Param("delegateId") int delegateid);
 
-    @Update("update DelegateTable set status = '已撤' where id = #{id} and username = #{username} and delegateTime = #{delegateTime}")
-    Boolean updatestatus(Delegate delegate);
+    @Update("update Delegate set status = '已撤' where delegateid = #{delegateid}")
+    boolean updateStatus(@Param("delegateId") int delegateid);
 
-    @Select("select * from DelegateTable where status = '已委' and futureName = #{futureName} and username = #{username}")
-    List<Delegate> selectDelegatesToUpdate(@Param("futureName") String futureName, @Param("username") String username);
-
-
-    @Update("update DelegateTable set status = '已成' where futureName = #{futureName} and username = #{username} and delegateTime = #{delegateTime}")
-    Boolean updateDelegateStatusToDone(Delegate delegate);
+    @Select("select * from Delegate where status = '已委' and futureid = #{futureid} and userid = #{userid}")
+    List<Delegate> selectDelegatesByFutureAndUser(@Param("futureid") int futureid, @Param("userid") int userid);
 
 
+    @Update("update Delegate set status = '已成' where delegateid = #{delegateid}")
+    boolean updateDelegateStatusToDone(@Param("delegateid") int delegateid);
+
+    @Update("update delegate set deliverydate = #{deliverydate} where delegateid = #{delegateid}")
+    boolean updateDelegateDeliveryDate(@Param("delegateid") int delegateid, @Param("deliverydate") String deliverydate);
 
 
 

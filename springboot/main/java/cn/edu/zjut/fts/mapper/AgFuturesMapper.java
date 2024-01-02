@@ -19,6 +19,6 @@ public interface AgFuturesMapper extends BaseMapper<AgFuture> {
 
     @Select("SELECT time FROM ag_futures LIMIT #{ag_last_read_position_id}, 1")
     Time selectAgtimeByLastReadPositionId(@Param("ag_last_read_position_id") int ag_last_read_position_id);
-    @Select("SELECT * FROM ag_futures WHERE id = #{id}")
+    @Select("SELECT * FROM sliver_data WHERE id = #{id}")
     AgFuture selectAgAllAttributesById(@Param("id") int id);
 }

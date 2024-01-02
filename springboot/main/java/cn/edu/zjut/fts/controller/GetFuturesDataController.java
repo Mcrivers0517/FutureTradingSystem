@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -43,18 +47,40 @@ public class GetFuturesDataController
     private static int currentRowAl = 1;
 
     @PostMapping("/getFuturesData")
-    public Future getFuturesData(@RequestBody Request request)
+    public Future getFuturesData(@RequestBody GetFutureDataRequest request)
+            throws ParseException
     {
         //0.获取前端信息
-        Date date = request.getDate();
-        Time time = request.getTime();
-        String futureName = request.getFutureName();
-        String username = request.getUsername();
+        int futureid = request.getFutureId();
+        int userid = request.getUserId();
+        String dateTimeString = request.getDateTimeString();
 
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        Date completeDateTime = dateTimeFormat.parse(dateTimeString);
+
+
+        // 使用 LocalDateTime 直接获取日期和时间部分
+        LocalDateTime localDateTime = completeDateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(); // 转换为 LocalDateTime
+
+        LocalDate date = localDateTime.toLocalDate(); // 获取日期部分（年月日）
+        LocalTime time = localDateTime.toLocalTime(); // 获取时间部分（时分秒）
+
+        DateTimeFormatter dataTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter dataFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        // 将 LocalDate、LocalTime 和 LocalDateTime 格式化为字符串
+        String formattedDate = date.format(dataFormatter); // 格式化日期部分
+        String formattedTime = time.format(timeFormatter); // 格式化时间部分
+        String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
+
+        System.out.println("日期部分：" + formattedDate);
+        System.out.println("时间部分：" + formattedTime);
+        System.out.println("日期时间部分：" + formattedDateTime);
 
         //1.返回当前时间期货数据
         Future future = new Future();
-        if (futureName.equals("au"))
+        if (futureid == 1)
         {
             AuFuture auFuture = auFuturesMapper.selectAuAllAttributesById(currentRowAu); //从数据库中读取期货数据
             currentRowAu += 1;
@@ -62,14 +88,14 @@ public class GetFuturesDataController
             future.setPrice(auFuture.getPrice());
             future.setVolume(auFuture.getVolume());
         }
-        else if (futureName.equals("ag"))
+        else if (futureid == 2)
         {
             AgFuture agFuture = agFuturesMapper.selectAgAllAttributesById(currentRowAg); //从数据库中读取期货数据
             currentRowAg += 1;
             future.setPrice(agFuture.getPrice());
             future.setVolume(agFuture.getVolume());
         }
-        else
+        else if (futureid == 3)
         {
             AlFuture alFuture = alFuturesMapper.selectAlAllAttributesById(currentRowAl); //从数据库中读取期货数据
             currentRowAl += 1;
@@ -80,25 +106,26 @@ public class GetFuturesDataController
         // 2.更新委托表
         //2.0获取成交当前价格，当前时间
         int currentPrice = future.getPrice();
-        //2.1.获取username的futureName种类的已委记录
-        List<Delegate> delegatesToUpdate = delegateMapper.selectDelegatesToUpdate(futureName, username);
-        Boolean whetherToUpdate = false;//2.2记录是否要更新表单
-        for (Delegate delegate : delegatesToUpdate)
+        //2.1.获取userid的futureid种类的已委记录
+        List<Delegate> delegates = delegateMapper.selectDelegatesByFutureAndUser(futureid, userid);
+        boolean whetherToUpdate = false;    //2.2记录是否要更新表单
+        // 遍历委托表，寻找达到成交要求的委托订单记录
+        for (Delegate delegate : delegates)
         {
             //2.3更新委托表
-            if (delegate.getAtt().equals("buy"))
+            if (delegate.getAttribute().equals("buy") || delegate.getAttribute().equals("buy2open"))
             {
                 if (delegate.getDelegatePrice() >= currentPrice)
                 {
-                    delegateMapper.updateDelegateStatusToDone(delegate);
+                    delegateMapper.updateDelegateStatusToDone(delegate.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
                     whetherToUpdate = true;
                 }
             }
-            else if (delegate.getAtt().equals("sell"))
+            else if (delegate.getAttribute().equals("sell") || delegate.getAttribute().equals("sell2open"))
             {
                 if (delegate.getDelegatePrice() <= currentPrice)
                 {
-                    delegateMapper.updateDelegateStatusToDone(delegate);
+                    delegateMapper.updateDelegateStatusToDone(delegate.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
                     whetherToUpdate = true;
                 }
             }
@@ -107,70 +134,69 @@ public class GetFuturesDataController
             // 3.如果交易达成，那么更新成交表transactionTable和持仓表positionTable中的记录
             if (whetherToUpdate)
             {
-                // 增加成交表
-                Transaction transaction = new Transaction();
-                transaction.setFutureName(futureName);
-                transaction.setUsername(username);
-                transaction.setBs(delegate.getAtt() + "2out");
-                transaction.setNum(delegate.getNum());
-                transaction.setPrice(delegate.getDelegatePrice());
-                transaction.setPremium(25);     //为简化程序，手续费固定为25
-                transaction.setProfit(transaction.getPrice() - 25); //利润=成交价-手续费
 
-                // 将long类型的日期转换为java.sql.Date
-                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                // 将Time类型的时间转换为java.sql.Time
-                java.sql.Time sqlTime = new java.sql.Time(time.getTime());
-                // 使用java.sql.Timestamp将日期和时间组合在一起
-                Timestamp combinedDateTime = new Timestamp(sqlDate.getTime() + sqlTime.getTime());
-                transaction.setTime(combinedDateTime);
-                System.out.println(transaction);
-                transactionMapper.insertTransaction(transaction);
-
-                //4.更新持仓表
-//                Position position = positionMapper.selectByFutureName(futureName);
-                Position position = new Position();
-                position.setFutureName(delegate.getFutureName());
-                position.setUsername(delegate.getUsername());
-                position.setBs(delegate.getAtt());
-                position.setAmount(delegate.getNum());
-                position.setFloatingProfitAndLoss(0);
-                position.setProfitLossRatio(0.00);
-                position.setOpenPrice(delegate.getDelegatePrice());
-                position.setCurrentPrice(currentPrice);
-                position.setCurrentTime(combinedDateTime);
-
-                // 处理 deliveryDate 的逻辑
-                LocalDateTime nTime = position.getCurrentTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                int dayOfMonth = nTime.getDayOfMonth();
+                // 设置交割日期
+                int dayOfMonth = date.getDayOfMonth();
 
                 if (dayOfMonth < 20)
                 {
                     // 如果 currentTime 的日期小于 20，设置 deliveryDate 为同月的第 20 天
-                    LocalDate deliveryDateDate = nTime.withDayOfMonth(20).toLocalDate();
-                    position.setDeliveryDate(Date.from(deliveryDateDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    LocalDate deliveryDate = date.withDayOfMonth(20);
+                    String formattedDeliveryDate = deliveryDate.format(dataFormatter); // 格式化日期部分
+                    delegate.setDeliveryDate(formattedDeliveryDate);
                 }
                 else
                 {
                     // 如果 currentTime 的日期大于等于 20，设置 deliveryDate 为下一个月的第 20 天
-                    LocalDate deliveryDateDate = nTime.plusMonths(1).withDayOfMonth(20).toLocalDate();
-                    position.setDeliveryDate(Date.from(deliveryDateDate.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    LocalDate deliveryDate = date.plusMonths(1).withDayOfMonth(20);
+                    String formattedDeliveryDate = deliveryDate.format(dataFormatter);
+                    delegate.setDeliveryDate(formattedDeliveryDate);
                 }
-                positionMapper.insertPosition(position);
-                System.out.println(position);
-            }
-        }
-        //4.更新持仓表
-        List<Position> positionList = positionMapper.selectall();
-        DecimalFormat df = new DecimalFormat("#.##");
-        for (Position position : positionList)
-        {
-            int floatingProfitAndLoss = (currentPrice - position.getOpenPrice()) * position.getAmount();
-            double profitLossRatio = ((currentPrice - position.getOpenPrice()) / position.getOpenPrice());
-            profitLossRatio = Double.parseDouble(df.format(profitLossRatio)); // 格式化为两位小数
-            System.out.println(profitLossRatio);
 
-            positionMapper.updatePosition(floatingProfitAndLoss, profitLossRatio, currentPrice);
+                delegateMapper.updateDelegateDeliveryDate(delegate.getDelegateId(), delegate.getDeliveryDate());
+
+                // 在成交表中增加成交记录
+                Transaction transaction = new Transaction();
+                transaction.setDelegateid(delegate.getDelegateId()); //绑定委托订单
+                transaction.setServiceFee(25.00);   //为简化程序，手续费暂时固定为25
+                transaction.setTransactionTime(formattedDateTime);
+                System.out.println(transaction);
+                transactionMapper.insertTransaction(transaction);
+
+                //4.更新持仓表
+                Position position = positionMapper.selectByFutureName(futureid, userid);
+                if (position != null)
+                {
+                    double originalCost = position.getCostPrice();
+                    double originalAmount = position.getAmount();
+                    if (delegate.getAttribute().equals("buy"))
+                        position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
+                    else
+                        position.setAmount(position.getAmount() - delegate.getAmount());    // 最新的持仓量等于原持仓量减委托出售量
+                    position.setCurrentPrice(currentPrice);
+                    position.setLastUpdate(formattedDateTime);
+                    position.setProfitLoss((currentPrice - position.getCostPrice() * position.getAmount())); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
+                    position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
+                    double totalCost = originalCost * originalAmount + position.getCurrentPrice() * delegate.getAmount() + transaction.getServiceFee(); // 总成本 = 原始成本 × 原始数量 + 新成本 × 新数量 + 手续费
+                    position.setCostPrice(totalCost / position.getAmount());    // 新的持仓成本 = 总成本 / 总数量
+                    positionMapper.updatePosition(position);
+                }
+                else
+                {
+                    position = new Position();
+                    position.setUserId(delegate.getUserId());
+                    position.setFutureId(delegate.getFutureId());
+                    position.setAmount(delegate.getAmount());
+                    position.setEntryPrice(currentPrice);
+                    position.setCurrentPrice(currentPrice);
+                    position.setProfitLoss(0);
+                    position.setProfitLossRatio(0);
+                    position.setCostPrice(currentPrice);
+                    position.setEntryDate(formattedDateTime);
+                    position.setLastUpdate(formattedDateTime);
+                    positionMapper.insertPosition(position);
+                }
+            }
         }
         return future;
     }
@@ -181,10 +207,9 @@ public class GetFuturesDataController
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class Request
+class GetFutureDataRequest
 {
-    Date date;
-    Time time;
-    String futureName;
-    String username;
+    String dateTimeString;
+    int futureId;
+    int userId;
 }

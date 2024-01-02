@@ -16,13 +16,15 @@ import java.util.Date;
 @TableName("delegatetable")
 public class Delegate
 {
-    private String futureName;
-    private String username;
-    private String att;
+    private int delegateId;
+    private int futureId;
+    private int userId;
+    private String attribute;
     private String status;
-    private int num;
-    private int delegatePrice;
+    private int amount;
+    private double delegatePrice;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    private Date delegateTime;
+    private String delegateTime;
+    private String deliveryDate;
 
 }

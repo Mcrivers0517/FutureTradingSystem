@@ -19,7 +19,7 @@ public interface AuFuturesMapper extends BaseMapper<AuFuture> {
 
     @Select("SELECT time FROM au_futures LIMIT #{a_last_read_position_id}, 1")
     Time selectAutimeByLastReadPositionId(@Param("a_last_read_position_id") int a_last_read_position_id);
-    @Select("SELECT * FROM au_futures WHERE id = #{id}")
+    @Select("SELECT * FROM gold_data WHERE id = #{id}")
     AuFuture selectAuAllAttributesById(@Param("id") int id);
 
 

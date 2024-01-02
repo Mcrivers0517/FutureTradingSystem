@@ -5,22 +5,20 @@ import cn.edu.zjut.fts.mapper.DelegateMapper;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-@Api(tags = "获取委托订单模块")
+@Api(tags = "获取历史订单模块")
 @CrossOrigin
 @RestController
-public class GetDelegateOrdersController
+public class GetHistoricalDelegateController
 {
-
     @Autowired
-    private DelegateMapper DelegateMapper;
+    private DelegateMapper delegateMapper;
 
-    @GetMapping("/getDelegateOrders")
-    public List selectAll() {
-        List<Delegate> list = DelegateMapper.selectall();
-        //System.out.println(list);
-        return list;
+    @GetMapping("/getHistoricalDelegate")
+    public List<Delegate> selectHistoricalDelegate()
+    {
+        return delegateMapper.selectHistoricalDelegate();
     }
-
 }

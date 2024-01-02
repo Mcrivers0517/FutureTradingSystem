@@ -10,15 +10,29 @@ import java.util.List;
 public interface PositionMapper extends BaseMapper<Position>
 {
 
-    @Select("select * from positiontable")
+    @Select("select * from position")
     public List<Position> selectall();
 
-    @Insert("insert into positiontable(futureName, username, bs, amount, floatingProfitAndLoss, profitLossRatio, openPrice, currentPrice, currentTime, deliveryDate) " + "values(#{futureName}, #{username}, #{bs}, #{amount}, #{floatingProfitAndLoss}, #{profitLossRatio}, #{openPrice}, #{currentPrice}, #{currentTime}, #{deliveryDate})")
+    @Insert("INSERT INTO position(UserID, FutureID, Amount, EntryPrice, CurrentPrice, ProfitLoss, EntryDate, LastUpdated, ProfitLossRatio, costPrice) " +
+            "VALUES(#{userId}, #{futureId}, #{amount}, #{entryPrice}, #{currentPrice}, #{profitLoss}, #{entryDate}, #{lastUpdated}, #{profitLossRatio}, #{costPrice})")
     int insertPosition(Position position);
 
-    @Update("update positiontable set floatingProfitAndLoss = #{floatingProfitAndLoss}, profitLossRatio = #{profitLossRatio}, currentPrice = #{currentPrice}")
-    int updatePosition(@Param("floatingProfitAndLoss") int floatingProfitAndLoss, @Param("profitLossRatio") double profitLossRatio, @Param("currentPrice") int currentPrice);
+    @Update("UPDATE position " +
+            "SET UserID = #{userId}, " +
+            "FutureID = #{futureId}, " +
+            "Amount = #{amount}, " +
+            "EntryPrice = #{entryPrice}, " +
+            "CurrentPrice = #{currentPrice}, " +
+            "ProfitLoss = #{profitLoss}, " +
+            "EntryDate = #{entryDate}, " +
+            "LastUpdated = #{lastUpdated}, " +
+            "ProfitLossRatio = #{profitLossRatio}, " +
+            "DeliveryDate = #{deliveryDate}, " +
+            "costPrice = #{costPrice} " +
+            "WHERE PositionID = #{positionId}")
+    int updatePosition(Position position);
 
-    @Select("select * from positiontable where futureName = #{futureName}")
-    Position selectByFutureName(@Param("futureName") String futureName);
+
+    @Select("select * from position where futureId = #{futureId} and userId = #{userId}")
+    Position selectByFutureName(@Param("futureId") int futureId, @Param("userId") int userId);
 }

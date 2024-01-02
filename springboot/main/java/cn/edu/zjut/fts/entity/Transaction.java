@@ -16,12 +16,8 @@ import java.util.Date;
 
 public class Transaction
 {
-    private String futureName;
-    private String username;
-    private String bs;
-    private int num;
-    private int price;
-    private int premium;
-    private int profit;
-    private Date time;
+    private int transactionid;
+    private int delegateid;
+    private double serviceFee;
+    private String transactionTime;
 }

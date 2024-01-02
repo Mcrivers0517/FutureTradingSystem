@@ -15,8 +15,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class Future
 {
-    private Date date;
-    private Time time;
     private int price;
     private int Volume;
 }

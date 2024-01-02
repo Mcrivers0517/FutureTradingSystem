@@ -17,17 +17,15 @@ import java.util.Date;
 public class Position
 {
 
-    private String futureName;
-    private String username;
-    private String bs;
-    private int amount;
-    private int floatingProfitAndLoss;
+    private int positionId;
+    private int userId;
+    private int futureId;
+    private double amount;
+    private double entryPrice;
+    private double currentPrice;
+    private double profitLoss;
     private double profitLossRatio;
-    @JsonProperty("openPrice")
-    private int openPrice;
-    private int currentPrice;
-    private Date currentTime;
-    private Date deliveryDate;
-
-
+    private double costPrice;
+    private String entryDate;
+    private String lastUpdate;
 }

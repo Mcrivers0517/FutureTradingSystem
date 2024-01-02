@@ -15,6 +15,8 @@ public interface TransactionMapper extends BaseMapper<Transaction>
     @Select("SELECT * FROM TransactionTable")
     List<Transaction> selectAll();
 
-    @Insert("INSERT INTO TransactionTable(futureName, username, bs, price, premium, profit,time) " + "VALUES(#{futureName}, #{username}, #{bs}, #{price}, #{premium}, #{profit},#{time})")
+    @Insert("INSERT INTO TransactionTable(delegateid, serviceFee, transactionTime) " + "VALUES(#{delegateid}, #{serviceFee}, #{transactionTime})")
     int insertTransaction(Transaction transaction);
+
+
 }
