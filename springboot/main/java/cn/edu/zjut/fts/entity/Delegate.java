@@ -13,7 +13,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("delegatetable")
+@TableName("delegate")
 public class Delegate
 {
     private int delegateId;
