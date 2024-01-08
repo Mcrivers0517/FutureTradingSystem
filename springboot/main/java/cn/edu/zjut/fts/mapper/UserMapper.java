@@ -33,4 +33,7 @@ public interface UserMapper extends BaseMapper<User>
 
     @Select("SELECT avatarUrl FROM user WHERE username = #{username}")
     String getAvatarUrlByUsername(@Param("username") String username);
+
+    @Select("SELECT Deposit FROM user WHERE id = #{userId}")
+    double getDeposit(@Param("userId") int userId);
 }
