@@ -27,7 +27,8 @@ import java.util.Date;
 @Api(tags = "平仓模块")
 @CrossOrigin
 @RestController
-public class ClosePositionController {
+public class ClosePositionController
+{
 
     @Autowired
     private DelegateMapper delegateMapper;
@@ -46,9 +47,9 @@ public class ClosePositionController {
             throws ParseException
     {
         System.out.println(request);
-        //获取持仓表id和平仓数量sellamount
-        int positionid =request.getPositionId();
-        int sellamount =request.getSellAmount();
+        //获取持仓表id和平仓数量sellAmount
+        int positionId = request.getPositionId();
+        int sellAmount = request.getSellAmount();
         String dateTimeString = request.getDelegateTime();
 
         //时间的格式处理
@@ -68,24 +69,28 @@ public class ClosePositionController {
         String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
 
         //获取持仓表中对应id的数据
-        Position position = positionMapper.getPositionById(positionid);
+        Position position = positionMapper.getPositionById(positionId);
         System.out.println(position);
 
-        //根据positionid找到对应的持仓记录对amount进行减去sellamount操作
-        positionMapper.updateAmountPositionById(positionid,sellamount);
+        //根据positionId找到对应的持仓记录对Amount进行减去sellAmount操作
+        positionMapper.updateAmountPositionById(positionId, sellAmount);
 
         //添加平仓的委托记录
-        Delegate delegate =new Delegate();
+        Delegate delegate = new Delegate();
         System.out.println("buy2open".equals(position.getAttribute()));
 
         //设置attribute
-        if("buy2open".equals(position.getAttribute())){
+        if ("buy2open".equals(position.getAttribute()))
+        {
             delegate.setAttribute("buy2close");
         }
-        else {delegate.setAttribute("sell2close");}
+        else
+        {
+            delegate.setAttribute("sell2close");
+        }
         //设置status,amount,delegatePrice,delegateTime,FutureId,UserId
         delegate.setStatus("已成");
-        delegate.setAmount(sellamount);
+        delegate.setAmount(sellAmount);
         delegate.setDelegatePrice(position.getCurrentPrice());
         delegate.setDelegateTime(formattedDateTime);
         delegate.setFutureId(position.getFutureId());
@@ -114,10 +119,10 @@ public class ClosePositionController {
         delegateMapper.insertDelegate(delegate);
 
         //更新成交记录
-        Transaction transaction =new Transaction();
+        Transaction transaction = new Transaction();
         transaction.setServiceFee(25);
         transaction.setTransactionTime(formattedDateTime);
-        transaction.setDelegateid(1);
+        transaction.setDelegateid(delegateMapper.selectDelegateIdByTime(delegate.getDelegateTime()));
         System.out.println(transaction);
         transactionMapper.insertTransaction(transaction);
     }

@@ -101,7 +101,7 @@ public class GetFuturesDataController
             for (Delegate delegate : delegates)
             {
                 //2.3更新委托表
-                if (delegate.getAttribute().equals("buy"))
+                if (delegate.getAttribute().equals("buy2open"))
                 {
                     if (delegate.getDelegatePrice() >= currentPrice)
                     {
@@ -109,7 +109,7 @@ public class GetFuturesDataController
                         whetherToUpdate = true;
                     }
                 }
-                else if (delegate.getAttribute().equals("sell"))
+                else if (delegate.getAttribute().equals("sell2open"))
                 {
                     if (delegate.getDelegatePrice() <= currentPrice)
                     {
