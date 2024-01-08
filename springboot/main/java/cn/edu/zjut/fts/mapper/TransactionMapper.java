@@ -12,10 +12,10 @@ import java.util.List;
 public interface TransactionMapper extends BaseMapper<Transaction>
 {
 
-    @Select("SELECT * FROM TransactionTable")
+    @Select("SELECT * FROM Transaction")
     List<Transaction> selectAll();
 
-    @Insert("INSERT INTO TransactionTable(delegateid, serviceFee, transactionTime) " + "VALUES(#{delegateid}, #{serviceFee}, #{transactionTime})")
+    @Insert("INSERT INTO Transaction(delegateid, serviceFee, transactionTime) " + "VALUES(#{delegateid}, #{serviceFee}, #{transactionTime})")
     int insertTransaction(Transaction transaction);
 
 
