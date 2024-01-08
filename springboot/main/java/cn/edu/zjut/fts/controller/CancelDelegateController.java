@@ -30,6 +30,10 @@ public class CancelDelegateController
             result.setResult("撤销订单成功");
             return result;
         }
+        else if (status==null){
+            result.setResult("订单不存在");
+            return result;
+        }
         else
         {
             result.setResult("订单已成，不能撤回");
