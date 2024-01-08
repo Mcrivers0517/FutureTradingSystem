@@ -204,10 +204,3 @@ public class GetFuturesDataController
 
 }
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class GetFutureDataRequest
-{
-    String dateTimeString;
-}

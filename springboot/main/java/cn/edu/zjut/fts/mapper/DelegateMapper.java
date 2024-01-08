@@ -16,7 +16,7 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     List<Delegate> selectHistoricalDelegate();
 
     @Insert("insert into delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime) " +
-            "values(#{userid}, #{futureid}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime})")
+            "values(#{userId}, #{futureId}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime})")
     int insertDelegate(Delegate delegate);
 
     @Select("select status from delegate where delegateid = #{delegateid}")
