@@ -29,10 +29,11 @@ public interface PositionMapper extends BaseMapper<Position>
             "ProfitLossRatio = #{profitLossRatio}, " +
             "DeliveryDate = #{deliveryDate}, " +
             "costPrice = #{costPrice} " +
+            "attribute = #{attribute} " +
             "WHERE PositionID = #{positionId}")
     int updatePosition(Position position);
 
 
-    @Select("select * from position where futureId = #{futureId} and userId = #{userId}")
-    Position selectByFutureName(@Param("futureId") int currentIndex);
+    @Select("select * from position where futureId = #{futureId} and userId = #{userId} and attribute = #{attribute}")
+    Position selectByFutureNameAndAttribute(@Param("futureId") int currentIndex, @Param("userid") int userid, @Param("attribute") String attribute);
 }

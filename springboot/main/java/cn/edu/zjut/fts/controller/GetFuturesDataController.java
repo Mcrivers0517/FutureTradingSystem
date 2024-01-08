@@ -36,10 +36,6 @@ public class GetFuturesDataController
 
     static List<Integer> currentRowList = new ArrayList<>();
 
-    private static int currentRowAu = 1;
-    private static int currentRowAg = 1;
-    private static int currentRowAl = 1;
-
     @PostMapping("/getFuturesData")
     public List<Futures> getFuturesData(@RequestBody GetFutureDataRequest request)
             throws ParseException
@@ -105,7 +101,7 @@ public class GetFuturesDataController
             for (Delegate delegate : delegates)
             {
                 //2.3更新委托表
-                if (delegate.getAttribute().equals("buy") || delegate.getAttribute().equals("buy2open"))
+                if (delegate.getAttribute().equals("buy"))
                 {
                     if (delegate.getDelegatePrice() >= currentPrice)
                     {
@@ -113,7 +109,7 @@ public class GetFuturesDataController
                         whetherToUpdate = true;
                     }
                 }
-                else if (delegate.getAttribute().equals("sell") || delegate.getAttribute().equals("sell2open"))
+                else if (delegate.getAttribute().equals("sell"))
                 {
                     if (delegate.getDelegatePrice() <= currentPrice)
                     {
@@ -156,19 +152,12 @@ public class GetFuturesDataController
                     transactionMapper.insertTransaction(transaction);
 
                     //4.更新持仓表
-                    Position position = positionMapper.selectByFutureName(currentIndex);
+                    Position position = positionMapper.selectByFutureNameAndAttribute(currentIndex, delegate.getUserId(), delegate.getAttribute());
                     if (position != null)
                     {
                         double originalCost = position.getCostPrice();
                         double originalAmount = position.getAmount();
-                        if (delegate.getAttribute().equals("buy"))
-                        {
-                            position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
-                        }
-                        else
-                        {
-                            position.setAmount(position.getAmount() - delegate.getAmount());    // 最新的持仓量等于原持仓量减委托出售量
-                        }
+                        position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
                         position.setCurrentPrice(currentPrice);
                         position.setLastUpdate(formattedDateTime);
                         position.setProfitLoss((currentPrice - position.getCostPrice() * position.getAmount())); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
@@ -190,6 +179,7 @@ public class GetFuturesDataController
                         position.setCostPrice(currentPrice);
                         position.setEntryDate(formattedDateTime);
                         position.setLastUpdate(formattedDateTime);
+                        position.setAttribute(delegate.getAttribute());
                         positionMapper.insertPosition(position);
                     }
                 }
@@ -200,7 +190,5 @@ public class GetFuturesDataController
         }
         return futuresList;
     }
-
-
 }
 
