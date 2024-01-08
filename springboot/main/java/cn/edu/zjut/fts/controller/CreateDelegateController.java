@@ -27,7 +27,7 @@ public class CreateDelegateController
     @Autowired
     private DelegateMapper delegateMapper;
 
-    @PostMapping("/BuyOrSell")
+    @PostMapping("/CreateDelegate")
     public void buyOrSell(@RequestBody DelegateRequest request)
             throws ParseException
     {

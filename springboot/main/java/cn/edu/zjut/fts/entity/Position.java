@@ -28,4 +28,5 @@ public class Position
     private double costPrice;
     private String entryDate;
     private String lastUpdate;
+    private String attribute;
 }
