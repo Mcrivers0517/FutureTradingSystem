@@ -36,4 +36,10 @@ public interface PositionMapper extends BaseMapper<Position>
 
     @Select("select * from position where futureId = #{futureId} and userId = #{userId} and attribute = #{attribute}")
     Position selectByFutureNameAndAttribute(@Param("futureId") int currentIndex, @Param("userid") int userid, @Param("attribute") String attribute);
+
+    @Select("select * from position where positionid = #{positionid}")
+    Position getPositionById(@Param("positionid") int positionid);
+
+    @Update("update position set amount = amount - #{sellamount} where positionid = #{positionid}")
+    boolean updateAmountPositionById(@Param("positionid") int positionid,@Param("sellamount") int sellamount);
 }

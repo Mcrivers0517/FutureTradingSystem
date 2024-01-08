@@ -1,5 +1,6 @@
 package cn.edu.zjut.fts.controller;
 
+import cn.edu.zjut.fts.entity.LoginResponse;
 import cn.edu.zjut.fts.entity.User;
 
 import cn.edu.zjut.fts.mapper.UserMapper;
@@ -16,39 +17,25 @@ import org.springframework.web.bind.annotation.*;
 @Api("登录模块")
 @RestController
 @CrossOrigin
-public class LoginController
-{
+public class LoginController {
 
     @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody User request)
-    {
+    public LoginResponse login(@RequestBody User request) {
         String password = request.getPassword();
         User selectUser = userMapper.selectByUsername(request);
         Boolean isSuccess = false;
         int userID = -1;
         System.out.println("selectUser:" + selectUser);
 
-        if (selectUser != null && password.equals(selectUser.getPassword()))
-        {
+        if (selectUser != null && password.equals(selectUser.getPassword())) {
             isSuccess = true;
             userID = selectUser.getId();
         }
 
         return new LoginResponse(isSuccess, userID);
     }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    class LoginResponse
-    {
-        @JsonProperty("isSuccess")
-        private boolean isSuccess;
-        private int userID;
-    }
-
 }
 

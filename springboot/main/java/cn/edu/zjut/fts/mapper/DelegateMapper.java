@@ -1,6 +1,7 @@
 package cn.edu.zjut.fts.mapper;
 
 import cn.edu.zjut.fts.entity.Delegate;
+import cn.edu.zjut.fts.entity.Position;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.*;
 
@@ -15,8 +16,8 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     @Select("select * from delegate where status = '已成'")
     List<Delegate> selectHistoricalDelegate();
 
-    @Insert("insert into delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime) " +
-            "values(#{userId}, #{futureId}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime})")
+    @Insert("insert into delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime,deliveryDate) " +
+            "values(#{userId}, #{futureId}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime},#{deliveryDate})")
     int insertDelegate(Delegate delegate);
 
     @Select("select status from delegate where delegateid = #{delegateid}")
@@ -35,6 +36,8 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     @Update("update delegate set deliverydate = #{deliverydate} where delegateid = #{delegateid}")
     boolean updateDelegateDeliveryDate(@Param("delegateid") int delegateid, @Param("deliverydate") String deliverydate);
 
+    @Select("select * from position where PositionID = #{PositionID}")
+    Delete getPositionById(@Param("PositionID") int PositionID);
 
 
 

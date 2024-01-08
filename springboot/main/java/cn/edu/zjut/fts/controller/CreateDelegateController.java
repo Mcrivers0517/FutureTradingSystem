@@ -62,7 +62,7 @@ public class CreateDelegateController
         Delegate delegate = new Delegate();
         delegate.setFutureId(futureid);
         delegate.setUserId(userid);
-        delegate.setAttribute(attribute+"open");
+        delegate.setAttribute(attribute+"2open");
         delegate.setStatus("已委");
         delegate.setAmount(amount);
         delegate.setDelegatePrice(delegatePrice);
