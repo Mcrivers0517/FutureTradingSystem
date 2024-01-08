@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import cn.edu.zjut.fts.entity.DelegateRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -37,12 +37,10 @@ public class CreateDelegateController
         String attribute = request.getAttribute();
         int amount = request.getAmount();
         double delegatePrice = request.getDelegatePrice();
-
         String dateTimeString = request.getDateTimeString();
 
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         Date completeDateTime = dateTimeFormat.parse(dateTimeString);
-
 
         // 使用 LocalDateTime 直接获取日期和时间部分
         LocalDateTime localDateTime = completeDateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(); // 转换为 LocalDateTime
@@ -64,7 +62,7 @@ public class CreateDelegateController
         Delegate delegate = new Delegate();
         delegate.setFutureId(futureid);
         delegate.setUserId(userid);
-        delegate.setAttribute(attribute);
+        delegate.setAttribute(attribute+"open");
         delegate.setStatus("已委");
         delegate.setAmount(amount);
         delegate.setDelegatePrice(delegatePrice);
@@ -73,15 +71,3 @@ public class CreateDelegateController
     }
 }
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class DelegateRequest
-{
-    String dateTimeString;
-    int futureId;
-    int userId;
-    int amount;
-    double delegatePrice;
-    String attribute;
-}
