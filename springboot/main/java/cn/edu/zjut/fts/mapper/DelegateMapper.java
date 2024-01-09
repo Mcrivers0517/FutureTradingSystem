@@ -39,8 +39,8 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
     @Select("select * from position where PositionID = #{PositionID}")
     Delete getPositionById(@Param("PositionID") int PositionID);
 
-    @Select("select delegateid from delegate where delegateDate = #{delegateDate}")
-    int selectDelegateIdByTime(@Param("delegateDate") String delegateDate);
+    @Select("select delegateid from delegate where delegateTime = #{delegateTime}")
+    int selectDelegateIdByTime(@Param("delegateTime") String delegateTime);
 
 
 

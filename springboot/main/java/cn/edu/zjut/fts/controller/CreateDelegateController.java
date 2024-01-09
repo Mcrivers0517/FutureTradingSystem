@@ -72,6 +72,11 @@ public class CreateDelegateController
             delegate.setDelegatePrice(delegatePrice);
             delegate.setDelegateTime(formattedDateTime);
             delegateMapper.insertDelegate(delegate);
+
+            //修改持仓资产
+            double productvalue=amount*delegatePrice;
+            userMapper.updateInitialCapitalByUserID(userid,productvalue);
+            userMapper.updateDepositByUserID(userid,-25);
         return createDelegateResult;
     }
 }
