@@ -90,7 +90,9 @@ export default {
 
           if (result.isSuccess) {
             alert("登录成功");
-            this.$router.push(`/?username=${request.username}&userID=${result.userID}`);
+            this.$router.push(
+              `/?username=${request.username}&userID=${result.userID}`
+            );
             console.log(result);
           } else {
             alert("用户名或密码错误，请重新输入");

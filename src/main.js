@@ -23,5 +23,10 @@ Vue.use(Vuex);
   
 new Vue({
   router,
+  created(){
+    this.startPriceDataFetch();
+  },
+  methods: {
+  }
   render: h => h(App),
 }).$mount('#app')

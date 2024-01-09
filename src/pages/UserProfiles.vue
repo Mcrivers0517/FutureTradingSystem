@@ -117,7 +117,7 @@ export default {
     return {
       PositionData: [],
       //avatarUrl: require("@/assets/default-avatar.png"),
-      avatarUrl: '',
+      avatarUrl: "",
       username: this.$route.query.username,
       userid: this.$route.query.userID,
       totalAssets: "totalAssets",
@@ -189,7 +189,7 @@ export default {
       axios
         .post(
           "/getUserAvatar",
-          { username: this.username},
+          { username: this.username },
           { responseType: "arraybuffer" }
         )
         .then((response) => {

@@ -5,6 +5,7 @@ import LoginFile from '../pages/LoginFile.vue';
 import MarketQuotes from '../pages/MarketQuotes.vue';
 import RegisterFile from '../pages/RegisterFile.vue';
 import StockTrendChart from '../pages/StockTrendChart.vue';
+import TestFunction from '../pages/TestFunction.vue';
 
 Vue.use(VueRouter);
 
@@ -35,6 +36,11 @@ const router = new VueRouter({
             name: 'StockTrendChart',
             component: StockTrendChart
         },
+        {
+            path: '/TestFunction',
+            name: 'TestFunction',
+            component: TestFunction
+        }
     ]
 })
 

@@ -40,6 +40,86 @@
       <el-container class="content-container">
         <el-main class="main">
           <div class="chart-content">
+            <div class="data-display">
+              <span
+                style="
+                  color: #f6455d;
+                  font-size: 18px;
+                  position: relative;
+                  left: 30px;
+                  top: -2px;
+                "
+                >{{
+                  this.chartSecondData.price[
+                    this.chartSecondData.price.length - 1
+                  ].toFixed(2)
+                }}</span
+              >
+              <span
+                style="
+                  color: #848e9c;
+                  position: relative;
+                  left: 75px;
+                  top: -14px;
+                "
+                >24h涨跌
+              </span>
+              <span
+                :style="{
+                  position: 'relative',
+                  left: '30px',
+                  top: '5px',
+                  color:
+                    this.dailyChange > 0
+                      ? '#f6455d'
+                      : this.dailyChange === 0
+                      ? '#e8ffff'
+                      : '#0ecb81',
+                }"
+              >
+                {{ this.dailyChange.toFixed(2) }}
+                {{ (this.dailyChangeRatio * 100).toFixed(2) }}%
+              </span>
+              <span
+                style="
+                  color: #848e9c;
+                  position: relative;
+                  left: 75px;
+                  top: -14px;
+                "
+                >今日开盘价
+              </span>
+              <span
+                style="color: #eaecef; position: relative; left: 18px; top: 5px"
+                >{{ this.dailyOpenPrice.toFixed(2) }}
+              </span>
+              <span
+                style="
+                  color: #848e9c;
+                  position: relative;
+                  left: 75px;
+                  top: -14px;
+                "
+                >24h最高价
+              </span>
+              <span
+                style="color: #eaecef; position: relative; left: 18px; top: 5px"
+                >{{ this.dailyHighestPrice.toFixed(2) }}
+              </span>
+              <span
+                style="
+                  color: #848e9c;
+                  position: relative;
+                  left: 75px;
+                  top: -14px;
+                "
+                >24h最低价
+              </span>
+              <span
+                style="color: #eaecef; position: relative; left: 18px; top: 5px"
+                >{{ this.dailyLowestPrice.toFixed(2) }}
+              </span>
+            </div>
             <div
               id="price-trend-chart"
               style="
@@ -68,6 +148,7 @@
                   <el-slider
                     v-model="buyQuantity"
                     :format-tooltip="formatTooltip"
+                    class="slider"
                   ></el-slider>
                 </div>
                 <el-input
@@ -80,7 +161,7 @@
                   <el-button
                     type="primary"
                     native-type="submit"
-                    @click="transaction"
+                    @click="buy"
                     id="buyButton"
                     >买入</el-button
                   >
@@ -101,6 +182,7 @@
                   <el-slider
                     v-model="sellQuantity"
                     :format-tooltip="formatTooltip"
+                    class="slider"
                   ></el-slider>
                 </div>
                 <el-input
@@ -113,7 +195,7 @@
                   <el-button
                     type="primary"
                     native-type="submit"
-                    @click="transaction"
+                    @click="sell"
                     id="sellButton"
                     >卖出</el-button
                   >
@@ -217,58 +299,8 @@ import axios from "axios";
 export default {
   data() {
     return {
-      CurrentOrderData: [
-        // {
-        //   type: "商品A",
-        //   Date: "2023-01-05",
-        //   Attribute: "买平",
-        //   Status: "未成交",
-        //   Price: 100.5,
-        //   Quantity: 10,
-        // },
-        // {
-        //   type: "商品B",
-        //   Date: "2023-01-06",
-        //   Attribute: "卖平",
-        //   Status: "未成交",
-        //   Price: 98.75,
-        //   Quantity: 8,
-        // },
-        // {
-        //   type: "商品C",
-        //   Date: "2023-01-07",
-        //   Attribute: "买开",
-        //   Status: "未成交",
-        //   Price: 55.25,
-        //   Quantity: 15,
-        // },
-      ],
-      HistoricalOrderData: [
-        // {
-        //   type: "商品D",
-        //   Date: "2023-05-10",
-        //   Attribute: "卖平",
-        //   Status: "已成交",
-        //   Price: 150.25,
-        //   Quantity: 5,
-        // },
-        // {
-        //   type: "商品E",
-        //   Date: "2023-04-15",
-        //   Attribute: "买开",
-        //   Status: "已成交",
-        //   Price: 120.75,
-        //   Quantity: 12,
-        // },
-        // {
-        //   type: "商品F",
-        //   Date: "2023-03-20",
-        //   Attribute: "卖开",
-        //   Status: "已成交",
-        //   Price: 200.0,
-        //   Quantity: 7,
-        // },
-      ],
+      CurrentOrderData: [],
+      HistoricalOrderData: [],
       myChart: null,
       buyPrice: null,
       buyQuantity: null,
@@ -288,87 +320,114 @@ export default {
         price: [],
         tradeVolume: [],
       },
+      dailyOpenPrice: 0,
+      dailyHighestPrice: 0,
+      dailyLowestPrice: 0,
+      dailyChange: 0,
+      dailyChangeRatio: 0,
+      dateTimeString: "",
       timerId: null,
     };
   },
   mounted() {
-    // this.getCurrentOrders();
-    // this.getHistoricalOrders();
-    // this.startPriceDataFetch();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
-
-    // 以下mounted()内容仅用作前端测试，项目运行时应注释
+  },
+  created() {
+    // this.getCurrentOrders();
+    // this.getHistoricalOrders();
 
     this.chartData.times = this.generateRandomHour();
     this.chartData.price = this.generateStockData();
     this.chartData.tradeVolume = this.generateTradeVolumeData();
-    this.drawChart();
+    this.startPriceDataFetch();
 
-    let currentSecond = 0;
-    let accumulatedVolume = 0; // 累计交易量
+    // 以下mounted()内容仅用作前端测试，项目运行时应注释
 
-    this.timerId = setInterval(() => {
-      // 生成新的价格
-      let newPrice =
-        Math.round(
-          (this.chartData.price[this.chartData.price.length - 1] +
-            Math.random() * 100 -
-            50) *
-            100
-        ) / 100;
-      if (newPrice < 10) {
-        newPrice = 50;
-      }
+    // this.drawChart();
 
-      // 生成新的交易量并累加
-      let newVolume = Math.round(Math.random() * 20 * 100) / 100;
-      accumulatedVolume += newVolume;
+    // let currentSecond = 0;
+    // let accumulatedVolume = 0; // 累计交易量
 
-      // 每秒更新价格，每分钟更新时间和价格点
-      if (currentSecond < 59) {
-        // 替换当前分钟的最后一个价格
-        this.chartData.price[this.chartData.price.length - 1] = newPrice;
-        this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
-          accumulatedVolume;
-        currentSecond++;
-      } else {
-        // 一分钟结束，更新时间标签和价格点
-        const newTime = this.getNextMinute(
-          this.chartData.times[this.chartData.times.length - 1]
-        );
-        this.chartData.times.push(newTime);
-        this.chartData.price.push(newPrice);
-        this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
+    // this.timerId = setInterval(() => {
+    //   // 生成新的价格
+    //   let newPrice =
+    //     Math.round(
+    //       (this.chartData.price[this.chartData.price.length - 1] +
+    //         Math.random() * 100 -
+    //         50) *
+    //         100
+    //     ) / 100;
+    //   if (newPrice < 10) {
+    //     newPrice = 50;
+    //   }
 
-        // 重置秒数和累计交易量
-        currentSecond = 0;
-        accumulatedVolume = 0;
-      }
+    //   // 生成新的交易量并累加
+    //   let newVolume = Math.round(Math.random() * 20 * 100) / 100;
+    //   accumulatedVolume += newVolume;
 
-      // 更新图表
-      this.updateChart();
-    }, 1000);
+    //   // 每秒更新价格，每分钟更新时间和价格点
+    //   if (currentSecond < 59) {
+    //     // 替换当前分钟的最后一个价格
+    //     this.chartData.price[this.chartData.price.length - 1] = newPrice;
+    //     this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+    //       accumulatedVolume;
+    //     currentSecond++;
+    //   } else {
+    //     // 一分钟结束，更新时间标签和价格点
+    //     const newTime = this.getNextMinute(
+    //       this.chartData.times[this.chartData.times.length - 1]
+    //     );
+    //     this.chartData.times.push(newTime);
+    //     this.chartData.price.push(newPrice);
+    //     this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
+
+    //     // 重置秒数和累计交易量
+    //     currentSecond = 0;
+    //     accumulatedVolume = 0;
+    //   }
+
+    //   // 更新图表
+    //   this.updateChart();
+    // }, 1000);
   },
   methods: {
+    // getNextMinute(currentTime) {
+    //   const [hour, minute] = currentTime.split(":").map(Number);
+    //   let nextMinute = minute + 1;
+    //   let nextHour = hour;
+    //   if (nextMinute === 60) {
+    //     nextMinute = 0;
+    //     nextHour = nextHour === 23 ? 0 : nextHour + 1;
+    //   }
+    //   return `${nextHour.toString().padStart(2, "0")}:${nextMinute
+    //     .toString()
+    //     .padStart(2, "0")}`;
+    // },
     getNextMinute(currentTime) {
-      const [hour, minute] = currentTime.split(":").map(Number);
+      const date = new Date(currentTime);
+      // console.log(currentTime);
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+
       let nextMinute = minute + 1;
       let nextHour = hour;
+
       if (nextMinute === 60) {
         nextMinute = 0;
         nextHour = nextHour === 23 ? 0 : nextHour + 1;
       }
-      return `${nextHour.toString().padStart(2, "0")}:${nextMinute
-        .toString()
-        .padStart(2, "0")}`;
+
+      return `${String(nextHour).padStart(2, "0")}:${String(
+        nextMinute
+      ).padStart(2, "0")}`;
     },
     logout() {
       this.$router.push("/Login");
     },
     handleMenu(index) {
-      // 处理菜单项点击事件，你可以在这里进行路由跳转
+      // 处理菜单项点击事件，在这里进行路由跳转
       if (index === "1") {
         this.$router.push("/"); // 跳转到主页
       } else if (index === "2-1") {
@@ -420,55 +479,85 @@ export default {
       }
     },
     // 交易接口
-    async transaction(event) {
-      const elementId = event.target.id;
-      if (elementId == "buyButton") {
-        try {
-          const payload = {
-            price: this.buyPrice,
-            quantity: this.buyQuantity,
-            amount: this.BuyAmount,
-          };
-          const response = await axios.post(
-            "http://localhost:5000/buy",
-            payload
-          );
-          console.log("Buy response:", response.data);
-        } catch (error) {
-          console.error("Error during buy operation:", error);
-        }
-      } else {
-        try {
-          const payload = {
-            price: this.sellPrice,
-            quantity: this.sellQuantity,
-            amount: this.SellAmount,
-          };
-          const response = await axios.post(
-            "http://localhost:5000/sell",
-            payload
-          );
-          console.log("Sell response:", response.data);
-        } catch (error) {
-          console.error("Error during sell operation:", error);
-        }
+    async buy() {
+      try {
+        const payload = {
+          dateTimeString: this.dateTimeString,
+          futureId: 1,
+          userId: 56,
+          amount: this.buyQuantity,
+          delegatePrice: this.sellPrice,
+          attribute: "buy",
+          // amount: this.SellAmount,
+        };
+        const response = await axios.post(
+          "http://localhost:5000/CreateDelegate",
+          payload
+        );
+        console.log("Sell response:", response.data);
+      } catch (error) {
+        console.error("Error during sell operation:", error);
+      }
+    },
+    async sell() {
+      try {
+        const payload = {
+          dateTimeString: this.dateTimeString,
+          futureId: 1,
+          userId: 56,
+          amount: this.sellQuantity,
+          delegatePrice: this.sellPrice,
+          attribute: "sell",
+          // amount: this.SellAmount,
+        };
+        const response = await axios.post(
+          "http://localhost:5000/CreateDelegate",
+          payload
+        );
+        console.log("Sell response:", response.data);
+      } catch (error) {
+        console.error("Error during sell operation:", error);
       }
     },
     // 获取价格和交易量接口
     async fetchAndProcessData() {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/getFuturesData"
+        const timestamp = Date.now(); // 毫秒时间戳
+        const date = new Date(timestamp);
+
+        const offset = 8 * 60; // UTC+8
+        const dateTimeString = new Date(date.getTime() + offset * 60000)
+          .toISOString()
+          .replace(
+            "Z",
+            `+${String(Math.abs(offset / 60)).padStart(2, "0")}:00`
+          );
+
+        this.dateTimeString = dateTimeString;
+
+        const response = await axios.post(
+          "http://localhost:5000/getFuturesData",
+          {
+            dateTimeString,
+          }
         );
         const responseData = response.data;
-        this.chartSecondData.times.push(responseData.time);
-        this.chartSecondData.price.push(responseData.price);
-        this.chartSecondData.tradeVolume.push(responseData.volume);
+        this.chartSecondData.times.push(dateTimeString);
+        this.chartSecondData.price.push(responseData[0].price);
+        this.chartSecondData.tradeVolume.push(responseData[0].volume);
+        this.dailyOpenPrice = responseData[0].dailyOpenPrice;
+        this.dailyHighestPrice = responseData[0].dailyHighestPrice;
+        this.dailyLowestPrice = responseData[0].dailyLowestPrice;
+        this.dailyChange = responseData[0].dailyChange;
+        this.dailyChangeRatio = responseData[0].dailyChangeRatio;
+        console.log("responseData:", responseData);
+        console.log("chartSecondData", this.chartSecondData);
         this.updateChart();
       } catch (error) {
         console.error("Error fetching and processing price data:", error);
       }
     },
+
     updateChart() {
       if (!this.myChart) {
         this.drawChart();
@@ -501,6 +590,19 @@ export default {
                 color: "#1e2227",
               },
             },
+            min: Math.min(...this.chartData.price) - 100,
+          },
+          {
+            type: "value",
+            name: "交易量",
+            position: "left", // 将交易量Y轴显示在左侧
+            axisLine: {
+              lineStyle: { color: "#b7bdc6" }, // 设置交易量Y轴的颜色
+            },
+            splitLine: {
+              show: false, // 可根据需要决定是否显示网格线
+            },
+            max: Math.max(...this.chartData.tradeVolume) * 5,
           },
         ],
         tooltip: {
@@ -546,9 +648,9 @@ export default {
                   dataIndex > 0 &&
                   priceData[dataIndex] > priceData[dataIndex - 1]
                 ) {
-                  return "#ff707e"; // 价格上涨，柱子设置为红色
+                  return "#f6465d"; // 价格上涨，柱子设置为红色
                 } else {
-                  return "#32d993"; // 价格下跌，柱子设置为绿色
+                  return "#0ecb81"; // 价格下跌，柱子设置为绿色
                 }
               }, // 设置数据点的颜色
             },
@@ -556,6 +658,54 @@ export default {
         ],
       };
 
+      // 以下是为了实现动态改变图表的纵坐标最大值，使得图像始终显示在合理的位置
+      const old_option = this.myChart.getOption();
+      const dataZoomInfo = old_option.dataZoom[0]; // 假设第一个 dataZoom 组件用于交易量数据
+
+      // // 获取当前显示范围的起始位置和结束位置
+      const start = dataZoomInfo.start;
+      const end = dataZoomInfo.end;
+
+      // 获取当前显示范围的数据
+      const allTradeVolumeData = this.chartData.tradeVolume;
+      const startTradeVolumeIndex = Math.floor(
+        (start / 100) * allTradeVolumeData.length
+      );
+      const endTradeVolumeIndex = Math.floor(
+        (end / 100) * allTradeVolumeData.length
+      );
+      const visibleTradeVolumeData = allTradeVolumeData.slice(
+        startTradeVolumeIndex,
+        endTradeVolumeIndex + 1
+      );
+
+      // 使得TradeVolume纵轴的最大值=显示的最大值*5
+      const maxTradeVolume = parseInt(Math.max(...visibleTradeVolumeData) * 5);
+
+      // 更新 yAxis 中关于交易量的配置
+      option.yAxis[1].max = maxTradeVolume;
+
+      // 获取当前显示范围的价格数据
+      const allPriceData = this.chartData.price;
+      const startPriceIndex = Math.floor((start / 100) * allPriceData.length);
+      const endPriceIndex = Math.floor((end / 100) * allPriceData.length);
+      const visiblePriceData = allPriceData.slice(
+        startPriceIndex,
+        endPriceIndex + 1
+      );
+
+      // 使得Price纵轴的最大值=显示的最大值+(显示的最大值-显示的最小值)*0.2，Price纵轴的最小值=显示的最小值-(显示的最大值-显示的最小值)*0.2
+      const maxPrice =
+        Math.max(...visiblePriceData) +
+        (Math.max(...visiblePriceData) - Math.min(...visiblePriceData)) * 0.2;
+      const minPrice =
+        Math.min(...visiblePriceData) -
+        (Math.max(...visiblePriceData) - Math.min(...visiblePriceData)) * 0.2;
+
+      option.yAxis[0].max = maxPrice;
+      option.yAxis[0].min = minPrice;
+
+      // 更新图表
       this.myChart.setOption(option);
     },
 
@@ -701,7 +851,7 @@ export default {
     //随机产生的时间数据，仅供前端测试所用
     generateRandomHour() {
       const times = [];
-      for (let hour = 0; hour < 24; hour++) {
+      for (let hour = 0; hour < 1; hour++) {
         for (let minute = 0; minute < 60; minute++) {
           const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
           const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
@@ -713,24 +863,27 @@ export default {
     //随机产生的期货价格数据，仅供前端测试所用
     generateStockData() {
       const data = [];
-      let price = 800;
-      for (let i = 0; i < 24 * 60; i++) {
+      let price = 4970;
+      for (let i = 0; i < 1 * 60; i++) {
         const change = Math.random() * 100 - 50;
         price += change;
 
-        // 确保价格不低于零
-        if (price < 10) {
-          price = 50;
+        // 确保价格在指定范围内波动
+        if (price < 4920) {
+          price = 4920;
+        } else if (price > 5020) {
+          price = 5020;
         }
 
         data.push(Math.round(price * 100) / 100);
       }
       return data;
     },
+
     //随机产生的交易量数据，仅供前端测试所用
     generateTradeVolumeData() {
       const data = [];
-      for (let i = 0; i < 24 * 60; i++) {
+      for (let i = 0; i < 1 * 60; i++) {
         const volume = Math.random() * 1000; // 随机生成交易量，你可以根据需要调整范围
         data.push(Math.round(volume * 100) / 100);
       }
@@ -787,6 +940,7 @@ export default {
                 color: "#1e2227",
               },
             },
+            min: Math.min(...this.chartData.price) - 100,
           },
           {
             type: "value",
@@ -798,7 +952,7 @@ export default {
             splitLine: {
               show: false, // 可根据需要决定是否显示网格线
             },
-            max: 5000,
+            max: Math.max(...this.chartData.tradeVolume) * 5,
           },
         ],
         series: [
@@ -841,9 +995,9 @@ export default {
                   dataIndex > 0 &&
                   priceData[dataIndex] > priceData[dataIndex - 1]
                 ) {
-                  return "#ff707e"; // 价格上涨，柱子设置为红色
+                  return "#f6465d"; // 价格上涨，柱子设置为红色
                 } else {
-                  return "#32d993"; // 价格下跌，柱子设置为绿色
+                  return "#0ecb81"; // 价格下跌，柱子设置为绿色
                 }
               }, // 设置数据点的颜色
             },
@@ -877,7 +1031,7 @@ export default {
           },
         ],
       };
-      console.log(option);
+      // console.log(option);
       myChart.setOption(option);
     },
     formatTooltip(val) {
@@ -918,7 +1072,7 @@ export default {
 .main {
   background-color: #181a20;
   padding: 10px;
-  height: 60vh;
+  height: 70vh;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -1024,6 +1178,9 @@ export default {
 .chart-content {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .deal {
   width: 100%;
@@ -1042,9 +1199,10 @@ export default {
   flex-direction: column;
   transform: translateY(-0%);
   align-items: center;
+  border: 1px solid #2b3139;
 }
 .input {
-  width: 70%;
+  width: 50%;
   margin-bottom: 25px;
 }
 /deep/.el-input__inner {
@@ -1083,7 +1241,7 @@ export default {
   color: #e8ffff;
   font-weight: 600;
   border-radius: 8px;
-  width: 70%;
+  width: 50%;
 }
 #buyButton.el-button--primary:hover {
   background: #32d993;
@@ -1097,7 +1255,7 @@ export default {
   color: #e8ffff;
   font-weight: 600;
   border-radius: 8px;
-  width: 70%;
+  width: 50%;
 }
 #sellButton.el-button--primary:hover {
   background: #ff707e;
@@ -1139,4 +1297,24 @@ export default {
   color: #181a20;
   border-radius: 4px;
 }
+.data-display {
+  height: 100px;
+  width: 80%;
+  background-color: #181a20;
+  border: 2px solid #2b3139;
+  display: flex;
+  align-items: center;
+}
+.current-price {
+  color: #f6455d;
+  font-size: 18px;
+  position: relative;
+  left: 30px;
+  top: -2px;
+}
+.slider {
+  width: 70%;
+  margin: 0 auto;
+}
 </style>
+
