@@ -41,5 +41,5 @@ public interface PositionMapper extends BaseMapper<Position>
     Position getPositionById(@Param("positionid") int positionid);
 
     @Update("update position set amount = amount - #{sellAmount} where positionid = #{positionId}")
-    boolean updateAmountPositionById(@Param("positionId") int positionid,@Param("sellamount") int sellAmount);
+    boolean updateAmountPositionById(@Param("positionId") int positionid,@Param("sellAmount") int sellAmount);
 }

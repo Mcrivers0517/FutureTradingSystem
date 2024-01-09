@@ -125,5 +125,23 @@ public class ClosePositionController
         transaction.setDelegateid(delegateMapper.selectDelegateIdByTime(delegate.getDelegateTime()));
         System.out.println(transaction);
         transactionMapper.insertTransaction(transaction);
+
+        //更新用户钱包
+        int uk=0;
+        int pk=0;
+        if(position.getEntryPrice()<=position.getCurrentPrice()){
+            uk=1;
+            pk=-1;
+        }
+        else {
+            uk=-1;
+            pk=1;
+        }
+        double userProfit = sellAmount*position.getCurrentPrice()*uk;
+        double productProfit = sellAmount*position.getEntryPrice()*pk;
+        System.out.println(userProfit+"   "+productProfit);
+        userMapper.updateDepositByUserID(position.getUserId(),userProfit);
+        userMapper.updateInitialCapitalByUserID(position.getUserId(),productProfit);
+
     }
 }
