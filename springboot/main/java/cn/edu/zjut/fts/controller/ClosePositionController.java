@@ -127,11 +127,22 @@ public class ClosePositionController
         transactionMapper.insertTransaction(transaction);
 
         //更新用户钱包
-        double userProfit = sellAmount*position.getProfitLoss()-25;
-        double productProfit = sellAmount*position.getEntryPrice()*(-1);
-        System.out.println(userProfit+"   "+productProfit);
-        userMapper.updateDepositByUserID(position.getUserId(),userProfit);
-        userMapper.updateInitialCapitalByUserID(position.getUserId(),productProfit);
-
+        int uk = 0;
+        int pk = 0;
+        if (position.getEntryPrice() <= position.getCurrentPrice())
+        {
+            uk = 1;
+            pk = -1;
+        }
+        else
+        {
+            uk = -1;
+            pk = 1;
+        }
+        double userProfit = sellAmount * position.getCurrentPrice() * uk;
+        double productProfit = sellAmount * position.getEntryPrice() * pk;
+        System.out.println(userProfit + "   " + productProfit);
+        userMapper.updateDepositByUserID(position.getUserId(), userProfit);
+        userMapper.updateInitialCapitalByUserID(position.getUserId(), productProfit);
     }
 }

@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Futures
 {
-    private int price;
+    private double price;
     private int volume;
+    private double dailyOpenPrice;
+    private double dailyHighestPrice;
+    private double dailyLowestPrice;
 }

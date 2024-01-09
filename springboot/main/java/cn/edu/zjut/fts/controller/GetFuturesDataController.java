@@ -83,17 +83,59 @@ public class GetFuturesDataController
 //            System.out.println(tableName);
             Futures futures = futuresMapper.selectAllByFutureAndId(tableName, currentRowList.get(currentIndex));
 
+//            System.out.println(currentRowList.get(currentIndex));
+
+            // 读第一条数据时，初始化开盘价，以及当日最高价和当日最低价
+            if (currentRowList.get(currentIndex) == 1)
+            {
+                futures.setDailyOpenPrice(futures.getPrice());
+                futures.setDailyHighestPrice(futures.getPrice());
+                futures.setDailyLowestPrice(futures.getPrice());
+                futuresMapper.updateDailyOpenPrice(futures.getPrice(), currentIndex + 1);
+                futuresMapper.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
+            }
+            // 时间变为0点时，重新设置开盘价，并重新初始化当日最高价和当日最低价
+            else if(formattedTime.equals("00:00:00"))
+            {
+                futures.setDailyOpenPrice(futures.getPrice());
+                futures.setDailyHighestPrice(futures.getPrice());
+                futures.setDailyLowestPrice(futures.getPrice());
+                futuresMapper.updateDailyOpenPrice(futures.getPrice(), currentIndex + 1);
+                futuresMapper.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
+            }
+
+
             int currentValue = currentRowList.get(currentIndex); // 获取当前索引的值
             currentValue += 1; // 增加值
             currentRowList.set(currentIndex, currentValue); // 将增加后的值放回列表中
 
-            futures.setPrice(futures.getPrice());
-            futures.setVolume(futures.getVolume());
+            // 从数据库中获得该期货的开盘价、最高价、最低价
+            futures.setDailyOpenPrice(futuresMapper.selectDailyOpenPriceByFutureId(currentIndex + 1));
+            futures.setDailyHighestPrice(futuresMapper.selectDailyHighestPriceByFutureId(currentIndex + 1));
+            futures.setDailyLowestPrice(futuresMapper.selectDailyLowestPriceByFutureId(currentIndex + 1));
+
+            // 如果期货的当前价格超过了当日最高价格，则更新最高价格
+            System.out.println(futures.getPrice());
+            if (futures.getPrice() > futuresMapper.selectDailyHighestPriceByFutureId(currentIndex + 1))
+            {
+                futures.setDailyHighestPrice(futures.getPrice());
+            }
+            // 如果期货的当前价格跌破了当日最低价格，则更新最低价格
+            if (futures.getPrice() < futuresMapper.selectDailyLowestPriceByFutureId(currentIndex + 1))
+            {
+                futures.setDailyLowestPrice(futures.getPrice());
+            }
+            // 更新数据库中的每日最高价和每日最低价
+            futuresMapper.updateDailyPrice(futures.getDailyHighestPrice(), futures.getDailyLowestPrice(), currentIndex + 1);
+
+//            futures.setPrice(futures.getPrice());
+//            futures.setVolume(futures.getVolume());
+
 
 
             // 2.更新委托表
             //2.0获取成交当前价格，当前时间
-            int currentPrice = futures.getPrice();
+            double currentPrice = futures.getPrice();
             //2.1.获取userid的futureid种类的已委记录
             List<Delegate> delegates = delegateMapper.selectDelegatesByFutureAndUser(currentIndex);
             boolean whetherToUpdate = false;    //2.2记录是否要更新表单
