@@ -85,7 +85,17 @@ public class GetFuturesDataController
 
 //            System.out.println(currentRowList.get(currentIndex));
 
+            // 读第一条数据时，初始化开盘价，以及当日最高价和当日最低价
             if (currentRowList.get(currentIndex) == 1)
+            {
+                futures.setDailyOpenPrice(futures.getPrice());
+                futures.setDailyHighestPrice(futures.getPrice());
+                futures.setDailyLowestPrice(futures.getPrice());
+                futuresMapper.updateDailyOpenPrice(futures.getPrice(), currentIndex + 1);
+                futuresMapper.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
+            }
+            // 时间变为0点时，重新设置开盘价，并重新初始化当日最高价和当日最低价
+            else if(formattedTime.equals("00:00:00"))
             {
                 futures.setDailyOpenPrice(futures.getPrice());
                 futures.setDailyHighestPrice(futures.getPrice());
@@ -99,6 +109,7 @@ public class GetFuturesDataController
             currentValue += 1; // 增加值
             currentRowList.set(currentIndex, currentValue); // 将增加后的值放回列表中
 
+            // 从数据库中获得该期货的开盘价、最高价、最低价
             futures.setDailyOpenPrice(futuresMapper.selectDailyOpenPriceByFutureId(currentIndex + 1));
             futures.setDailyHighestPrice(futuresMapper.selectDailyHighestPriceByFutureId(currentIndex + 1));
             futures.setDailyLowestPrice(futuresMapper.selectDailyLowestPriceByFutureId(currentIndex + 1));
