@@ -45,4 +45,7 @@ public interface UserMapper extends BaseMapper<User>
     @Update("UPDATE user SET InitialCapital =InitialCapital + #{ProfitLoss} WHERE userid = #{UserID}")
     int updateInitialCapitalByUserID(@Param("UserID") int UserID,@Param("ProfitLoss") double ProfitLoss);
 
+    @Update("UPDATE user SET Deposit =Deposit + #{rechargeAmount} WHERE userid = #{UserID}")
+    int recharge(@Param("UserID") int UserID,@Param("rechargeAmount") double rechargeAmount);
+
 }
