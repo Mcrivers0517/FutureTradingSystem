@@ -32,7 +32,7 @@ public class LoginController {
 
         if (selectUser != null && password.equals(selectUser.getPassword())) {
             isSuccess = true;
-            userID = selectUser.getId();
+            userID = selectUser.getUserId();
         }
 
         return new LoginResponse(isSuccess, userID);

@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class getAssetsResult
+public class GetAssetsRequest
 {
-    private double Deposit;
-    private double InitialCapital;
-    private double totalProfitLoss;
-    private double totalProfitLossRatio;
+    private int userId;
 }
-

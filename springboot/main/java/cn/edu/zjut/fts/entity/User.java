@@ -16,7 +16,7 @@ import java.util.Date;
 public class User
 {
 
-    private int id;
+    private int userId;
     private String username;
     private String password;
     private String avatarUrl;

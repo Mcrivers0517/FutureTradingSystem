@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class rechargeResult {
-    private boolean result;
+public class GetPositionRequest
+{
+    int userId;
 }

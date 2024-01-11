@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class getAssetsRequest
+public class CancelDelegateResponse
 {
-    private int userid;
+    String result;
 }
+

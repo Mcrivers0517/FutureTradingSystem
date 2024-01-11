@@ -11,14 +11,15 @@ import org.springframework.web.bind.annotation.*;
 @Api("充值模块")
 @RestController
 @CrossOrigin
-public class rechargeController {
+public class RechargeController
+{
     @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/recharge")
-    public rechargeResult rechargeresult(@RequestBody rechargeRequest request) {
+    public RechargeResult rechargeresult(@RequestBody RechargeRequest request) {
         System.out.println(request);
-        rechargeResult result = new rechargeResult(true);
+        RechargeResult result = new RechargeResult(true);
         userMapper.recharge(request.getUserid(),request.getRechargeAmount());
         return result;
     }

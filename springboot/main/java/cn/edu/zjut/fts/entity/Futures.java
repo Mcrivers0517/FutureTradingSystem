@@ -16,4 +16,6 @@ public class Futures
     private double dailyOpenPrice;
     private double dailyHighestPrice;
     private double dailyLowestPrice;
+    private double dailyChange;
+    private double dailyChangeRatio;
 }

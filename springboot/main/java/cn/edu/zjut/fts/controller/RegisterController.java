@@ -21,13 +21,9 @@ public class RegisterController {
 
 @PostMapping("/register")
 public String insert(@RequestParam("username") String username,
-                     @RequestParam("password") String password,
-                     @RequestParam("confirmPassword") String confirmPassword) {
+                     @RequestParam("password") String password) {
     try {
         // 检查两次输入的密码是否相同
-        if (!password.equals(confirmPassword)) {
-            return "两次输入的密码不一致";
-        }
 
         // 创建 User 对象并设置属性
         User user = new User();

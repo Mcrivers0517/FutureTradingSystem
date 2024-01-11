@@ -8,16 +8,25 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 @Mapper
-public interface DelegateMapper extends BaseMapper<Delegate>{
+public interface DelegateMapper extends BaseMapper<Delegate>
+{
 
-    @Select("select * from delegate where status = '已委'")
-    List<Delegate> selectCurrentDelegate();
+    @Select("SELECT * FROM delegate WHERE status = '已委' AND userId = #{userId} AND futureId = #{futureId}")
+    List<Delegate> selectCurrentDelegateById(@Param("userId") int userId, @Param("futureId") int futureId);
+
+    @Select("SELECT * FROM delegate WHERE status = '已成' AND userId = #{userId} AND futureId = #{futureId}")
+    List<Delegate> selectHistoricalDelegateById(@Param("userId") int userId, @Param("futureId") int futureId);
+
+    @Select("SELECT * FROM delegate WHERE status = '已委' AND userId = #{userId}")
+    List<Delegate> selectAllCurrentDelegateById(@Param("userId") int userId);
+
+    @Select("SELECT * FROM delegate WHERE status = '已成' AND userId = #{userId}")
+    List<Delegate> selectAllHistoricalDelegateById(@Param("userId") int userId);
 
     @Select("select * from delegate where status = '已成'")
     List<Delegate> selectHistoricalDelegate();
 
-    @Insert("insert into delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime,deliveryDate) " +
-            "values(#{userId}, #{futureId}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime},#{deliveryDate})")
+    @Insert("insert into delegate(userid, futureid, attribute, status, amount, delegatePrice, delegateTime,deliveryDate) " + "values(#{userId}, #{futureId}, #{attribute}, #{status}, #{amount}, #{delegatePrice}, #{delegateTime},#{deliveryDate})")
     int insertDelegate(Delegate delegate);
 
     @Select("select status from delegate where delegateid = #{delegateid}")
@@ -28,7 +37,6 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
 
     @Select("select * from delegate where status = '已委' and futureid = #{futureid}")
     List<Delegate> selectDelegatesByFutureAndUser(@Param("futureid") int currentIndex);
-
 
     @Update("update delegate set status = '已成' where delegateid = #{delegateid}")
     boolean updateDelegateStatusToDone(@Param("delegateid") int delegateid);
@@ -41,9 +49,4 @@ public interface DelegateMapper extends BaseMapper<Delegate>{
 
     @Select("select delegateid from delegate where delegateTime = #{delegateTime}")
     int selectDelegateIdByTime(@Param("delegateTime") String delegateTime);
-
-
-
-
-
 }

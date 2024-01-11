@@ -44,6 +44,6 @@ public interface PositionMapper extends BaseMapper<Position>
     boolean updateAmountPositionById(@Param("positionId") int positionid,@Param("sellAmount") int sellAmount);
 
     @Select("select * from position where userId = #{userId}")
-    List<Position> selectByuserid(@Param("userId") int userId);
+    List<Position> getPositionByUserId(@Param("userId") int userId);
 
 }

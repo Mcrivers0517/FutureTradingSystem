@@ -27,6 +27,6 @@ public class Position
     private double profitLossRatio;
     private double costPrice;
     private String entryDate;
-    private String lastUpdate;
+    private String lastUpdated;
     private String attribute;
 }

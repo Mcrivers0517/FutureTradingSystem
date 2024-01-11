@@ -64,9 +64,9 @@ public class GetFuturesDataController
         String formattedTime = time.format(timeFormatter); // 格式化时间部分
         String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
 
-        System.out.println("日期部分：" + formattedDate);
-        System.out.println("时间部分：" + formattedTime);
-        System.out.println("日期时间部分：" + formattedDateTime);
+//        System.out.println("日期部分：" + formattedDate);
+//        System.out.println("时间部分：" + formattedTime);
+//        System.out.println("日期时间部分：" + formattedDateTime);
 
         //1.返回当前时间期货数据
 
@@ -115,7 +115,7 @@ public class GetFuturesDataController
             futures.setDailyLowestPrice(futuresMapper.selectDailyLowestPriceByFutureId(currentIndex + 1));
 
             // 如果期货的当前价格超过了当日最高价格，则更新最高价格
-            System.out.println(futures.getPrice());
+//            System.out.println(futures.getPrice());
             if (futures.getPrice() > futuresMapper.selectDailyHighestPriceByFutureId(currentIndex + 1))
             {
                 futures.setDailyHighestPrice(futures.getPrice());
@@ -127,6 +127,9 @@ public class GetFuturesDataController
             }
             // 更新数据库中的每日最高价和每日最低价
             futuresMapper.updateDailyPrice(futures.getDailyHighestPrice(), futures.getDailyLowestPrice(), currentIndex + 1);
+
+            futures.setDailyChange(futures.getPrice() - futures.getDailyOpenPrice());
+            futures.setDailyChangeRatio(futures.getDailyChange() / futures.getDailyOpenPrice());
 
 //            futures.setPrice(futures.getPrice());
 //            futures.setVolume(futures.getVolume());
@@ -159,7 +162,7 @@ public class GetFuturesDataController
                         whetherToUpdate = true;
                     }
                 }
-                System.out.println(delegate);
+//                System.out.println(delegate);
 
                 // 3.如果交易达成，那么更新成交表transactionTable和持仓表positionTable中的记录
                 if (whetherToUpdate)
@@ -190,7 +193,7 @@ public class GetFuturesDataController
                     transaction.setDelegateid(delegate.getDelegateId()); //绑定委托订单
                     transaction.setServiceFee(25.00);   //为简化程序，手续费暂时固定为25
                     transaction.setTransactionTime(formattedDateTime);
-                    System.out.println(transaction);
+//                    System.out.println(transaction);
                     transactionMapper.insertTransaction(transaction);
 
                     //4.更新持仓表
@@ -201,7 +204,7 @@ public class GetFuturesDataController
                         double originalAmount = position.getAmount();
                         position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
                         position.setCurrentPrice(currentPrice);
-                        position.setLastUpdate(formattedDateTime);
+                        position.setLastUpdated(formattedDateTime);
                         position.setProfitLoss((currentPrice - position.getCostPrice() * position.getAmount())); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
                         position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
                         double totalCost = originalCost * originalAmount + position.getCurrentPrice() * delegate.getAmount() + transaction.getServiceFee(); // 总成本 = 原始成本 × 原始数量 + 新成本 × 新数量 + 手续费
@@ -220,7 +223,7 @@ public class GetFuturesDataController
                         position.setProfitLossRatio(0);
                         position.setCostPrice(currentPrice);
                         position.setEntryDate(formattedDateTime);
-                        position.setLastUpdate(formattedDateTime);
+                        position.setLastUpdated(formattedDateTime);
                         position.setAttribute(delegate.getAttribute());
                         positionMapper.insertPosition(position);
                     }

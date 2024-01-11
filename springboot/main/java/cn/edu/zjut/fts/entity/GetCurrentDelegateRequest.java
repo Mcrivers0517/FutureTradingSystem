@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateDelegateControllerResult
+public class GetCurrentDelegateRequest
 {
-    boolean result;
+    int userId;
+    int futureId;
 }
-

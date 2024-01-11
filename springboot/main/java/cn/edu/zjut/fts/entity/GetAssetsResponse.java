@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelDelegateResult
+public class GetAssetsResponse
 {
-    String result;
+    private double deposit;
+    private double currentCapital;
+    private double totalProfitLoss;
+    private double totalProfitLossRatio;
 }
 

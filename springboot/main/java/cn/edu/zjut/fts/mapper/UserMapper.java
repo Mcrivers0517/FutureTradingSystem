@@ -17,11 +17,9 @@ public interface UserMapper extends BaseMapper<User>
     //插入操作，用于注册实现
     @Insert("insert into user values (#{id},#{username},#{password},#{avatarUrl})")
     int insert(User user);
-    @Select("SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS username_exists\n" +
-            "FROM User\n" +
-            "WHERE username = #{username}")
-    Integer selectIfExists(User user);
 
+    @Select("SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS username_exists\n" + "FROM User\n" + "WHERE username = #{username}")
+    Integer selectIfExists(User user);
 
 
     //查询操作，用于登录逻辑实现

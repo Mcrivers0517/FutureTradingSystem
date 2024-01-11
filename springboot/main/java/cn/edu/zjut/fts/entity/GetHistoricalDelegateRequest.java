@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class rechargeRequest {
-    private int userid;
-    private double rechargeAmount;
+public class GetHistoricalDelegateRequest
+{
+    int userId;
+    int futureId;
 }
