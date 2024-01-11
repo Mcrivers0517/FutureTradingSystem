@@ -51,9 +51,9 @@
                 "
                 >{{
                   this.chartSecondData.price[
-                    this.chartSecondData.price.length - 2
-                  ]
-                }}.00</span
+                    this.chartSecondData.price.length - 1
+                  ].toFixed(2)
+                }}</span
               >
               <span
                 style="
@@ -222,66 +222,71 @@
                 </el-header>
                 <el-main
                   ><el-table
-                    :data="CurrentDelegateData"
+                    :data="CurrentOrderData"
                     class="posi-table"
                     :cell-style="tableRowClassName"
                     height="430"
                     v-if="activeIndex === '1'"
                   >
-                    <el-table-column prop="delegateId" label="流水号">
+                    <el-table-column prop="type" label="品种">
                     </el-table-column>
-                    <el-table-column prop="delegateTime" label="日期">
+                    <el-table-column prop="Date" label="日期">
                     </el-table-column>
-                    <el-table-column prop="attribute" label="属性">
+                    <el-table-column prop="Attribute" label="属性">
                     </el-table-column>
-                    <el-table-column prop="delegatePrice" label="价格">
+                    <el-table-column prop="Price" label="价格">
                     </el-table-column>
-                    <el-table-column prop="status" label="状态">
+                    <el-table-column prop="Status" label="状态">
                     </el-table-column>
-                    <el-table-column prop="amount" label="数量">
+                    <el-table-column prop="Quantity" label="数量">
                     </el-table-column>
                     <el-table-column label="金额">
                       <template slot-scope="scope">
-                        {{ scope.row.delegatePrice * scope.row.amount }}
+                        {{ scope.row.Price * scope.row.Quantity }}
                       </template>
                     </el-table-column>
                     <el-table-column label="撤单" :width="60">
-                      <template slot-scope="scope">
-                        <el-button
-                          class="revoke"
-                          @click="cancelDelegate(scope.row)"
-                          icon="el-icon-delete-solid"
-                        ></el-button>
-                      </template>
+                      <el-button
+                        class="revoke"
+                        @click="cancelOrder(row.id)"
+                        icon="el-icon-delete-solid"
+                      ></el-button>
                     </el-table-column>
                   </el-table>
                   <el-table
-                    :data="HistoricalDelegateData"
+                    :data="HistoricalOrderData"
                     class="posi-table"
                     :cell-style="tableRowClassName"
                     height="430"
                     v-if="activeIndex === '2'"
-                    ><el-table-column prop="delegateId" label="流水号">
+                  >
+                    <el-table-column prop="type" label="品种">
                     </el-table-column>
-                    <el-table-column prop="delegateTime" label="日期">
+                    <el-table-column prop="Date" label="日期">
                     </el-table-column>
-                    <el-table-column prop="attribute" label="属性">
+                    <el-table-column prop="Attribute" label="属性">
                     </el-table-column>
-                    <el-table-column prop="delegatePrice" label="价格">
+                    <el-table-column prop="Price" label="价格">
                     </el-table-column>
-                    <el-table-column prop="status" label="状态">
+                    <el-table-column prop="Status" label="状态">
                     </el-table-column>
-                    <el-table-column prop="amount" label="数量">
+                    <el-table-column prop="Quantity" label="数量">
                     </el-table-column>
-                    <el-table-column label="金额" :width="120">
+                    <el-table-column label="金额">
                       <template slot-scope="scope">
-                        {{ scope.row.delegatePrice * scope.row.amount }}
+                        {{ scope.row.Price * scope.row.Quantity }}
                       </template>
                     </el-table-column>
+                    <el-table-column label="删除" :width="60">
+                      <el-button
+                        class="delete"
+                        @click="deleteOrder(row.id)"
+                        icon="el-icon-delete-solid"
+                      ></el-button>
+                    </el-table-column>
                   </el-table>
-                </el-main>
-              </el-container></el-main
-            >
+                </el-main> </el-container
+            ></el-main>
           </el-container>
         </el-footer>
       </el-container>
@@ -294,8 +299,8 @@ import axios from "axios";
 export default {
   data() {
     return {
-      CurrentDelegateData: [],
-      HistoricalDelegateData: [],
+      CurrentOrderData: [],
+      HistoricalOrderData: [],
       myChart: null,
       buyPrice: null,
       buyQuantity: null,
@@ -322,59 +327,84 @@ export default {
       dailyChangeRatio: 0,
       dateTimeString: "",
       timerId: null,
-      accumulatedVolume: 0,
     };
   },
   mounted() {
-    // console.log(
-    //   "times",
-    //   this.$store.state.chartData[this.$store.state.activeRowNumber].times
-    //     .length
-    // );
-    this.startPriceDataFetch();
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
   },
   created() {
-    if (
-      this.$store.state.chartData[this.$store.state.activeRowNumber].times
-        .length == 0
-    ) {
-      this.$store.state.chartData[this.$store.state.activeRowNumber].times =
-        this.generateRandomHour();
-    }
-    if (
-      this.$store.state.chartData[this.$store.state.activeRowNumber].price
-        .length == 0
-    ) {
-      this.$store.state.chartData[this.$store.state.activeRowNumber].price =
-        this.generateStockData();
-    }
-    if (
-      this.$store.state.chartData[this.$store.state.activeRowNumber].tradeVolume
-        .length == 0
-    ) {
-      this.$store.state.chartData[
-        this.$store.state.activeRowNumber
-      ].tradeVolume = this.generateTradeVolumeData();
-    }
-    if (
-      this.$store.state.tempVolume[this.$store.state.activeRowNumber] == null
-    ) {
-      this.accumulatedVolume = 0;
-    } else {
-      this.accumulatedVolume =
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber];
-    }
-    this.getCurrentDelegate();
-    this.getHistoricalDelegate();
-    // console.log("accumulatedVolume", this.accumulatedVolume);
     // this.getCurrentOrders();
     // this.getHistoricalOrders();
-    // this.chartData.price = this.generateStockData()
+
+    this.chartData.times = this.generateRandomHour();
+    this.chartData.price = this.generateStockData();
+    this.chartData.tradeVolume = this.generateTradeVolumeData();
+    this.startPriceDataFetch();
+
+    // 以下mounted()内容仅用作前端测试，项目运行时应注释
+
+    // this.drawChart();
+
+    // let currentSecond = 0;
+    // let accumulatedVolume = 0; // 累计交易量
+
+    // this.timerId = setInterval(() => {
+    //   // 生成新的价格
+    //   let newPrice =
+    //     Math.round(
+    //       (this.chartData.price[this.chartData.price.length - 1] +
+    //         Math.random() * 100 -
+    //         50) *
+    //         100
+    //     ) / 100;
+    //   if (newPrice < 10) {
+    //     newPrice = 50;
+    //   }
+
+    //   // 生成新的交易量并累加
+    //   let newVolume = Math.round(Math.random() * 20 * 100) / 100;
+    //   accumulatedVolume += newVolume;
+
+    //   // 每秒更新价格，每分钟更新时间和价格点
+    //   if (currentSecond < 59) {
+    //     // 替换当前分钟的最后一个价格
+    //     this.chartData.price[this.chartData.price.length - 1] = newPrice;
+    //     this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+    //       accumulatedVolume;
+    //     currentSecond++;
+    //   } else {
+    //     // 一分钟结束，更新时间标签和价格点
+    //     const newTime = this.getNextMinute(
+    //       this.chartData.times[this.chartData.times.length - 1]
+    //     );
+    //     this.chartData.times.push(newTime);
+    //     this.chartData.price.push(newPrice);
+    //     this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
+
+    //     // 重置秒数和累计交易量
+    //     currentSecond = 0;
+    //     accumulatedVolume = 0;
+    //   }
+
+    //   // 更新图表
+    //   this.updateChart();
+    // }, 1000);
   },
   methods: {
+    // getNextMinute(currentTime) {
+    //   const [hour, minute] = currentTime.split(":").map(Number);
+    //   let nextMinute = minute + 1;
+    //   let nextHour = hour;
+    //   if (nextMinute === 60) {
+    //     nextMinute = 0;
+    //     nextHour = nextHour === 23 ? 0 : nextHour + 1;
+    //   }
+    //   return `${nextHour.toString().padStart(2, "0")}:${nextMinute
+    //     .toString()
+    //     .padStart(2, "0")}`;
+    // },
     getNextMinute(currentTime) {
       const date = new Date(currentTime);
       // console.log(currentTime);
@@ -394,63 +424,58 @@ export default {
       ).padStart(2, "0")}`;
     },
     logout() {
-      this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-        this.accumulatedVolume;
-      clearInterval(this.timerId);
       this.$router.push("/Login");
     },
     handleMenu(index) {
       // 处理菜单项点击事件，在这里进行路由跳转
       if (index === "1") {
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-          this.accumulatedVolume;
-        clearInterval(this.timerId);
         this.$router.push("/"); // 跳转到主页
       } else if (index === "2-1") {
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-          this.accumulatedVolume;
-        clearInterval(this.timerId);
-        this.$router.push("/CurrentDelegate"); // 跳转到当前委托页
+        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
       } else if (index === "2-2") {
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-          this.accumulatedVolume;
-        clearInterval(this.timerId);
-        this.$router.push("/HistoricalDelegate"); // 跳转到历史委托页
+        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
       } else if (index === "3") {
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-          this.accumulatedVolume;
-        clearInterval(this.timerId);
         this.$router.push("/MarketQuotes"); // 跳转到行情页
       } else if (index === "4") {
-        this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
-          this.accumulatedVolume;
-        clearInterval(this.timerId);
         this.$router.push("/message-center"); // 跳转到消息中心页
       }
     },
     // 撤销订单接口
-    async cancelDelegate(row) {
-      console.log(row);
+    async cancelOrder(orderId) {
       try {
-        const response = await axios.post(
-          "http://localhost:5000/cancelDelegate",
-          {
-            delegateId: row.delegateId,
-          }
-        );
-        console.log(response);
-        if (response.data.result == "撤销订单成功") {
-          console.log(111111);
-          alert(response.data.result);
-          // 从 CurrentDelegateData 中移除对应的订单
-          this.CurrentDelegateData = this.CurrentDelegateData.filter(
-            (delegate) => delegate.delegateId !== row.delegateId
+        const response = await axios.post("http://localhost:5000/cancelOrder", {
+          orderId,
+        });
+        if (response.data.success) {
+          // 从 CurrentOrderData 中移除对应的订单
+          this.CurrentOrderData = this.CurrentOrderData.filter(
+            (order) => order.id !== orderId
           );
-        } else{
-          alert(response.data.result);
+        } else {
+          // 处理失败情况
+          console.error("Cancel order failed:", response.data.message);
         }
       } catch (error) {
         console.error("Error during cancel operation:", error);
+      }
+    },
+    // 删除订单接口
+    async deleteOrder(orderId) {
+      try {
+        const response = await axios.post("http://localhost:5000/deleteOrder", {
+          orderId,
+        });
+        if (response.data.success) {
+          // 从 HistoricalOrderData 中移除对应的订单
+          this.HistoricalOrderData = this.HistoricalOrderData.filter(
+            (order) => order.id !== orderId
+          );
+        } else {
+          // 处理失败情况
+          console.error("Delete order failed:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error during delete operation:", error);
       }
     },
     // 交易接口
@@ -461,28 +486,17 @@ export default {
           futureId: 1,
           userId: 56,
           amount: this.buyQuantity,
-          delegatePrice: this.buyPrice,
+          delegatePrice: this.sellPrice,
           attribute: "buy",
+          // amount: this.SellAmount,
         };
-
-        console.log(this.dateTimeString);
-
         const response = await axios.post(
-          "http://localhost:5000/createDelegate",
+          "http://localhost:5000/CreateDelegate",
           payload
         );
-
-        console.log(response.data);
-
-        if (response.data.result == false) {
-          // 订单创建成功
-          alert("您的余额不足");
-        } else {
-          // 余额不足
-          alert("订单创建成功");
-        }
+        console.log("Sell response:", response.data);
       } catch (error) {
-        console.error("Error during buy operation:", error);
+        console.error("Error during sell operation:", error);
       }
     },
     async sell() {
@@ -494,24 +508,13 @@ export default {
           amount: this.sellQuantity,
           delegatePrice: this.sellPrice,
           attribute: "sell",
+          // amount: this.SellAmount,
         };
-
-        console.log(this.dateTimeString);
-
         const response = await axios.post(
-          "http://localhost:5000/createDelegate",
+          "http://localhost:5000/CreateDelegate",
           payload
         );
-
-        console.log(response.data);
-
-        if (response.data.result == false) {
-          // 订单创建成功
-          alert("您的余额不足");
-        } else {
-          // 余额不足
-          alert("订单创建成功");
-        }
+        console.log("Sell response:", response.data);
       } catch (error) {
         console.error("Error during sell operation:", error);
       }
@@ -531,23 +534,22 @@ export default {
           );
 
         this.dateTimeString = dateTimeString;
-        console.log("dateTimeString", this.dateTimeString);
 
-        // const response = await axios.post(
-        //   "http://localhost:5000/getFuturesData",
-        //   {
-        //     dateTimeString,
-        //   }
-        // );
-        // const responseData = response.data;
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].times.push(dateTimeString);
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].price.push(responseData[0].price);
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].tradeVolume.push(responseData[0].volume);
-        // this.dailyOpenPrice = responseData[0].dailyOpenPrice;
-        // this.dailyHighestPrice = responseData[0].dailyHighestPrice;
-        // this.dailyLowestPrice = responseData[0].dailyLowestPrice;
-        // this.dailyChange = responseData[0].dailyChange;
-        // this.dailyChangeRatio = responseData[0].dailyChangeRatio;
+        const response = await axios.post(
+          "http://localhost:5000/getFuturesData",
+          {
+            dateTimeString,
+          }
+        );
+        const responseData = response.data;
+        this.chartSecondData.times.push(dateTimeString);
+        this.chartSecondData.price.push(responseData[0].price);
+        this.chartSecondData.tradeVolume.push(responseData[0].volume);
+        this.dailyOpenPrice = responseData[0].dailyOpenPrice;
+        this.dailyHighestPrice = responseData[0].dailyHighestPrice;
+        this.dailyLowestPrice = responseData[0].dailyLowestPrice;
+        this.dailyChange = responseData[0].dailyChange;
+        this.dailyChangeRatio = responseData[0].dailyChangeRatio;
         // console.log("responseData:", responseData);
         // console.log("chartSecondData", this.chartSecondData);
       } catch (error) {
@@ -563,8 +565,7 @@ export default {
       let option = {
         xAxis: {
           type: "category",
-          data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-            .times,
+          data: this.chartData.times,
           splitLine: {
             show: true,
             lineStyle: {
@@ -588,13 +589,7 @@ export default {
                 color: "#1e2227",
               },
             },
-            min:
-              Math.min(
-                ...this.$store.state.chartData[
-                  this.$store.state.activeRowNumber
-                ].price
-              ) - 100,
-            // min: 4850,
+            min: Math.min(...this.chartData.price) - 100,
           },
           {
             type: "value",
@@ -606,12 +601,7 @@ export default {
             splitLine: {
               show: false, // 可根据需要决定是否显示网格线
             },
-            max:
-              Math.max(
-                ...this.$store.state.chartData[
-                  this.$store.state.activeRowNumber
-                ].tradeVolume
-              ) * 5,
+            max: Math.max(...this.chartData.tradeVolume) * 5,
           },
         ],
         tooltip: {
@@ -621,8 +611,7 @@ export default {
           {
             name: "价格",
             type: "line",
-            data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-              .price,
+            data: this.chartData.price,
             lineStyle: {
               color: "#f0b90b",
             },
@@ -647,16 +636,13 @@ export default {
           {
             name: "交易量",
             type: "bar",
-            data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-              .tradeVolume,
+            data: this.chartData.tradeVolume,
             yAxisIndex: 1, // 使用右侧的Y轴
             itemStyle: {
               color: (params) => {
                 const dataIndex = params.dataIndex;
                 // 访问Vue组件上下文，通过箭头函数
-                const priceData =
-                  this.$store.state.chartData[this.$store.state.activeRowNumber]
-                    .price;
+                const priceData = this.chartData.price;
                 if (
                   dataIndex > 0 &&
                   priceData[dataIndex] > priceData[dataIndex - 1]
@@ -680,9 +666,7 @@ export default {
       const end = dataZoomInfo.end;
 
       // 获取当前显示范围的数据
-      const allTradeVolumeData =
-        this.$store.state.chartData[this.$store.state.activeRowNumber]
-          .tradeVolume;
+      const allTradeVolumeData = this.chartData.tradeVolume;
       const startTradeVolumeIndex = Math.floor(
         (start / 100) * allTradeVolumeData.length
       );
@@ -701,8 +685,7 @@ export default {
       option.yAxis[1].max = maxTradeVolume;
 
       // 获取当前显示范围的价格数据
-      const allPriceData =
-        this.$store.state.chartData[this.$store.state.activeRowNumber].price;
+      const allPriceData = this.chartData.price;
       const startPriceIndex = Math.floor((start / 100) * allPriceData.length);
       const endPriceIndex = Math.floor((end / 100) * allPriceData.length);
       const visiblePriceData = allPriceData.slice(
@@ -733,175 +716,92 @@ export default {
         .padStart(2, "0")}`;
     },
     startPriceDataFetch() {
+      this.fetchAndProcessData(); // 初始获取一次数据
+
+      let currentSecond = 0;
+      let accumulatedVolume = 0; // 累计交易量
+
       this.timerId = setInterval(() => {
-        let currentDate = new Date();
-        let currentSecond = currentDate.getSeconds();
-
-        const timestamp = Date.now(); // 毫秒时间戳
-        const date = new Date(timestamp);
-
-        const offset = 8 * 60; // UTC+8
-        const dateTimeString = new Date(date.getTime() + offset * 60000)
-          .toISOString()
-          .replace(
-            "Z",
-            `+${String(Math.abs(offset / 60)).padStart(2, "0")}:00`
-          );
-
-        this.dateTimeString = dateTimeString;
-
-        this.chartSecondData.price =
-          this.$store.state.chartSecondData[
-            this.$store.state.activeRowNumber
-          ].price;
-        this.dailyOpenPrice =
-          this.$store.state.dailyOpenPrice[this.$store.state.activeRowNumber];
-        this.dailyHighestPrice =
-          this.$store.state.dailyHighestPrice[
-            this.$store.state.activeRowNumber
-          ];
-        this.dailyLowestPrice =
-          this.$store.state.dailyLowestPrice[this.$store.state.activeRowNumber];
-        this.dailyChange =
-          this.$store.state.dailyChange[this.$store.state.activeRowNumber];
-        this.dailyChangeRatio =
-          this.$store.state.dailyChangeRatio[this.$store.state.activeRowNumber];
-
-        // console.log("222", this.$store.state.chartData[this.$store.state.activeRowNumber].price);
+        // 获取新的价格
+        this.fetchAndProcessData();
 
         let newPrice =
-          this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-            .price[
-            this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-              .price.length - 1
-          ];
-
-        // console.log(
-        //   "111",
-        //   this.$store.state.dailyHighestPrice[this.$store.state.activeRowNumber]
-        // );
+          this.chartSecondData.price[this.chartSecondData.price.length - 1];
 
         // 获取新的交易量并累加
         let newVolume =
-          this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-            .tradeVolume[
-            this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-              .tradeVolume.length - 1
+          this.chartSecondData.tradeVolume[
+            this.chartSecondData.tradeVolume.length - 1
           ];
-        // console.log(
-        //   this.$store.state.chartData[this.$store.state.activeRowNumber]
-        //     .tradeVolume[
-        //     this.$store.state.chartData[this.$store.state.activeRowNumber]
-        //       .tradeVolume.length - 1
-        //   ]
-        // );
-
-        this.accumulatedVolume += newVolume;
+        accumulatedVolume += newVolume;
 
         // 每秒更新价格，每分钟更新时间和价格点
         if (currentSecond < 59) {
           // 替换当前分钟的最后一个价格
-          this.$store.state.chartData[this.$store.state.activeRowNumber].price[
-            this.$store.state.chartData[this.$store.state.activeRowNumber].price
-              .length - 1
-          ] = newPrice;
-          this.$store.state.chartData[
-            this.$store.state.activeRowNumber
-          ].tradeVolume[
-            this.$store.state.chartData[this.$store.state.activeRowNumber]
-              .tradeVolume.length - 1
-          ] = this.accumulatedVolume;
-          // console.log(currentSecond);
+          this.chartData.price[this.chartData.price.length - 1] = newPrice;
+          this.chartData.tradeVolume[this.chartData.tradeVolume.length - 1] =
+            accumulatedVolume;
           currentSecond++;
         } else {
           // 一分钟结束，更新时间标签和价格点
-          // console.log(
-          //   this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-          //     .times[
-          //     this.$store.state.chartSecondData[
-          //       this.$store.state.activeRowNumber
-          //     ].times.length - 1
-          //   ]
-          // );
           const newTime = this.getNextMinute(
-            this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-              .times[
-              this.$store.state.chartSecondData[
-                this.$store.state.activeRowNumber
-              ].times.length - 1
-            ]
+            this.chartSecondData.times[this.chartSecondData.times.length - 1]
           );
-          this.$store.state.chartData[
-            this.$store.state.activeRowNumber
-          ].times.push(newTime);
-          this.$store.state.chartData[
-            this.$store.state.activeRowNumber
-          ].price.push(newPrice);
-          this.$store.state.chartData[
-            this.$store.state.activeRowNumber
-          ].tradeVolume.push(this.accumulatedVolume); // 添加累计交易量
+          this.chartData.times.push(newTime);
+          this.chartData.price.push(newPrice);
+          this.chartData.tradeVolume.push(accumulatedVolume); // 添加累计交易量
 
           // 重置秒数和累计交易量
           currentSecond = 0;
-          this.accumulatedVolume = 0;
-          this.$store.state.chartSecondData[
-            this.$store.state.activeRowNumber
-          ].times = [];
-          this.$store.state.chartSecondData[
-            this.$store.state.activeRowNumber
-          ].price = [];
-          this.$store.state.chartSecondData[
-            this.$store.state.activeRowNumber
-          ].tradeVolume = [];
+          accumulatedVolume = 0;
+          this.chartSecondData.times = [];
+          this.chartSecondData.price = [];
+          this.chartSecondData.tradeVolume = [];
         }
 
         // 更新图表
         this.updateChart();
       }, 1000);
     },
-    async getCurrentDelegate() {
+    async getCurrentOrders() {
       try {
-        const response = await axios.post(
-          "http://localhost:5000/getCurrentDelegate",
-          {
-            userId: this.$store.state.activeUserId,
-            futureId: this.$store.state.activeRowNumber,
-          }
+        const response = await axios.get(
+          "http://localhost:5000/getCurrentOrders"
         );
-        const CurrentDelegateData = response.data.map((data) => ({
-          delegateId: data.delegateId,
-          delegateTime: data.delegateTime,
-          attribute: data.attribute,
-          delegatePrice: data.delegatePrice,
-          status: data.status,
-          amount: data.amount,
+        const responseData = response.data;
+        const CurrentPositionData = responseData.map((data) => ({
+          type: data.type,
+          Date: data.Date,
+          Attribute: data.Attribute,
+          Price: data.Price,
+          Status: data.Status,
+          Quantity: data.Quantity,
+          // 其他需要的字段
         }));
-        this.CurrentDelegateData = CurrentDelegateData;
+        this.CurrentPositionData = CurrentPositionData;
       } catch (error) {
         console.error("Error getting current positions:", error);
       }
     },
 
-    async getHistoricalDelegate() {
+    async getHistoricalOrders() {
       try {
-        const response = await axios.post(
-          "http://localhost:5000/getHistoricalDelegate",
-          {
-            userId: this.$store.state.activeUserId,
-            futureId: this.$store.state.activeRowNumber,
-          }
+        const response = await axios.get(
+          "http://localhost:5000/getHistoricalOrders"
         );
-        const HistoricalDelegateData = response.data.map((data) => ({
-          delegateId: data.delegateId,
-          delegateTime: data.delegateTime,
-          attribute: data.attribute,
-          delegatePrice: data.delegatePrice,
-          status: data.status,
-          amount: data.amount,
+        const responseData = response.data;
+        const HistoricalPositionData = responseData.map((data) => ({
+          type: data.type,
+          Date: data.Date,
+          Attribute: data.Attribute,
+          Price: data.Price,
+          Status: data.Status,
+          Quantity: data.Quantity,
+          // 其他需要的字段
         }));
-        this.HistoricalDelegateData = HistoricalDelegateData;
+        this.HistoricalPositionData = HistoricalPositionData;
       } catch (error) {
-        console.error("Error getting Historical positions:", error);
+        console.error("Error getting historical positions:", error);
       }
     },
 
@@ -949,79 +849,31 @@ export default {
     //随机产生的时间数据，仅供前端测试所用
     generateRandomHour() {
       const times = [];
-      const currentDate = new Date(); // Get the current date and time
-
-      for (let minute = 0; minute < 60; minute++) {
-        // Subtract minutes from the current time
-        const time = new Date(currentDate.getTime() - minute * 60000);
-        const hour = time.getHours();
-        const minuteStr = time.getMinutes();
-
-        // Format the time strings
-        const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
-        const formattedMinuteStr =
-          minuteStr < 10 ? `0${minuteStr}` : `${minuteStr}`;
-
-        // Push the formatted time string into the times array
-        times.unshift(`${hourStr}:${formattedMinuteStr}`); // Use unshift to add to the beginning
+      for (let hour = 0; hour < 1; hour++) {
+        for (let minute = 0; minute < 60; minute++) {
+          const hourStr = hour < 10 ? `0${hour}` : `${hour}`;
+          const minuteStr = minute < 10 ? `0${minute}` : `${minute}`;
+          times.push(`${hourStr}:${minuteStr}`);
+        }
       }
-
       return times;
     },
-
     //随机产生的期货价格数据，仅供前端测试所用
     generateStockData() {
       const data = [];
-      if (this.$store.state.activeRowNumber == 0) {
-        // console.log(
-        //   "----------------------------------------------------------------"
-        // );
-        let price = 4970;
-        for (let i = 0; i < 1 * 60; i++) {
-          const change = Math.random() * 100 - 50;
-          price += change;
+      let price = 4970;
+      for (let i = 0; i < 1 * 60; i++) {
+        const change = Math.random() * 100 - 50;
+        price += change;
 
-          // 确保价格在指定范围内波动
-          if (price < 4920) {
-            price = 4920;
-          } else if (price > 5020) {
-            price = 5020;
-          }
-
-          data.push(Math.round(price * 100) / 100);
+        // 确保价格在指定范围内波动
+        if (price < 4920) {
+          price = 4920;
+        } else if (price > 5020) {
+          price = 5020;
         }
-      } else if (this.$store.state.activeRowNumber == 1) {
-        let price = 4450; // 将初始价格设为 4450，在指定范围内
-        for (let i = 0; i < 60; i++) {
-          // 60个数据点
-          const change = Math.random() * 600 - 300; // 改变值在 -300 到 300 之间
-          price += change;
 
-          // 确保价格在指定范围内波动
-          if (price < 4300) {
-            price = 4300;
-          } else if (price > 4600) {
-            price = 4600;
-          }
-
-          data.push(Math.round(price * 100) / 100);
-        }
-      } else if (this.$store.state.activeRowNumber == 2) {
-        let price = 14500; // 将初始价格设为 14500，在指定范围内
-        for (let i = 0; i < 60; i++) {
-          // 60个数据点
-          const change = Math.random() * 6000 - 3000; // 改变值在 -3000 到 3000 之间
-          price += change;
-
-          // 确保价格在指定范围内波动
-          if (price < 13000) {
-            price = 13000;
-          } else if (price > 16000) {
-            price = 16000;
-          }
-
-          data.push(Math.round(price * 100) / 100);
-        }
+        data.push(Math.round(price * 100) / 100);
       }
       return data;
     },
@@ -1059,8 +911,7 @@ export default {
         },
         xAxis: {
           type: "category",
-          data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-            .times,
+          data: this.chartData.times,
           axisLine: {
             lineStyle: {
               color: "#b7bdc6", // 设置坐标轴线的颜色
@@ -1087,13 +938,7 @@ export default {
                 color: "#1e2227",
               },
             },
-            min:
-              Math.min(
-                ...this.$store.state.chartData[
-                  this.$store.state.activeRowNumber
-                ].price
-              ) - 100,
-            // min: 4850,
+            min: Math.min(...this.chartData.price) - 100,
           },
           {
             type: "value",
@@ -1105,20 +950,14 @@ export default {
             splitLine: {
               show: false, // 可根据需要决定是否显示网格线
             },
-            max:
-              Math.max(
-                ...this.$store.state.chartData[
-                  this.$store.state.activeRowNumber
-                ].tradeVolume
-              ) * 5,
+            max: Math.max(...this.chartData.tradeVolume) * 5,
           },
         ],
         series: [
           {
             name: "价格",
             type: "line",
-            data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-              .price,
+            data: this.chartData.price,
             lineStyle: {
               color: "#f0b90b",
             },
@@ -1143,16 +982,13 @@ export default {
           {
             name: "交易量",
             type: "bar",
-            data: this.$store.state.chartData[this.$store.state.activeRowNumber]
-              .tradeVolume, // 新编写的交易量数据生成函数
+            data: this.chartData.tradeVolume, // 新编写的交易量数据生成函数
             symbol: "none",
             itemStyle: {
               color: (params) => {
                 const dataIndex = params.dataIndex;
                 // 访问Vue组件上下文，通过箭头函数
-                const priceData =
-                  this.$store.state.chartData[this.$store.state.activeRowNumber]
-                    .price;
+                const priceData = this.chartData.price;
                 if (
                   dataIndex > 0 &&
                   priceData[dataIndex] > priceData[dataIndex - 1]

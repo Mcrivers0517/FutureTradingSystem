@@ -5,6 +5,8 @@ import LoginFile from '../pages/LoginFile.vue';
 import MarketQuotes from '../pages/MarketQuotes.vue';
 import RegisterFile from '../pages/RegisterFile.vue';
 import StockTrendChart from '../pages/StockTrendChart.vue';
+import CurrentDelegate from '../pages/CurrentDelegate.vue';
+import HistoricalDelegate from '../pages/HistoricalDelegate.vue';
 import TestFunction from '../pages/TestFunction.vue';
 
 Vue.use(VueRouter);
@@ -40,6 +42,16 @@ const router = new VueRouter({
             path: '/TestFunction',
             name: 'TestFunction',
             component: TestFunction
+        },
+        {
+            path: '/CurrentDelegate',
+            name: 'CurrentDelegate',
+            component: CurrentDelegate
+        },
+        {
+            path: '/HistoricalDelegate',
+            name: 'HistoricalDelegate',
+            component: HistoricalDelegate
         }
     ]
 })

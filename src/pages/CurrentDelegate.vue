@@ -10,7 +10,7 @@
           />
         </div>
         <el-menu
-          default-active="3"
+          default-active="2-1"
           class="el-menu-demo"
           mode="horizontal"
           @select="handleSelect"
@@ -41,33 +41,36 @@
       <el-container class="content-container">
         <el-main class="main">
           <el-table
-            :data="marketData"
+            :data="CurrentDelegateData"
             class="futures-table"
             :cell-style="tableRowClassName"
-            :default-sort="{ prop: 'type', order: 'ascending' }"
+            :default-sort="{ prop: 'futureId', order: 'ascending' }"
             @row-click="handleRowClick"
           >
-            <el-table-column prop="type" label="品种" :width="80" sortable>
+            <el-table-column prop="futureId" label="品种"> </el-table-column>
+            <el-table-column prop="delegateId" label="流水号">
             </el-table-column>
-            <el-table-column prop="price" label="现价" sortable>
+            <el-table-column prop="delegateTime" label="日期">
             </el-table-column>
-            <el-table-column prop="tradeVolume" label="成交量" sortable>
+            <el-table-column prop="attribute" label="属性"> </el-table-column>
+            <el-table-column prop="delegatePrice" label="价格">
             </el-table-column>
-            <el-table-column prop="dailyOpenPrice" label="日开仓价" sortable>
+            <el-table-column prop="status" label="状态"> </el-table-column>
+            <el-table-column prop="amount" label="数量"> </el-table-column>
+            <el-table-column label="金额">
+              <template slot-scope="scope">
+                {{ scope.row.delegatePrice * scope.row.amount }}
+              </template>
             </el-table-column>
-            <el-table-column prop="dailyHighestPrice" label="日最高价" sortable>
+            <el-table-column label="撤单" :width="60">
+              <template slot-scope="scope">
+                <el-button
+                  class="revoke"
+                  @click="cancelDelegate(scope.row)"
+                  icon="el-icon-delete-solid"
+                ></el-button>
+              </template>
             </el-table-column>
-            <el-table-column prop="dailyLowestPrice" label="日最低价" sortable>
-            </el-table-column>
-            <el-table-column prop="dailyChange" label="价格浮动" sortable>
-            </el-table-column>
-            <el-table-column
-              prop="dailyChangeRatio"
-              label="价格浮动比"
-              :width="175"
-              sortable
-              :formatter="formatDailyChangeRatio"
-            ></el-table-column>
           </el-table>
         </el-main>
       </el-container>
@@ -76,48 +79,64 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     return {
-      marketData: [],
+      CurrentDelegateData: [],
     };
   },
   mounted() {
-    setTimeout(() => {
-      this.getMarketData();
-    }, 1500); // 等待1.5秒钟后调用 getMarketData 方法(等待this.$store.state.dailyChange 等属性正确初始化)
+    this.getCurrentDelegate();
   },
   methods: {
-    getMarketData() {
-      console.log(this.$store.state.dailyOpenPrice);
-      for (let i = 0; i < this.$store.state.chartSecondData.length; i++) {
-        let type = "";
-        if (i === 0) {
-          type = "金";
-        } else if (i === 1) {
-          type = "银";
-        } else if (i === 2) {
-          type = "铝";
+    async cancelDelegate(row) {
+      console.log(row);
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/cancelDelegate",
+          {
+            delegateId: row.delegateId,
+          }
+        );
+        console.log(response);
+        if (response.data.result == "撤销订单成功") {
+          console.log(111111);
+          alert(response.data.result);
+          // 从 CurrentDelegateData 中移除对应的订单
+          this.CurrentDelegateData = this.CurrentDelegateData.filter(
+            (delegate) => delegate.delegateId !== row.delegateId
+          );
+        } else {
+          alert(response.data.result);
         }
-
-        this.marketDataObject = {
-          type, // 设置不同的 type 值
-          price:
-            this.$store.state.chartSecondData[i].price[
-              this.$store.state.chartSecondData[i].price.length - 1
-            ],
-          tradeVolume:
-            this.$store.state.chartSecondData[i].tradeVolume[
-              this.$store.state.chartSecondData[i].tradeVolume.length - 1
-            ],
-          dailyOpenPrice: this.$store.state.dailyOpenPrice[i],
-          dailyHighestPrice: this.$store.state.dailyHighestPrice[i],
-          dailyLowestPrice: this.$store.state.dailyLowestPrice[i],
-          dailyChange: this.$store.state.dailyChange[i],
-          dailyChangeRatio: this.$store.state.dailyChangeRatio[i],
-        };
-        this.marketData.push(this.marketDataObject);
-        console.log(this.marketData);
+      } catch (error) {
+        console.error("Error during cancel operation:", error);
+      }
+    },
+    async getCurrentDelegate() {
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/getCurrentDelegate",
+          {
+            userId: this.$store.state.activeUserId,
+            futureId: -1,
+          }
+        );
+        console.log(response.data);
+        const CurrentDelegateData = response.data.map((data) => ({
+          futureId: data.futureId,
+          delegateId: data.delegateId,
+          delegateTime: data.delegateTime,
+          attribute: data.attribute,
+          delegatePrice: data.delegatePrice,
+          status: data.status,
+          amount: data.amount,
+        }));
+        this.CurrentDelegateData = CurrentDelegateData;
+        console.log("CurrentDelegateData", this.CurrentDelegateData);
+      } catch (error) {
+        console.error("Error getting current positions:", error);
       }
     },
 
@@ -128,10 +147,10 @@ export default {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
       if (index === "1") {
         this.$router.push("/"); // 跳转到主页
-      } else if (index === "2-1") {
-        this.$router.push("/CurrentDelegate"); // 跳转到当前委托页
       } else if (index === "2-2") {
         this.$router.push("/HistoricalDelegate"); // 跳转到历史委托页
+      } else if (index === "3") {
+        this.$router.push("/MarketQuotes"); // 跳转到行情页
       } else if (index === "4") {
         this.$router.push("/message-center"); // 跳转到消息中心页
       }
@@ -250,5 +269,10 @@ export default {
   border-color: #e5c333;
   color: #181a20;
   border-radius: 4px;
+}
+.el-button.revoke {
+  background-color: #181a20;
+  color: #848e9c;
+  border: none;
 }
 </style>

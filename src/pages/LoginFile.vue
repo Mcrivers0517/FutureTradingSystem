@@ -90,6 +90,7 @@ export default {
 
           if (result.isSuccess) {
             alert("登录成功");
+            this.$store.state.activeUserId = result.userID;
             this.$router.push(
               `/?username=${request.username}&userID=${result.userID}`
             );

@@ -57,19 +57,28 @@
               <span>{{ username }}</span>
             </div>
             <div class="user-id">
-              <span>{{ userid }}</span>
+              <span>{{ $store.state.activeUserId }}</span>
             </div>
           </div>
           <div class="main-content" id="main-content-1">
             <div class="assets-container">
               <span class="assets">总资产估值</span>
               <div class="assets-values">
-                <span class="assets-value">{{ totalAssets }}</span>
+                <span class="assets-value">{{ totalAssets.toFixed(2) }}</span>
                 <span class="assets-currency">RMB</span>
               </div>
               <div class="profit-and-loss">
-                <span class="profit-and-loss-title">今日盈亏</span>
-                <span class="profit-and-loss-value">{{ dailyProfitLoss }}</span>
+                <span class="profit-and-loss-title">总盈亏</span>
+                <span class="profit-and-loss-value">{{
+                  totalProfitLoss.toFixed(2)
+                }}</span>
+                <span class="profit-and-loss-value"
+                  >({{ totalProfitLossRatio.toFixed(2) }}%)
+                </span>
+              </div>
+              <div class="profit-and-loss">
+                <span class="profit-and-loss-title">账户余额</span>
+                <span class="deposit">{{ deposit.toFixed(2) }} RMB</span>
               </div>
             </div>
           </div>
@@ -81,25 +90,20 @@
                 class="posi-table"
                 :cell-style="tableRowClassName"
               >
-                <el-table-column prop="type" label="品种" :width="80">
+                <el-table-column prop="futureId" label="品种" :width="80">
                 </el-table-column>
-                <el-table-column prop="BuyOrSell" label="买/卖">
+                <el-table-column prop="attribute" label="属性">
                 </el-table-column>
-                <el-table-column prop="Position" label="持仓">
+                <el-table-column prop="amount" label="数量"> </el-table-column>
+                <el-table-column prop="currentPrice" label="现价">
                 </el-table-column>
-                <el-table-column prop="FloatingProfitOrLoss" label="浮动盈亏">
+                <el-table-column prop="costPrice" label="成本价">
                 </el-table-column>
-                <el-table-column prop="ProfitOrLossRatio" label="盈亏比率">
+                <el-table-column prop="ProfitLoss" label="浮动盈亏">
                 </el-table-column>
-                <el-table-column prop="AverageOpeningPrice" label="开仓均价">
+                <el-table-column prop="ProfitLossRatio" label="浮动盈亏率">
                 </el-table-column>
-                <el-table-column prop="CurrentPrice" label="现价">
-                </el-table-column>
-                <el-table-column
-                  prop="LatestTransactionTime"
-                  label="最新成交时间"
-                  :width="175"
-                >
+                <el-table-column prop="LastUpdated" label="最近成交时间">
                 </el-table-column>
               </el-table>
             </div>
@@ -116,18 +120,20 @@ export default {
   data() {
     return {
       PositionData: [],
-      //avatarUrl: require("@/assets/default-avatar.png"),
       avatarUrl: "",
       username: this.$route.query.username,
       userid: this.$route.query.userID,
       totalAssets: "totalAssets",
-      dailyProfitLoss: "dailyProfitLoss",
+      totalProfitLoss: "totalProfitLoss",
+      totalProfitLossRatio: "totalProfitLossRatio",
+      deposit: "deposit",
     };
   },
   created() {
     this.getPositions();
     this.getUserInfo();
     this.fetchAvatar();
+    this.getAssets();
   },
   methods: {
     logout() {
@@ -136,9 +142,9 @@ export default {
     handleSelect(index) {
       // 处理菜单项点击事件，你可以在这里进行路由跳转
       if (index === "2-1") {
-        this.$router.push("/StockTrendChart"); // 跳转到当前委托页
+        this.$router.push("/CurrentDelegate"); // 跳转到当前委托页
       } else if (index === "2-2") {
-        this.$router.push("/StockTrendChart"); // 跳转到历史委托页
+        this.$router.push("/HistoricalDelegate"); // 跳转到历史委托页
       } else if (index === "3") {
         this.$router.push("/MarketQuotes"); // 跳转到行情页
       } else if (index === "4") {
@@ -150,20 +156,42 @@ export default {
     },
     async getPositions() {
       try {
-        const response = await axios.get("localhost:5000/getPositions");
-        const responseData = response.data;
-        const tableData = responseData.Position;
-        const PositionData = tableData.map((data) => ({
-          type: data.type, //期货品种
-          BuyOrSell: data.BuyOrSell, //买/卖
-          Position: data.Position, //持仓
-          FloatingProfitOrLoss: data.FloatingProfitOrLoss, //浮动盈亏
-          ProfitOrLossRatio: data.ProfitOrLossRatio, //盈亏比率
-          AverageOpeningPrice: data.AverageOpeningPrice, //开仓均价
-          CurrentPrice: data.CurrentPrice, //现价
-          LatestTransactionTime: data.LatestTransactionTime, //最新成交时间
+        const userId = this.$store.state.activeUserId; // 获取用户ID
+        const response = await axios.post("http://localhost:5000/getPosition", {
+          userId,
+        });
+
+        console.log(response.data);
+        const PositionData = response.data.map((data) => ({
+          futureId: data.futureId, // 期货品种
+          attribute: data.attribute, // 买/卖
+          amount: data.amount, // 持仓
+          currentPrice: data.currentPrice, // 浮动盈亏
+          costPrice: data.costPrice, // 盈亏比率
+          ProfitLoss: data.profitLoss, // 开仓均价
+          ProfitLossRatio: data.profitLossRatio, // 现价
+          LastUpdated: data.lastUpdated, // 最新成交时间
         }));
         this.PositionData = PositionData;
+        console.log("PositionData", this.PositionData);
+      } catch (error) {
+        console.error("Data Acquisition Failure:", error);
+      }
+    },
+
+    async getAssets() {
+      try {
+        const userId = this.$store.state.activeUserId; // 设置 userId
+        console.log(userId);
+        const response = await axios.post("http://localhost:5000/getAssets", {
+          userId,
+        });
+        const responseData = response.data;
+        this.totalAssets = responseData.currentCapital; // 用户总资产
+        this.totalProfitLoss = responseData.totalProfitLoss; // 总计盈亏
+        this.totalProfitLossRatio = responseData.totalProfitLossRatio;
+        this.deposit = responseData.deposit;
+        console.log(response.data);
       } catch (error) {
         console.error("Data Acquisition Failure:", error);
       }
@@ -176,7 +204,7 @@ export default {
         this.username = responseData.username; //用户名
         this.userid = responseData.userid; //用户id
         this.totalAssets = responseData.totalAssets; //用户总资产
-        this.dailyProfitLoss = response.dailyProfitLoss; //今日盈亏
+        this.totalProfitLoss = response.totalProfitLoss; //今日盈亏
       } catch (error) {
         console.error("Data Acquisition Failure:", error);
       }
@@ -361,6 +389,13 @@ export default {
   font-weight: 600;
   margin-left: 1%;
   color: #f6465d;
+}
+.deposit {
+  margin-top: 1.6%;
+  font-size: 15px;
+  font-weight: 600;
+  margin-left: 1%;
+  color: #d9d9d9;
 }
 .custom-avatar {
   border-radius: 10px;
