@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetAssetsResponse
 {
+    private String username;
     private double deposit;
     private double currentCapital;
     private double totalProfitLoss;

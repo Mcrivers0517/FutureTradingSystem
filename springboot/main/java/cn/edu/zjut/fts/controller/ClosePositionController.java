@@ -42,14 +42,17 @@ public class ClosePositionController
     @Autowired
     private UserMapper userMapper;
 
-    @PostMapping("/ClosePosition")
-    public void closePosition(@RequestBody ClosePositionRequest request)
+    @PostMapping("/closePosition")
+    public boolean closePosition(@RequestBody ClosePositionRequest request)
             throws ParseException
     {
+//        System.out.println(request);
+        //获取持仓表id和平仓数量closeAmount
+//        try
+//        {
         System.out.println(request);
-        //获取持仓表id和平仓数量sellAmount
         int positionId = request.getPositionId();
-        int sellAmount = request.getSellAmount();
+        int closeAmount = request.getCloseAmount();
         String dateTimeString = request.getDelegateTime();
 
         //时间的格式处理
@@ -70,10 +73,10 @@ public class ClosePositionController
 
         //获取持仓表中对应id的数据
         Position position = positionMapper.getPositionById(positionId);
-        System.out.println(position);
+//        System.out.println(position);
 
-        //根据positionId找到对应的持仓记录对Amount进行减去sellAmount操作
-        positionMapper.updateAmountPositionById(positionId, sellAmount);
+        //根据positionId找到对应的持仓记录对Amount进行减去closeAmount操作
+        positionMapper.updateAmountPositionById(positionId, closeAmount);
 
         //添加平仓的委托记录
         Delegate delegate = new Delegate();
@@ -90,7 +93,7 @@ public class ClosePositionController
         }
         //设置status,amount,delegatePrice,delegateTime,FutureId,UserId
         delegate.setStatus("已成");
-        delegate.setAmount(sellAmount);
+        delegate.setAmount(closeAmount);
         delegate.setDelegatePrice(position.getCurrentPrice());
         delegate.setDelegateTime(formattedDateTime);
         delegate.setFutureId(position.getFutureId());
@@ -127,10 +130,17 @@ public class ClosePositionController
         transactionMapper.insertTransaction(transaction);
 
         //更新用户钱包
-        double userProfit = sellAmount*position.getProfitLoss()-25;
-        double productProfit = sellAmount*position.getEntryPrice()*(-1);
-        System.out.println(userProfit+"   "+productProfit);
-        userMapper.updateDepositByUserID(position.getUserId(),userProfit);
-        userMapper.updateInitialCapitalByUserID(position.getUserId(),productProfit);
+        double userProfit = closeAmount * position.getProfitLoss() - 25;
+        double productProfit = closeAmount * position.getEntryPrice() * (-1);
+        System.out.println(userProfit + "   " + productProfit);
+        userMapper.updateDepositByUserID(position.getUserId(), userProfit);
+        userMapper.updateInitialCapitalByUserID(position.getUserId(), productProfit);
+
+        return true;
+//        }
+//        catch (Exception e)
+//        {
+//            return false;
+//        }
     }
 }

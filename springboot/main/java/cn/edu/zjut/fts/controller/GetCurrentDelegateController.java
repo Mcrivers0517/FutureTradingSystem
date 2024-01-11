@@ -21,7 +21,7 @@ public class GetCurrentDelegateController
     @PostMapping("/getCurrentDelegate")
     public List<Delegate> selectCurrentDelegate(@RequestBody GetCurrentDelegateRequest request)
     {
-        System.out.println(request.getFutureId());
+//        System.out.println(request.getFutureId());
         if (request.getFutureId() == -1)
         {
             return delegateMapper.selectAllCurrentDelegateById(request.getUserId());

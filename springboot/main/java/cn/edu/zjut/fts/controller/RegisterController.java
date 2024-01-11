@@ -1,48 +1,37 @@
 package cn.edu.zjut.fts.controller;
 
-import cn.edu.zjut.fts.entity.User;
+import cn.edu.zjut.fts.entity.RegisterRequest;
 import cn.edu.zjut.fts.mapper.UserMapper;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@Api(tags = "撤销委托订单模块")
+@CrossOrigin
 @RestController
-public class RegisterController {
+public class RegisterController
+{
     @Autowired
     private UserMapper userMapper;
 
-//查询所有用户
-//    @GetMapping("/user")
-//    public  List query(){
-//
-//        List<User> list = userMapper.selectall();
-//        System.out.println(list);
-//        return list;
-//    }
+    @PostMapping("/register")
+    public boolean insert(@RequestBody RegisterRequest request)
+    {
 
-@PostMapping("/register")
-public String insert(@RequestParam("username") String username,
-                     @RequestParam("password") String password) {
-    try {
-        // 检查两次输入的密码是否相同
-
-        // 创建 User 对象并设置属性
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(password);
+        System.out.println(request);
+        String username = request.getUsername();
+        String password = request.getPassword();
 
         // 直接保存用户信息到数据库
-        int result = userMapper.insert(user);
-        if (result > 0) {
-            return "注册成功";
-        } else {
-            return "注册失败";
+        int result = userMapper.insertUser(username, password);
+        if (result > 0)
+        {
+            return true;
         }
-    } catch (Exception e) {
-        // 适当处理异常（记录或返回有意义的错误消息）
-        return "注册过程中发生错误";
+        else
+        {
+            return false;
+        }
     }
-}
-
-
 }
 

@@ -40,6 +40,8 @@ public class GetFuturesDataController
     public List<Futures> getFuturesData(@RequestBody GetFutureDataRequest request)
             throws ParseException
     {
+
+
         //0.获取前端信息
         List<String> tableNames = futuresMapper.selectAllTableName();
 
@@ -80,13 +82,14 @@ public class GetFuturesDataController
                 currentRowList.add(1);
             }
 
+
 //            System.out.println(tableName);
             Futures futures = futuresMapper.selectAllByFutureAndId(tableName, currentRowList.get(currentIndex));
 
 //            System.out.println(currentRowList.get(currentIndex));
 
             // 读第一条数据时，初始化开盘价，以及当日最高价和当日最低价
-            if (currentRowList.get(currentIndex) == 1)
+            if (currentRowList.get(currentIndex) == 1) // 1代表数据表中id为1的条目，即第1条数据
             {
                 futures.setDailyOpenPrice(futures.getPrice());
                 futures.setDailyHighestPrice(futures.getPrice());
@@ -95,7 +98,7 @@ public class GetFuturesDataController
                 futuresMapper.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
             }
             // 时间变为0点时，重新设置开盘价，并重新初始化当日最高价和当日最低价
-            else if(formattedTime.equals("00:00:00"))
+            else if (formattedTime.equals("00:00:00"))
             {
                 futures.setDailyOpenPrice(futures.getPrice());
                 futures.setDailyHighestPrice(futures.getPrice());
@@ -127,6 +130,7 @@ public class GetFuturesDataController
             }
             // 更新数据库中的每日最高价和每日最低价
             futuresMapper.updateDailyPrice(futures.getDailyHighestPrice(), futures.getDailyLowestPrice(), currentIndex + 1);
+            futuresMapper.updateCurrentPrice(futures.getPrice(), currentIndex + 1);
 
             futures.setDailyChange(futures.getPrice() - futures.getDailyOpenPrice());
             futures.setDailyChangeRatio(futures.getDailyChange() / futures.getDailyOpenPrice());
@@ -135,19 +139,23 @@ public class GetFuturesDataController
 //            futures.setVolume(futures.getVolume());
 
 
-
             // 2.更新委托表
             //2.0获取成交当前价格，当前时间
             double currentPrice = futures.getPrice();
+
             //2.1.获取userid的futureid种类的已委记录
             List<Delegate> delegates = delegateMapper.selectDelegatesByFutureAndUser(currentIndex);
             boolean whetherToUpdate = false;    //2.2记录是否要更新表单
             // 遍历委托表，寻找达到成交要求的委托订单记录
             for (Delegate delegate : delegates)
             {
+//                System.out.println("delegate" + delegate);
                 //2.3更新委托表
                 if (delegate.getAttribute().equals("buy2open"))
                 {
+//                    System.out.println("DelegatePrice" + delegate.getDelegatePrice());
+//                    System.out.println("currentPrice" + currentPrice);
+
                     if (delegate.getDelegatePrice() >= currentPrice)
                     {
                         delegateMapper.updateDelegateStatusToDone(delegate.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
@@ -163,10 +171,14 @@ public class GetFuturesDataController
                     }
                 }
 //                System.out.println(delegate);
+                futures.setTransacted(false);
 
                 // 3.如果交易达成，那么更新成交表transactionTable和持仓表positionTable中的记录
                 if (whetherToUpdate)
                 {
+
+                    futures.setTransacted(true);
+                    futures.setTransactedDelegateId(delegate.getDelegateId());
 
                     // 设置交割日期
                     int dayOfMonth = date.getDayOfMonth();
@@ -197,7 +209,8 @@ public class GetFuturesDataController
                     transactionMapper.insertTransaction(transaction);
 
                     //4.更新持仓表
-                    Position position = positionMapper.selectByFutureNameAndAttribute(currentIndex, delegate.getUserId(), delegate.getAttribute());
+                    Position position = positionMapper.selectByFutureIdAndAttribute(currentIndex, delegate.getUserId(), delegate.getAttribute());
+//                    System.out.println(position);
                     if (position != null)
                     {
                         double originalCost = position.getCostPrice();
@@ -205,10 +218,10 @@ public class GetFuturesDataController
                         position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
                         position.setCurrentPrice(currentPrice);
                         position.setLastUpdated(formattedDateTime);
-                        position.setProfitLoss((currentPrice - position.getCostPrice() * position.getAmount())); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
-                        position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
                         double totalCost = originalCost * originalAmount + position.getCurrentPrice() * delegate.getAmount() + transaction.getServiceFee(); // 总成本 = 原始成本 × 原始数量 + 新成本 × 新数量 + 手续费
                         position.setCostPrice(totalCost / position.getAmount());    // 新的持仓成本 = 总成本 / 总数量
+                        position.setProfitLoss((currentPrice - position.getCostPrice()) * position.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
+                        position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
                         positionMapper.updatePosition(position);
                     }
                     else
@@ -224,10 +237,20 @@ public class GetFuturesDataController
                         position.setCostPrice(currentPrice);
                         position.setEntryDate(formattedDateTime);
                         position.setLastUpdated(formattedDateTime);
+//                        System.out.println("attribute:" + delegate.getAttribute());
                         position.setAttribute(delegate.getAttribute());
+//                        System.out.println("position:" + position);
                         positionMapper.insertPosition(position);
                     }
                 }
+            }
+            List<Position> Positions = positionMapper.selectAPositionsByFutureId(currentIndex);
+            for (Position position : Positions)
+            {
+                position.setCurrentPrice(currentPrice);
+                position.setProfitLoss((currentPrice - position.getCostPrice()) * position.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
+                position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
+                positionMapper.updatePosition(position);
             }
             currentIndex++;
 

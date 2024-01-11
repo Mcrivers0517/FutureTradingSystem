@@ -18,7 +18,7 @@ public class GetAssetsController
 {
 
     @Autowired
-    private UserMapper usermapper;
+    private UserMapper userMapper;
 
     @Autowired
     private PositionMapper positionMapper;
@@ -32,13 +32,14 @@ public class GetAssetsController
 
         //获取保证金
         GetAssetsResponse result = new GetAssetsResponse();
-        result.setDeposit(usermapper.getDeposit(userId));
+        result.setDeposit(userMapper.getDeposit(userId));
+        result.setUsername(userMapper.selectUsernameByUserId(userId));
 
         //获取userid的position属性
-        double chushizichan = 0;
+        double initialCapital;
         double currentCapital = 0;
         double totalProfitLoss = 0;
-        double totalProfitLossRatio = 0;
+        double totalProfitLossRatio;
         List<Position> positionList = positionMapper.getPositionByUserId(userId);
         System.out.println("----------------------------" + positionList);
         for (Position position : positionList)
@@ -47,8 +48,15 @@ public class GetAssetsController
             totalProfitLoss += position.getProfitLoss();
             System.out.println("----------------------------" + position);
         }
-        chushizichan = usermapper.getInitialCapital(userId);
-        totalProfitLossRatio = totalProfitLoss / chushizichan * 100;
+        initialCapital = userMapper.getInitialCapital(userId);
+        if (initialCapital != 0)
+        {
+            totalProfitLossRatio = totalProfitLoss / initialCapital * 100;
+        }
+        else
+        {
+            totalProfitLossRatio = 0;
+        }
         //设置属性
         result.setCurrentCapital(currentCapital);
         result.setTotalProfitLoss(totalProfitLoss);

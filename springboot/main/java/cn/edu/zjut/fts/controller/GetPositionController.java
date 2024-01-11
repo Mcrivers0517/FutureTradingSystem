@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "获取历史订单模块")
+@Api(tags = "获取持仓")
 @CrossOrigin
 @RestController
 public class GetPositionController

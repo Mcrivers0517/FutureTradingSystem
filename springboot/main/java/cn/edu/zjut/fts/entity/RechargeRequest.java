@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RechargeRequest
 {
-    private int userid;
+    private int userId;
     private double rechargeAmount;
 }

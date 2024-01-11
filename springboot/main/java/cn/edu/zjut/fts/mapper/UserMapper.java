@@ -12,14 +12,17 @@ public interface UserMapper extends BaseMapper<User>
     //查询所有用户
 
     @Select("select * from user")
-    public List<User> selectall();
+    List<User> selectall();
 
     //插入操作，用于注册实现
-    @Insert("insert into user values (#{id},#{username},#{password},#{avatarUrl})")
-    int insert(User user);
+    @Insert("insert into user (username, password) values (#{username},#{password})")
+    int insertUser(@Param("username") String username, @Param("password") String password);
 
     @Select("SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS username_exists\n" + "FROM User\n" + "WHERE username = #{username}")
     Integer selectIfExists(User user);
+
+    @Select("select username from user where userid = #{userId}")
+    String selectUsernameByUserId(@Param("userId") int userId);
 
 
     //查询操作，用于登录逻辑实现
@@ -37,13 +40,13 @@ public interface UserMapper extends BaseMapper<User>
 
     @Select("SELECT InitialCapital FROM user WHERE userid = #{userId}")
     double getInitialCapital(@Param("userId") int userId);
+
     @Update("UPDATE user SET Deposit =Deposit + #{ProfitLoss} WHERE userid = #{UserID}")
-    int updateDepositByUserID(@Param("UserID") int UserID,@Param("ProfitLoss") double ProfitLoss);
+    int updateDepositByUserID(@Param("UserID") int UserID, @Param("ProfitLoss") double ProfitLoss);
 
     @Update("UPDATE user SET InitialCapital =InitialCapital + #{ProfitLoss} WHERE userid = #{UserID}")
-    int updateInitialCapitalByUserID(@Param("UserID") int UserID,@Param("ProfitLoss") double ProfitLoss);
+    int updateInitialCapitalByUserID(@Param("UserID") int UserID, @Param("ProfitLoss") double ProfitLoss);
 
-    @Update("UPDATE user SET Deposit =Deposit + #{rechargeAmount} WHERE userid = #{UserID}")
-    int recharge(@Param("UserID") int UserID,@Param("rechargeAmount") double rechargeAmount);
-
+    @Update("UPDATE user SET Deposit = Deposit + #{rechargeAmount} WHERE userid = #{userId}")
+    int recharge(@Param("userId") int userId, @Param("rechargeAmount") double rechargeAmount);
 }

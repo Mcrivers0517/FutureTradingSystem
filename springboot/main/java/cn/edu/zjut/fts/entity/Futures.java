@@ -18,4 +18,6 @@ public class Futures
     private double dailyLowestPrice;
     private double dailyChange;
     private double dailyChangeRatio;
+    private boolean transacted;
+    private int transactedDelegateId;
 }

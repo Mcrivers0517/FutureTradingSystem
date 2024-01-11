@@ -20,7 +20,7 @@ public class GetHistoricalDelegateController
     @PostMapping("/getHistoricalDelegate")
     public List<Delegate> selectHistoricalDelegate(@RequestBody GetHistoricalDelegateRequest request)
     {
-        System.out.println(request);
+//        System.out.println(request);
         if (request.getFutureId() == -1)
         {
             return delegateMapper.selectAllHistoricalDelegateById(request.getUserId());

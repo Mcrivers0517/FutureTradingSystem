@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RechargeResult
+public class RegisterRequest
 {
-    private boolean result;
+    private String username;
+    private String password;
 }

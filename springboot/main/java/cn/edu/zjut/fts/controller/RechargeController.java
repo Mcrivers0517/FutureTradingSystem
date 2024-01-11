@@ -17,10 +17,10 @@ public class RechargeController
     private UserMapper userMapper;
 
     @PostMapping("/recharge")
-    public RechargeResult rechargeresult(@RequestBody RechargeRequest request) {
+    public RechargeResponse rechargeresult(@RequestBody RechargeRequest request) {
         System.out.println(request);
-        RechargeResult result = new RechargeResult(true);
-        userMapper.recharge(request.getUserid(),request.getRechargeAmount());
+        RechargeResponse result = new RechargeResponse(true);
+        userMapper.recharge(request.getUserId(),request.getRechargeAmount());
         return result;
     }
 }

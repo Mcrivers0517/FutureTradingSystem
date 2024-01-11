@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClosePositionRequest
+public class RechargeResponse
 {
-    int positionId;
-    int closeAmount;
-    String delegateTime;
+    private boolean result;
 }
-

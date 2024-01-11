@@ -25,10 +25,15 @@ public interface FuturesMapper extends BaseMapper<Futures>
     @Update("update futures set DailyHighestPrice = #{dailyHighestPrice}, DailyLowestPrice = #{dailyLowestPrice} where FutureID = #{futureId}")
     boolean updateDailyPrice(@Param("dailyHighestPrice") double dailyHighestPrice, @Param("dailyLowestPrice") double dailyLowestPrice, @Param("futureId") int futureId);
 
+    @Update("update futures set CurrentPrice = #{currentPrice} where FutureID = #{futureId}")
+    boolean updateCurrentPrice(@Param("currentPrice") double currentPrice, @Param("futureId") int futureId);
+
     @Select("select DailyOpenPrice from futures where FutureID = #{futureId}")
     double selectDailyOpenPriceByFutureId(@Param("futureId") int futureId);
+
     @Select("select DailyHighestPrice from futures where FutureID = #{futureId}")
     double selectDailyHighestPriceByFutureId(@Param("futureId") int futureId);
+
     @Select("select DailyLowestPrice from futures where FutureID = #{futureId}")
     double selectDailyLowestPriceByFutureId(@Param("futureId") int futureId);
 }
