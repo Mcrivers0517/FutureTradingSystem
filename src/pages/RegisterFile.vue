@@ -85,21 +85,18 @@ export default {
         password: this.password,
       };
 
-      axios
-        .post("http://localhost:5000/register", request)
-        .then((response) => {
-          const result = response.data;
-          console.log(result);
-          if (result.isSuccess) {
-            alert("注册成功，请返回登录界面登录");
-            this.$router.push("/Login");
-          } else {
-            alert("注册失败：该用户名已存在");
-          }
-        })
-        .catch((error) => {
-          console.error("注册请求失败", error);
-        });
+      console.log(request);
+
+      axios.post("http://localhost:5000/register", request).then((response) => {
+        const result = response.data;
+        console.log(result);
+        if (result) {
+          alert("注册成功，请返回登录界面登录");
+          this.$router.push("/Login");
+        } else {
+          alert("注册失败：该用户名已存在");
+        }
+      });
     },
   },
 };

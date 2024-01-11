@@ -18,16 +18,7 @@ new Vue({
   store,
   created()
   {
-    // this.$store.state.chartData[this.$store.state.activeRowNumber].times = this.generateRandomHour();
-    // this.$store.state.chartData[this.$store.state.activeRowNumber].price = this.generateStockData();
-    // this.$store.state.chartData[this.$store.state.activeRowNumber].tradeVolume = this.generateTradeVolumeData();
-
-    // this.startPriceDataFetch();
     this.fetchAndProcessData();
-    // this.timerId = setInterval(() =>
-    // {
-    //   this.fetchAndProcessData();
-    // }, 1000);
   },
   methods: {
     generateRandomHour()
@@ -169,6 +160,8 @@ new Vue({
           this.$store.state.chartSecondData[index].times.push(dateTimeString);
           this.$store.state.chartSecondData[index].price.push(response.data[index].price);
           this.$store.state.chartSecondData[index].tradeVolume.push(response.data[index].volume);
+          this.$store.state.transacted = response.data[index].transacted;
+          this.$store.state.transactedDelegateId = response.data[index].transactedDelegateId;
           if (this.$store.state.dailyOpenPrice.length < index + 1)
           {
             this.$store.state.dailyOpenPrice.push(response.data[index].dailyOpenPrice);
@@ -182,6 +175,14 @@ new Vue({
           this.$store.state.dailyLowestPrice[index] = response.data[index].dailyLowestPrice;
           this.$store.state.dailyChange[index] = response.data[index].dailyChange;
           this.$store.state.dailyChangeRatio[index] = response.data[index].dailyChangeRatio;
+
+          // console.log("transacted", this.$store.state.transacted);
+          // console.log("transactedDelegateId", this.$store.state.transactedDelegateId);
+
+          if (this.$store.state.transacted)
+          {
+            alert(`您的编号为${this.$store.state.transactedDelegateId}的订单已成交！`);
+          }
 
           // this.$store.state.dailyOpenPrice[index].push(response.data[index].dailyOpenPrice);
           // this.$store.state.dailyHighestPrice[index].push(response.data[index].dailyHighestPrice);

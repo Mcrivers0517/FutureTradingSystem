@@ -33,6 +33,8 @@ export default new Vuex.Store({
         tempVolume: [],
         activeRowNumber: 0,
         activeUserId: 0,
+        transacted: false,
+        transactedDelegateId: 0,
     },
     mutations: {
         // 在这里定义用于修改状态的 mutation

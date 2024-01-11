@@ -458,8 +458,8 @@ export default {
       try {
         const payload = {
           dateTimeString: this.dateTimeString,
-          futureId: 1,
-          userId: 56,
+          futureId: this.$store.state.activeRowNumber,
+          userId: this.$store.state.activeUserId,
           amount: this.buyQuantity,
           delegatePrice: this.buyPrice,
           attribute: "buy",
@@ -475,10 +475,8 @@ export default {
         console.log(response.data);
 
         if (response.data.result == false) {
-          // 订单创建成功
-          alert("您的余额不足");
+          alert("保证金不足订单金额的10%，委托订单创建失败");
         } else {
-          // 余额不足
           alert("订单创建成功");
         }
       } catch (error) {
@@ -489,8 +487,8 @@ export default {
       try {
         const payload = {
           dateTimeString: this.dateTimeString,
-          futureId: 1,
-          userId: 56,
+          futureId: this.$store.state.activeRowNumber,
+          userId: this.$store.state.activeUserId,
           amount: this.sellQuantity,
           delegatePrice: this.sellPrice,
           attribute: "sell",
@@ -506,10 +504,8 @@ export default {
         console.log(response.data);
 
         if (response.data.result == false) {
-          // 订单创建成功
-          alert("您的余额不足");
+          alert("保证金不足订单金额的10%，委托订单创建失败");
         } else {
-          // 余额不足
           alert("订单创建成功");
         }
       } catch (error) {

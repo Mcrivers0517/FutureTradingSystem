@@ -46,6 +46,7 @@
             :cell-style="tableRowClassName"
             :default-sort="{ prop: 'type', order: 'ascending' }"
             @row-click="handleRowClick"
+            height="600"
           >
             <el-table-column prop="futureId" label="品种"> </el-table-column>
             <el-table-column prop="delegateId" label="流水号">
