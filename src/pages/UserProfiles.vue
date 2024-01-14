@@ -224,6 +224,11 @@ export default {
         .toISOString()
         .replace("Z", `+${String(Math.abs(offset / 60)).padStart(2, "0")}:00`);
 
+      if (this.closeAmount <= 0) {
+        alert("平仓数量不能小于等于0！");
+        return;
+      }
+
       const request = {
         positionId: row.positionId,
         closeAmount: this.closeAmount,
