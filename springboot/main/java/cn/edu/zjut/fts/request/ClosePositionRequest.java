@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetCurrentDelegateRequest
+public class ClosePositionRequest
 {
-    int userId;
-    int futureId;
+    int positionId;
+    int closeAmount;
+    String delegateTime;
 }
+

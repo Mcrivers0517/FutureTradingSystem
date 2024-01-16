@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

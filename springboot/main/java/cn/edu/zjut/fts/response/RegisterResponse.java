@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancelDelegateResponse
+public class RegisterResponse
 {
-    String result;
+    boolean response;
 }
-

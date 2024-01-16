@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetAssetsRequest
+public class LoginRequest
 {
-    private int userId;
+    String username;
+    String password;
 }

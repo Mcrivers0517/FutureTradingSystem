@@ -1,9 +1,9 @@
 package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.Delegate;
-import cn.edu.zjut.fts.entity.GetCurrentDelegateRequest;
-import cn.edu.zjut.fts.entity.GetCurrentDelegateRequest;
+import cn.edu.zjut.fts.request.GetCurrentDelegateRequest;
 import cn.edu.zjut.fts.mapper.DelegateMapper;
+import cn.edu.zjut.fts.response.GetCurrentDelegateResponse;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,16 +19,15 @@ public class GetCurrentDelegateController
     private DelegateMapper delegateMapper;
 
     @PostMapping("/getCurrentDelegate")
-    public List<Delegate> selectCurrentDelegate(@RequestBody GetCurrentDelegateRequest request)
+    public GetCurrentDelegateResponse getCurrentDelegate(@RequestBody GetCurrentDelegateRequest request)
     {
-//        System.out.println(request.getFutureId());
         if (request.getFutureId() == -1)
         {
-            return delegateMapper.selectAllCurrentDelegateById(request.getUserId());
+            return new GetCurrentDelegateResponse(delegateMapper.selectAllCurrentDelegateById(request.getUserId()));
         }
         else
         {
-            return delegateMapper.selectCurrentDelegateById(request.getUserId(), request.getFutureId());
+            return new GetCurrentDelegateResponse(delegateMapper.selectCurrentDelegateById(request.getUserId(), request.getFutureId()));
         }
     }
 }

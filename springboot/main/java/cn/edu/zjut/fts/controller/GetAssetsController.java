@@ -5,6 +5,8 @@ import cn.edu.zjut.fts.entity.*;
 import cn.edu.zjut.fts.mapper.PositionMapper;
 import cn.edu.zjut.fts.mapper.UserMapper;
 
+import cn.edu.zjut.fts.request.GetAssetsRequest;
+import cn.edu.zjut.fts.response.GetAssetsResponse;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,14 +28,15 @@ public class GetAssetsController
     @PostMapping("/getAssets")
     public GetAssetsResponse login(@RequestBody GetAssetsRequest request)
     {
-        System.out.println(request);
         //获取request属性
         int userId = request.getUserId();
 
+        System.out.println(request);
+
         //获取保证金
-        GetAssetsResponse result = new GetAssetsResponse();
-        result.setDeposit(userMapper.getDeposit(userId));
-        result.setUsername(userMapper.selectUsernameByUserId(userId));
+        GetAssetsResponse response = new GetAssetsResponse();
+        response.setDeposit(userMapper.getDeposit(userId));
+        response.setUsername(userMapper.selectUsernameByUserId(userId));
 
         //获取userid的position属性
         double initialCapital;
@@ -41,12 +44,10 @@ public class GetAssetsController
         double totalProfitLoss = 0;
         double totalProfitLossRatio;
         List<Position> positionList = positionMapper.getPositionByUserId(userId);
-        System.out.println("----------------------------" + positionList);
         for (Position position : positionList)
         {
             currentCapital += position.getCurrentPrice() * position.getAmount();
             totalProfitLoss += position.getProfitLoss();
-            System.out.println("----------------------------" + position);
         }
         initialCapital = userMapper.getInitialCapital(userId);
         if (initialCapital != 0)
@@ -58,10 +59,9 @@ public class GetAssetsController
             totalProfitLossRatio = 0;
         }
         //设置属性
-        result.setCurrentCapital(currentCapital);
-        result.setTotalProfitLoss(totalProfitLoss);
-        result.setTotalProfitLossRatio(totalProfitLossRatio);
-        System.out.println(result);
-        return result;
+        response.setCurrentCapital(currentCapital);
+        response.setTotalProfitLoss(totalProfitLoss);
+        response.setTotalProfitLossRatio(totalProfitLossRatio);
+        return response;
     }
 }

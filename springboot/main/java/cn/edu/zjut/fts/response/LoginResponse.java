@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

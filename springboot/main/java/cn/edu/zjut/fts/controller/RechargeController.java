@@ -1,9 +1,9 @@
 package cn.edu.zjut.fts.controller;
 
-import cn.edu.zjut.fts.entity.*;
-
 import cn.edu.zjut.fts.mapper.UserMapper;
 
+import cn.edu.zjut.fts.request.RechargeRequest;
+import cn.edu.zjut.fts.response.RechargeResponse;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +17,16 @@ public class RechargeController
     private UserMapper userMapper;
 
     @PostMapping("/recharge")
-    public RechargeResponse rechargeresult(@RequestBody RechargeRequest request) {
+    public RechargeResponse recharge(@RequestBody RechargeRequest request)
+    {
         System.out.println(request);
-        RechargeResponse result = new RechargeResponse(true);
-        userMapper.recharge(request.getUserId(),request.getRechargeAmount());
-        return result;
+        if (userMapper.recharge(request.getUserId(), request.getRechargeAmount()) == 1)
+        {
+            return new RechargeResponse(true);
+        }
+        else
+        {
+            return new RechargeResponse(false);
+        }
     }
 }

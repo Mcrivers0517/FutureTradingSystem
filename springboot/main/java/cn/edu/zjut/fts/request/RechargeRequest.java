@@ -1,4 +1,4 @@
-package cn.edu.zjut.fts.entity;
+package cn.edu.zjut.fts.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetHistoricalDelegateRequest
+public class RechargeRequest
 {
-    int userId;
-    int futureId;
+    private int userId;
+    private double rechargeAmount;
 }

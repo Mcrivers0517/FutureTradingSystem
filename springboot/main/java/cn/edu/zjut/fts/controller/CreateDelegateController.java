@@ -1,12 +1,12 @@
 package cn.edu.zjut.fts.controller;
 
-import cn.edu.zjut.fts.entity.CreateDelegateControllerResponse;
+import cn.edu.zjut.fts.response.CreateDelegateResponse;
 import cn.edu.zjut.fts.entity.Delegate;
 import cn.edu.zjut.fts.mapper.*;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import cn.edu.zjut.fts.entity.DelegateRequest;
+import cn.edu.zjut.fts.request.CreateDelegateRequest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,7 +30,7 @@ public class CreateDelegateController
     private UserMapper userMapper;
 
     @PostMapping("/createDelegate")
-    public CreateDelegateControllerResponse buyOrSell(@RequestBody DelegateRequest request)
+    public CreateDelegateResponse buyOrSell(@RequestBody CreateDelegateRequest request)
             throws ParseException
     {
         System.out.println(request);
@@ -41,14 +41,12 @@ public class CreateDelegateController
         double delegatePrice = request.getDelegatePrice();
         String dateTimeString = request.getDateTimeString();
 
-        CreateDelegateControllerResponse createDelegateResult = new CreateDelegateControllerResponse(true);
         double Deposit = userMapper.getDeposit(userid);
         if (Deposit < amount * delegatePrice * 0.1)
         {
-            createDelegateResult.setResult(false);
-            return createDelegateResult;
+            return new CreateDelegateResponse(false);
         }
-        ;
+
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
         Date completeDateTime = dateTimeFormat.parse(dateTimeString);
 
@@ -83,7 +81,7 @@ public class CreateDelegateController
         double productvalue = amount * delegatePrice;
         userMapper.updateInitialCapitalByUserID(userid, productvalue);
         userMapper.updateDepositByUserID(userid, -25);
-        return createDelegateResult;
+        return new CreateDelegateResponse(true);
     }
 }
 

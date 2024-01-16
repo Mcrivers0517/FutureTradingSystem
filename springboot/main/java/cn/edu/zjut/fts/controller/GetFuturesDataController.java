@@ -2,10 +2,9 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.*;
 import cn.edu.zjut.fts.mapper.*;
+import cn.edu.zjut.fts.request.GetFutureDataRequest;
+import cn.edu.zjut.fts.response.GetFuturesDataResponse;
 import io.swagger.annotations.Api;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,13 +36,14 @@ public class GetFuturesDataController
     static List<Integer> currentRowList = new ArrayList<>();
 
     @PostMapping("/getFuturesData")
-    public List<Futures> getFuturesData(@RequestBody GetFutureDataRequest request)
+    public GetFuturesDataResponse getFuturesData(@RequestBody GetFutureDataRequest request)
             throws ParseException
     {
 
-
         //0.获取前端信息
         List<String> tableNames = futuresMapper.selectAllTableName();
+
+        System.out.println(request);
 
         String dateTimeString = request.getDateTimeString();
 
@@ -256,7 +256,7 @@ public class GetFuturesDataController
 
             futuresList.add(futures);
         }
-        return futuresList;
+        return new GetFuturesDataResponse(futuresList);
     }
 }
 
