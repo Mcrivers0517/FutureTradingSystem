@@ -80,9 +80,6 @@ public class AvatarUploadController
     @ApiOperation(value = "获取用户头像", notes = "根据用户名获取用户头像")
     public ResponseEntity<byte[]> getUserAvatar(@RequestBody User request)
     {
-        System.out.println("request:" + request);
-        System.out.println(11111111);
-
         try
         {
             String username = request.getUsername();
