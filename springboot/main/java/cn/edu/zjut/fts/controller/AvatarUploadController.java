@@ -1,7 +1,7 @@
 package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.User;
-import cn.edu.zjut.fts.mapper.UserMapper;
+import cn.edu.zjut.fts.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 public class AvatarUploadController
 {
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @PostMapping("/uploadAvatar")
     @ApiOperation(value = "上传文件并保存", notes = "测试上传功能")
@@ -60,7 +60,7 @@ public class AvatarUploadController
 
             System.out.println(avatarUrl);
 
-            int rowsAffected = userMapper.updateAvatarUrlByUsername(username, avatarUrl);
+            int rowsAffected = userService.updateAvatarUrlByUsername(username, avatarUrl);
             if (rowsAffected > 0)
             {
                 System.out.println("success");
@@ -86,7 +86,7 @@ public class AvatarUploadController
         try
         {
             String username = request.getUsername();
-            String avatarUrl = userMapper.getAvatarUrlByUsername(username);
+            String avatarUrl = userService.getAvatarUrlByUsername(username);
 
             if (avatarUrl != null)
             {
@@ -112,13 +112,5 @@ public class AvatarUploadController
             // 发生异常时的处理
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    class AvatarResponse
-    {
-        private String avatarUrl;
     }
 }

@@ -4,11 +4,11 @@ import cn.edu.zjut.fts.request.ClosePositionRequest;
 import cn.edu.zjut.fts.entity.Delegate;
 import cn.edu.zjut.fts.entity.Position;
 import cn.edu.zjut.fts.entity.Transaction;
-import cn.edu.zjut.fts.mapper.DelegateMapper;
-import cn.edu.zjut.fts.mapper.PositionMapper;
-import cn.edu.zjut.fts.mapper.TransactionMapper;
-import cn.edu.zjut.fts.mapper.UserMapper;
 import cn.edu.zjut.fts.response.ClosePositionResponse;
+import cn.edu.zjut.fts.service.DelegateService;
+import cn.edu.zjut.fts.service.PositionService;
+import cn.edu.zjut.fts.service.TransactionService;
+import cn.edu.zjut.fts.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,16 +32,16 @@ public class ClosePositionController
 {
 
     @Autowired
-    private DelegateMapper delegateMapper;
+    private DelegateService delegateService;
 
     @Autowired
-    private PositionMapper positionMapper;
+    private PositionService positionService;
 
     @Autowired
-    private TransactionMapper transactionMapper;
+    private TransactionService transactionService;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @PostMapping("/closePosition")
     public ClosePositionResponse closePosition(@RequestBody ClosePositionRequest request)
@@ -71,11 +71,11 @@ public class ClosePositionController
             String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
 
             //获取持仓表中对应id的数据
-            Position position = positionMapper.getPositionById(positionId);
+            Position position = positionService.getPositionById(positionId);
 //        System.out.println(position);
 
             //根据positionId找到对应的持仓记录对Amount进行减去closeAmount操作
-            positionMapper.updateAmountPositionById(positionId, closeAmount);
+            positionService.updateAmountPositionById(positionId, closeAmount);
 
             //添加平仓的委托记录
             Delegate delegate = new Delegate();
@@ -118,22 +118,22 @@ public class ClosePositionController
 
             //插入委托记录
             System.out.println(delegate);
-            delegateMapper.insertDelegate(delegate);
+            delegateService.addDelegate(delegate);
 
             //更新成交记录
             Transaction transaction = new Transaction();
             transaction.setServiceFee(25);
             transaction.setTransactionTime(formattedDateTime);
-            transaction.setDelegateid(delegateMapper.selectDelegateIdByTime(delegate.getDelegateTime()));
+            transaction.setDelegateid(delegateService.getDelegateIdByTime(delegate.getDelegateTime()));
             System.out.println(transaction);
-            transactionMapper.insertTransaction(transaction);
+            transactionService.addTransaction(transaction);
 
             //更新用户钱包
             double userProfit = closeAmount * position.getProfitLoss() - 25;
             double productProfit = closeAmount * position.getEntryPrice() * (-1);
             System.out.println(userProfit + "   " + productProfit);
-            userMapper.updateDepositByUserID(position.getUserId(), userProfit);
-            userMapper.updateInitialCapitalByUserID(position.getUserId(), productProfit);
+            userService.updateDepositByUserID(position.getUserId(), userProfit);
+            userService.updateInitialCapitalByUserID(position.getUserId(), productProfit);
 
             return new ClosePositionResponse(true);
         }

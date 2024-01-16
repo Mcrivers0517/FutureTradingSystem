@@ -2,11 +2,10 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.entity.*;
 
-import cn.edu.zjut.fts.mapper.PositionMapper;
-import cn.edu.zjut.fts.mapper.UserMapper;
-
 import cn.edu.zjut.fts.request.GetAssetsRequest;
 import cn.edu.zjut.fts.response.GetAssetsResponse;
+import cn.edu.zjut.fts.service.PositionService;
+import cn.edu.zjut.fts.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +19,10 @@ public class GetAssetsController
 {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Autowired
-    private PositionMapper positionMapper;
+    private PositionService positionService;
 
     @PostMapping("/getAssets")
     public GetAssetsResponse login(@RequestBody GetAssetsRequest request)
@@ -35,21 +34,21 @@ public class GetAssetsController
 
         //获取保证金
         GetAssetsResponse response = new GetAssetsResponse();
-        response.setDeposit(userMapper.getDeposit(userId));
-        response.setUsername(userMapper.selectUsernameByUserId(userId));
+        response.setDeposit(userService.getDeposit(userId));
+        response.setUsername(userService.getUsernameByUserId(userId));
 
         //获取userid的position属性
         double initialCapital;
         double currentCapital = 0;
         double totalProfitLoss = 0;
         double totalProfitLossRatio;
-        List<Position> positionList = positionMapper.getPositionByUserId(userId);
+        List<Position> positionList = positionService.getPositionByUserId(userId);
         for (Position position : positionList)
         {
             currentCapital += position.getCurrentPrice() * position.getAmount();
             totalProfitLoss += position.getProfitLoss();
         }
-        initialCapital = userMapper.getInitialCapital(userId);
+        initialCapital = userService.getInitialCapital(userId);
         if (initialCapital != 0)
         {
             totalProfitLossRatio = totalProfitLoss / initialCapital * 100;

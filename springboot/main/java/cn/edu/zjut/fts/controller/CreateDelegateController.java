@@ -2,7 +2,8 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.response.CreateDelegateResponse;
 import cn.edu.zjut.fts.entity.Delegate;
-import cn.edu.zjut.fts.mapper.*;
+import cn.edu.zjut.fts.service.DelegateService;
+import cn.edu.zjut.fts.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +25,10 @@ public class CreateDelegateController
 {
 
     @Autowired
-    private DelegateMapper delegateMapper;
+    private DelegateService delegateService;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @PostMapping("/createDelegate")
     public CreateDelegateResponse buyOrSell(@RequestBody CreateDelegateRequest request)
@@ -41,7 +42,7 @@ public class CreateDelegateController
         double delegatePrice = request.getDelegatePrice();
         String dateTimeString = request.getDateTimeString();
 
-        double Deposit = userMapper.getDeposit(userid);
+        double Deposit = userService.getDeposit(userid);
         if (Deposit < amount * delegatePrice * 0.1)
         {
             return new CreateDelegateResponse(false);
@@ -75,12 +76,12 @@ public class CreateDelegateController
         delegate.setAmount(amount);
         delegate.setDelegatePrice(delegatePrice);
         delegate.setDelegateTime(formattedDateTime);
-        delegateMapper.insertDelegate(delegate);
+        delegateService.addDelegate(delegate);
 
         //修改持仓资产
         double productvalue = amount * delegatePrice;
-        userMapper.updateInitialCapitalByUserID(userid, productvalue);
-        userMapper.updateDepositByUserID(userid, -25);
+        userService.updateInitialCapitalByUserID(userid, productvalue);
+        userService.updateDepositByUserID(userid, -25);
         return new CreateDelegateResponse(true);
     }
 }

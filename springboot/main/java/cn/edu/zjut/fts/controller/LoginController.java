@@ -4,8 +4,7 @@ import cn.edu.zjut.fts.request.LoginRequest;
 import cn.edu.zjut.fts.response.LoginResponse;
 import cn.edu.zjut.fts.entity.User;
 
-import cn.edu.zjut.fts.mapper.UserMapper;
-
+import cn.edu.zjut.fts.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,7 @@ public class LoginController
 {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request)
@@ -28,7 +27,7 @@ public class LoginController
         String username = request.getUsername();
         String password = request.getPassword();
 
-        User selectUser = userMapper.selectByUsername(username);
+        User selectUser = userService.getUserByUsername(username);
         System.out.println("selectUser:" + selectUser);
 
         if (selectUser != null && password.equals(selectUser.getPassword()))
