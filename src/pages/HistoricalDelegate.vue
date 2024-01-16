@@ -47,18 +47,19 @@
             :default-sort="{ prop: 'type', order: 'ascending' }"
             @row-click="handleRowClick"
             height="600"
+            :header-cell-style="{ 'text-align': 'center' }"
           >
-            <el-table-column prop="futureId" label="品种"> </el-table-column>
-            <el-table-column prop="delegateId" label="流水号">
+            <el-table-column prop="futureId" label="品种" align="center" width="80"> </el-table-column>
+            <el-table-column prop="delegateId" label="流水号" align="center">
             </el-table-column>
-            <el-table-column prop="delegateTime" label="日期">
+            <el-table-column prop="delegateTime" label="日期" align="center">
             </el-table-column>
-            <el-table-column prop="attribute" label="属性"> </el-table-column>
-            <el-table-column prop="delegatePrice" label="价格">
+            <el-table-column prop="attribute" label="属性" align="center"> </el-table-column>
+            <el-table-column prop="delegatePrice" label="价格" align="center">
             </el-table-column>
-            <el-table-column prop="status" label="状态"> </el-table-column>
-            <el-table-column prop="amount" label="数量"> </el-table-column>
-            <el-table-column label="金额">
+            <el-table-column prop="status" label="状态" align="center"> </el-table-column>
+            <el-table-column prop="amount" label="数量" align="center"> </el-table-column>
+            <el-table-column label="金额" align="center">
               <template slot-scope="scope">
                 {{ scope.row.delegatePrice * scope.row.amount }}
               </template>
@@ -92,7 +93,7 @@ export default {
           }
         );
         console.log(response.data);
-        const HistoricalDelegateData = response.data.map((data) => ({
+        const HistoricalDelegateData = response.data.response.map((data) => ({
           futureId: data.futureId,
           delegateId: data.delegateId,
           delegateTime: data.delegateTime,

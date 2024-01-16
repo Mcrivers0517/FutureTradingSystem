@@ -239,7 +239,11 @@ export default {
         .post("http://localhost:5000/closePosition", request)
         .then((response) => {
           const result = response.data;
-          console.log(result);
+          if (result) {
+            alert("平仓请求成功！");
+          } else {
+            alert("平仓请求失败!");
+          }
         })
         .catch((error) => {
           console.error("平仓请求失败", error);
@@ -292,7 +296,7 @@ export default {
         });
 
         console.log(response.data);
-        const PositionData = response.data.map((data) => ({
+        const PositionData = response.data.response.map((data) => ({
           positionId: data.positionId,
           futureId: data.futureId, // 期货品种
           attribute: data.attribute, // 买/卖

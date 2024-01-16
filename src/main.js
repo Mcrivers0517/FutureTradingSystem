@@ -155,63 +155,33 @@ new Vue({
             dateTimeString,
           }
         );
-        for (let index = 0; index < response.data.length; index++)
+        console.log("response", response.data.response);
+        for (let index = 0; index < response.data.response.length; index++)
         {
           this.$store.state.chartSecondData[index].times.push(dateTimeString);
-          this.$store.state.chartSecondData[index].price.push(response.data[index].price);
-          this.$store.state.chartSecondData[index].tradeVolume.push(response.data[index].volume);
-          this.$store.state.transacted = response.data[index].transacted;
-          this.$store.state.transactedDelegateId = response.data[index].transactedDelegateId;
+          this.$store.state.chartSecondData[index].price.push(response.data.response[index].price);
+          this.$store.state.chartSecondData[index].tradeVolume.push(response.data.response[index].volume);
+          this.$store.state.transacted = response.data.response[index].transacted;
+          this.$store.state.transactedDelegateId = response.data.response[index].transactedDelegateId;
           if (this.$store.state.dailyOpenPrice.length < index + 1)
           {
-            this.$store.state.dailyOpenPrice.push(response.data[index].dailyOpenPrice);
-            this.$store.state.dailyHighestPrice.push(response.data[index].dailyHighestPrice);
-            this.$store.state.dailyLowestPrice.push(response.data[index].dailyLowestPrice);
-            this.$store.state.dailyChange.push(response.data[index].dailyChange);
-            this.$store.state.dailyChangeRatio.push(response.data[index].dailyChangeRatio);
+            this.$store.state.dailyOpenPrice.push(response.data.response[index].dailyOpenPrice);
+            this.$store.state.dailyHighestPrice.push(response.data.response[index].dailyHighestPrice);
+            this.$store.state.dailyLowestPrice.push(response.data.response[index].dailyLowestPrice);
+            this.$store.state.dailyChange.push(response.data.response[index].dailyChange);
+            this.$store.state.dailyChangeRatio.push(response.data.response[index].dailyChangeRatio);
           }
-          this.$store.state.dailyOpenPrice[index] = response.data[index].dailyOpenPrice;
-          this.$store.state.dailyHighestPrice[index] = response.data[index].dailyHighestPrice;
-          this.$store.state.dailyLowestPrice[index] = response.data[index].dailyLowestPrice;
-          this.$store.state.dailyChange[index] = response.data[index].dailyChange;
-          this.$store.state.dailyChangeRatio[index] = response.data[index].dailyChangeRatio;
-
-          // console.log("transacted", this.$store.state.transacted);
-          // console.log("transactedDelegateId", this.$store.state.transactedDelegateId);
+          this.$store.state.dailyOpenPrice[index] = response.data.response[index].dailyOpenPrice;
+          this.$store.state.dailyHighestPrice[index] = response.data.response[index].dailyHighestPrice;
+          this.$store.state.dailyLowestPrice[index] = response.data.response[index].dailyLowestPrice;
+          this.$store.state.dailyChange[index] = response.data.response[index].dailyChange;
+          this.$store.state.dailyChangeRatio[index] = response.data.response[index].dailyChangeRatio;
 
           if (this.$store.state.transacted)
           {
             alert(`您的编号为${this.$store.state.transactedDelegateId}的订单已成交！`);
           }
-
-          // this.$store.state.dailyOpenPrice[index].push(response.data[index].dailyOpenPrice);
-          // this.$store.state.dailyHighestPrice[index].push(response.data[index].dailyHighestPrice);
-          // this.$store.state.dailyLowestPrice[index].push(response.data[index].dailyLowestPrice);
-          // this.$store.state.dailyChange[index].push(response.data[index].dailyChange);
-          // this.$store.state.dailyChangeRatio[index].push(response.data[index].dailyChangeRatio);
         }
-        // console.log(this.$store.state.dailyOpenPrice);
-        // console.log(this.$store.state.dailyHighestPrice);
-        // console.log(this.$store.state.dailyLowestPrice);
-        // console.log(this.$store.state.dailyChange);
-        // console.log(this.$store.state.dailyChangeRatio);
-        // for (let index = 0; index < response.data.length; index++)
-        // {
-        //   this.$store.state.dailyHighestPrice[index].push(response.data[index].dailyHighestPrice);
-        //   console.log(this.$store.state.dailyHighestPrice);
-        // }
-        // this.$store.state.dailyHighestPrice[1].push(response.data[1].dailyHighestPrice);
-        // console.log("333", this.$store.state.dailyHighestPrice[1]);
-        // console.log("222", this.$store.state.chartSecondData);
-        // console.log("222", this.$store.state.chartSecondData.times);
-        // for (const data of response.data)
-        // {
-        //   this.$store.state.dailyOpenPrice.push(data.dailyOpenPrice);
-        //   this.$store.state.dailyHighestPrice.push(data.dailyHighestPrice);
-        //   this.$store.state.dailyLowestPrice.push(data.dailyLowestPrice);
-        //   this.$store.state.dailyChange.push(data.dailyChange);
-        //   this.$store.state.dailyChangeRatio.push(data.dailyChangeRatio);
-        // }
       }, 1000);
     },
   },

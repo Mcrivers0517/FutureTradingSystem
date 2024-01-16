@@ -446,7 +446,7 @@ export default {
           this.CurrentDelegateData = this.CurrentDelegateData.filter(
             (delegate) => delegate.delegateId !== row.delegateId
           );
-        } else{
+        } else {
           alert(response.data.result);
         }
       } catch (error) {
@@ -456,6 +456,10 @@ export default {
     // 交易接口
     async buy() {
       try {
+        if (this.buyQuantity <= 0) {
+          alert("数量不能小于等于零！");
+          return;
+        }
         const payload = {
           dateTimeString: this.dateTimeString,
           futureId: this.$store.state.activeRowNumber,
@@ -485,6 +489,10 @@ export default {
     },
     async sell() {
       try {
+        if (this.sellQuantity <= 0) {
+          alert("数量不能小于等于零！");
+          return;
+        }
         const payload = {
           dateTimeString: this.dateTimeString,
           futureId: this.$store.state.activeRowNumber,
@@ -528,24 +536,6 @@ export default {
 
         this.dateTimeString = dateTimeString;
         console.log("dateTimeString", this.dateTimeString);
-
-        // const response = await axios.post(
-        //   "http://localhost:5000/getFuturesData",
-        //   {
-        //     dateTimeString,
-        //   }
-        // );
-        // const responseData = response.data;
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].times.push(dateTimeString);
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].price.push(responseData[0].price);
-        // this.$store.state.chartData[this.$store.state.activeRowNumber].tradeVolume.push(responseData[0].volume);
-        // this.dailyOpenPrice = responseData[0].dailyOpenPrice;
-        // this.dailyHighestPrice = responseData[0].dailyHighestPrice;
-        // this.dailyLowestPrice = responseData[0].dailyLowestPrice;
-        // this.dailyChange = responseData[0].dailyChange;
-        // this.dailyChangeRatio = responseData[0].dailyChangeRatio;
-        // console.log("responseData:", responseData);
-        // console.log("chartSecondData", this.chartSecondData);
       } catch (error) {
         console.error("Error fetching and processing price data:", error);
       }
@@ -864,7 +854,7 @@ export default {
             futureId: this.$store.state.activeRowNumber,
           }
         );
-        const CurrentDelegateData = response.data.map((data) => ({
+        const CurrentDelegateData = response.data.response.map((data) => ({
           delegateId: data.delegateId,
           delegateTime: data.delegateTime,
           attribute: data.attribute,
@@ -887,7 +877,7 @@ export default {
             futureId: this.$store.state.activeRowNumber,
           }
         );
-        const HistoricalDelegateData = response.data.map((data) => ({
+        const HistoricalDelegateData = response.data.response.map((data) => ({
           delegateId: data.delegateId,
           delegateTime: data.delegateTime,
           attribute: data.attribute,
@@ -896,6 +886,7 @@ export default {
           amount: data.amount,
         }));
         this.HistoricalDelegateData = HistoricalDelegateData;
+        console.log("HistoricalDelegateData", this.HistoricalDelegateData);
       } catch (error) {
         console.error("Error getting Historical positions:", error);
       }
