@@ -6,18 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("user")
-public class User
-{
+@TableName("transaction")
 
-    private int userId;
-    private String username;
-    private String password;
-    private String avatarUrl;
+public class TransactionEntity
+{
+    private int transactionid;
+    private int delegateid;
+    private double serviceFee;
+    private String transactionTime;
 }

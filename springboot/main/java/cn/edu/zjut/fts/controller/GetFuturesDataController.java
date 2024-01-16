@@ -4,9 +4,9 @@ import cn.edu.zjut.fts.entity.*;
 import cn.edu.zjut.fts.request.GetFutureDataRequest;
 import cn.edu.zjut.fts.response.GetFuturesDataResponse;
 import cn.edu.zjut.fts.service.DelegateService;
-import cn.edu.zjut.fts.service.FuturesService;
-import cn.edu.zjut.fts.service.PositionService;
-import cn.edu.zjut.fts.service.TransactionService;
+import cn.edu.zjut.fts.service.FuturesServiceImpl;
+import cn.edu.zjut.fts.service.PositionServiceImpl;
+import cn.edu.zjut.fts.service.TransactionServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +28,13 @@ import java.util.List;
 public class GetFuturesDataController
 {
     @Autowired
-    private FuturesService futuresService;
+    private FuturesServiceImpl futuresServiceImpl;
     @Autowired
-    private PositionService positionService;
+    private PositionServiceImpl positionServiceImpl;
     @Autowired
     private DelegateService delegateService;
     @Autowired
-    private TransactionService transactionService;
+    private TransactionServiceImpl transactionServiceImpl;
 
     static List<Integer> currentRowList = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class GetFuturesDataController
     {
 
         //0.获取前端信息
-        List<String> tableNames = futuresService.getAllTableNames();
+        List<String> tableNames = futuresServiceImpl.getAllTableNames();
 
         System.out.println(request);
 
@@ -75,7 +75,7 @@ public class GetFuturesDataController
 
         //1.返回当前时间期货数据
 
-        List<Futures> futuresList = new ArrayList<>();
+        List<FuturesEntity> futuresEntityList = new ArrayList<>();
 
         int currentIndex = 0;
         for (String tableName : tableNames)
@@ -87,27 +87,27 @@ public class GetFuturesDataController
 
 
 //            System.out.println(tableName);
-            Futures futures = futuresService.getFuturesById(tableName, currentRowList.get(currentIndex));
+            FuturesEntity futuresEntity = futuresServiceImpl.getFuturesById(tableName, currentRowList.get(currentIndex));
 
 //            System.out.println(currentRowList.get(currentIndex));
 
             // 读第一条数据时，初始化开盘价，以及当日最高价和当日最低价
             if (currentRowList.get(currentIndex) == 1) // 1代表数据表中id为1的条目，即第1条数据
             {
-                futures.setDailyOpenPrice(futures.getPrice());
-                futures.setDailyHighestPrice(futures.getPrice());
-                futures.setDailyLowestPrice(futures.getPrice());
-                futuresService.updateDailyOpenPrice(futures.getPrice(), currentIndex + 1);
-                futuresService.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
+                futuresEntity.setDailyOpenPrice(futuresEntity.getPrice());
+                futuresEntity.setDailyHighestPrice(futuresEntity.getPrice());
+                futuresEntity.setDailyLowestPrice(futuresEntity.getPrice());
+                futuresServiceImpl.updateDailyOpenPrice(futuresEntity.getPrice(), currentIndex + 1);
+                futuresServiceImpl.updateDailyPrice(futuresEntity.getPrice(), futuresEntity.getPrice(), currentIndex + 1);
             }
             // 时间变为0点时，重新设置开盘价，并重新初始化当日最高价和当日最低价
             else if (formattedTime.equals("00:00:00"))
             {
-                futures.setDailyOpenPrice(futures.getPrice());
-                futures.setDailyHighestPrice(futures.getPrice());
-                futures.setDailyLowestPrice(futures.getPrice());
-                futuresService.updateDailyOpenPrice(futures.getPrice(), currentIndex + 1);
-                futuresService.updateDailyPrice(futures.getPrice(), futures.getPrice(), currentIndex + 1);
+                futuresEntity.setDailyOpenPrice(futuresEntity.getPrice());
+                futuresEntity.setDailyHighestPrice(futuresEntity.getPrice());
+                futuresEntity.setDailyLowestPrice(futuresEntity.getPrice());
+                futuresServiceImpl.updateDailyOpenPrice(futuresEntity.getPrice(), currentIndex + 1);
+                futuresServiceImpl.updateDailyPrice(futuresEntity.getPrice(), futuresEntity.getPrice(), currentIndex + 1);
             }
 
 
@@ -116,27 +116,27 @@ public class GetFuturesDataController
             currentRowList.set(currentIndex, currentValue); // 将增加后的值放回列表中
 
             // 从数据库中获得该期货的开盘价、最高价、最低价
-            futures.setDailyOpenPrice(futuresService.getDailyOpenPriceByFutureId(currentIndex + 1));
-            futures.setDailyHighestPrice(futuresService.getDailyHighestPriceByFutureId(currentIndex + 1));
-            futures.setDailyLowestPrice(futuresService.getDailyLowestPriceByFutureId(currentIndex + 1));
+            futuresEntity.setDailyOpenPrice(futuresServiceImpl.getDailyOpenPriceByFutureId(currentIndex + 1));
+            futuresEntity.setDailyHighestPrice(futuresServiceImpl.getDailyHighestPriceByFutureId(currentIndex + 1));
+            futuresEntity.setDailyLowestPrice(futuresServiceImpl.getDailyLowestPriceByFutureId(currentIndex + 1));
 
             // 如果期货的当前价格超过了当日最高价格，则更新最高价格
 //            System.out.println(futures.getPrice());
-            if (futures.getPrice() > futuresService.getDailyHighestPriceByFutureId(currentIndex + 1))
+            if (futuresEntity.getPrice() > futuresServiceImpl.getDailyHighestPriceByFutureId(currentIndex + 1))
             {
-                futures.setDailyHighestPrice(futures.getPrice());
+                futuresEntity.setDailyHighestPrice(futuresEntity.getPrice());
             }
             // 如果期货的当前价格跌破了当日最低价格，则更新最低价格
-            if (futures.getPrice() < futuresService.getDailyLowestPriceByFutureId(currentIndex + 1))
+            if (futuresEntity.getPrice() < futuresServiceImpl.getDailyLowestPriceByFutureId(currentIndex + 1))
             {
-                futures.setDailyLowestPrice(futures.getPrice());
+                futuresEntity.setDailyLowestPrice(futuresEntity.getPrice());
             }
             // 更新数据库中的每日最高价和每日最低价
-            futuresService.updateDailyPrice(futures.getDailyHighestPrice(), futures.getDailyLowestPrice(), currentIndex + 1);
-            futuresService.updateCurrentPrice(futures.getPrice(), currentIndex + 1);
+            futuresServiceImpl.updateDailyPrice(futuresEntity.getDailyHighestPrice(), futuresEntity.getDailyLowestPrice(), currentIndex + 1);
+            futuresServiceImpl.updateCurrentPrice(futuresEntity.getPrice(), currentIndex + 1);
 
-            futures.setDailyChange(futures.getPrice() - futures.getDailyOpenPrice());
-            futures.setDailyChangeRatio(futures.getDailyChange() / futures.getDailyOpenPrice());
+            futuresEntity.setDailyChange(futuresEntity.getPrice() - futuresEntity.getDailyOpenPrice());
+            futuresEntity.setDailyChangeRatio(futuresEntity.getDailyChange() / futuresEntity.getDailyOpenPrice());
 
 //            futures.setPrice(futures.getPrice());
 //            futures.setVolume(futures.getVolume());
@@ -144,44 +144,44 @@ public class GetFuturesDataController
 
             // 2.更新委托表
             //2.0获取成交当前价格，当前时间
-            double currentPrice = futures.getPrice();
+            double currentPrice = futuresEntity.getPrice();
 
             //2.1.获取userid的futureid种类的已委记录
-            List<Delegate> delegates = delegateService.getDelegatesByFuture(currentIndex);
+            List<DelegateEntity> delegateEntities = delegateService.getDelegatesByFuture(currentIndex);
             boolean whetherToUpdate = false;    //2.2记录是否要更新表单
             // 遍历委托表，寻找达到成交要求的委托订单记录
-            for (Delegate delegate : delegates)
+            for (DelegateEntity delegateEntity : delegateEntities)
             {
 //                System.out.println("delegate" + delegate);
                 //2.3更新委托表
-                if (delegate.getAttribute().equals("buy2open"))
+                if (delegateEntity.getAttribute().equals("buy2open"))
                 {
 //                    System.out.println("DelegatePrice" + delegate.getDelegatePrice());
 //                    System.out.println("currentPrice" + currentPrice);
 
-                    if (delegate.getDelegatePrice() >= currentPrice)
+                    if (delegateEntity.getDelegatePrice() >= currentPrice)
                     {
-                        delegateService.updateDelegateStatusToDone(delegate.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
+                        delegateService.updateDelegateStatusToDone(delegateEntity.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
                         whetherToUpdate = true;
                     }
                 }
-                else if (delegate.getAttribute().equals("sell2open"))
+                else if (delegateEntity.getAttribute().equals("sell2open"))
                 {
-                    if (delegate.getDelegatePrice() <= currentPrice)
+                    if (delegateEntity.getDelegatePrice() <= currentPrice)
                     {
-                        delegateService.updateDelegateStatusToDone(delegate.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
+                        delegateService.updateDelegateStatusToDone(delegateEntity.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
                         whetherToUpdate = true;
                     }
                 }
 //                System.out.println(delegate);
-                futures.setTransacted(false);
+                futuresEntity.setTransacted(false);
 
                 // 3.如果交易达成，那么更新成交表transactionTable和持仓表positionTable中的记录
                 if (whetherToUpdate)
                 {
 
-                    futures.setTransacted(true);
-                    futures.setTransactedDelegateId(delegate.getDelegateId());
+                    futuresEntity.setTransacted(true);
+                    futuresEntity.setTransactedDelegateId(delegateEntity.getDelegateId());
 
                     // 设置交割日期
                     int dayOfMonth = date.getDayOfMonth();
@@ -191,75 +191,75 @@ public class GetFuturesDataController
                         // 如果 currentTime 的日期小于 20，设置 deliveryDate 为同月的第 20 天
                         LocalDate deliveryDate = date.withDayOfMonth(20);
                         String formattedDeliveryDate = deliveryDate.format(dataFormatter); // 格式化日期部分
-                        delegate.setDeliveryDate(formattedDeliveryDate);
+                        delegateEntity.setDeliveryDate(formattedDeliveryDate);
                     }
                     else
                     {
                         // 如果 currentTime 的日期大于等于 20，设置 deliveryDate 为下一个月的第 20 天
                         LocalDate deliveryDate = date.plusMonths(1).withDayOfMonth(20);
                         String formattedDeliveryDate = deliveryDate.format(dataFormatter);
-                        delegate.setDeliveryDate(formattedDeliveryDate);
+                        delegateEntity.setDeliveryDate(formattedDeliveryDate);
                     }
 
-                    delegateService.updateDelegateDeliveryDate(delegate.getDelegateId(), delegate.getDeliveryDate());
+                    delegateService.updateDelegateDeliveryDate(delegateEntity.getDelegateId(), delegateEntity.getDeliveryDate());
 
                     // 在成交表中增加成交记录
-                    Transaction transaction = new Transaction();
-                    transaction.setDelegateid(delegate.getDelegateId()); //绑定委托订单
-                    transaction.setServiceFee(25.00);   //为简化程序，手续费暂时固定为25
-                    transaction.setTransactionTime(formattedDateTime);
+                    TransactionEntity transactionEntity = new TransactionEntity();
+                    transactionEntity.setDelegateid(delegateEntity.getDelegateId()); //绑定委托订单
+                    transactionEntity.setServiceFee(25.00);   //为简化程序，手续费暂时固定为25
+                    transactionEntity.setTransactionTime(formattedDateTime);
 //                    System.out.println(transaction);
-                    transactionService.addTransaction(transaction);
+                    transactionServiceImpl.addTransaction(transactionEntity);
 
                     //4.更新持仓表
-                    Position position = positionService.getByFutureIdAndAttribute(currentIndex, delegate.getUserId(), delegate.getAttribute());
+                    PositionEntity positionEntity = positionServiceImpl.getByFutureIdAndAttribute(currentIndex, delegateEntity.getUserId(), delegateEntity.getAttribute());
 //                    System.out.println(position);
-                    if (position != null)
+                    if (positionEntity != null)
                     {
-                        double originalCost = position.getCostPrice();
-                        double originalAmount = position.getAmount();
-                        position.setAmount(position.getAmount() + delegate.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
-                        position.setCurrentPrice(currentPrice);
-                        position.setLastUpdated(formattedDateTime);
-                        double totalCost = originalCost * originalAmount + position.getCurrentPrice() * delegate.getAmount() + transaction.getServiceFee(); // 总成本 = 原始成本 × 原始数量 + 新成本 × 新数量 + 手续费
-                        position.setCostPrice(totalCost / position.getAmount());    // 新的持仓成本 = 总成本 / 总数量
-                        position.setProfitLoss((currentPrice - position.getCostPrice()) * position.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
-                        position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
-                        positionService.updatePosition(position);
+                        double originalCost = positionEntity.getCostPrice();
+                        double originalAmount = positionEntity.getAmount();
+                        positionEntity.setAmount(positionEntity.getAmount() + delegateEntity.getAmount());    // 最新的持仓量等于原持仓量加委托购买量
+                        positionEntity.setCurrentPrice(currentPrice);
+                        positionEntity.setLastUpdated(formattedDateTime);
+                        double totalCost = originalCost * originalAmount + positionEntity.getCurrentPrice() * delegateEntity.getAmount() + transactionEntity.getServiceFee(); // 总成本 = 原始成本 × 原始数量 + 新成本 × 新数量 + 手续费
+                        positionEntity.setCostPrice(totalCost / positionEntity.getAmount());    // 新的持仓成本 = 总成本 / 总数量
+                        positionEntity.setProfitLoss((currentPrice - positionEntity.getCostPrice()) * positionEntity.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
+                        positionEntity.setProfitLossRatio(positionEntity.getProfitLoss() / positionEntity.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
+                        positionServiceImpl.updatePosition(positionEntity);
                     }
                     else
                     {
-                        position = new Position();
-                        position.setUserId(delegate.getUserId());
-                        position.setFutureId(delegate.getFutureId());
-                        position.setAmount(delegate.getAmount());
-                        position.setEntryPrice(currentPrice);
-                        position.setCurrentPrice(currentPrice);
-                        position.setProfitLoss(0);
-                        position.setProfitLossRatio(0);
-                        position.setCostPrice(currentPrice);
-                        position.setEntryDate(formattedDateTime);
-                        position.setLastUpdated(formattedDateTime);
+                        positionEntity = new PositionEntity();
+                        positionEntity.setUserId(delegateEntity.getUserId());
+                        positionEntity.setFutureId(delegateEntity.getFutureId());
+                        positionEntity.setAmount(delegateEntity.getAmount());
+                        positionEntity.setEntryPrice(currentPrice);
+                        positionEntity.setCurrentPrice(currentPrice);
+                        positionEntity.setProfitLoss(0);
+                        positionEntity.setProfitLossRatio(0);
+                        positionEntity.setCostPrice(currentPrice);
+                        positionEntity.setEntryDate(formattedDateTime);
+                        positionEntity.setLastUpdated(formattedDateTime);
 //                        System.out.println("attribute:" + delegate.getAttribute());
-                        position.setAttribute(delegate.getAttribute());
+                        positionEntity.setAttribute(delegateEntity.getAttribute());
 //                        System.out.println("position:" + position);
-                        positionService.insertPosition(position);
+                        positionServiceImpl.insertPosition(positionEntity);
                     }
                 }
             }
-            List<Position> Positions = positionService.getPositionsByFutureId(currentIndex);
-            for (Position position : Positions)
+            List<PositionEntity> positionEntities = positionServiceImpl.getPositionsByFutureId(currentIndex);
+            for (PositionEntity positionEntity : positionEntities)
             {
-                position.setCurrentPrice(currentPrice);
-                position.setProfitLoss((currentPrice - position.getCostPrice()) * position.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
-                position.setProfitLossRatio(position.getProfitLoss() / position.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
-                positionService.updatePosition(position);
+                positionEntity.setCurrentPrice(currentPrice);
+                positionEntity.setProfitLoss((currentPrice - positionEntity.getCostPrice()) * positionEntity.getAmount()); //浮动盈亏 = (当前价格 - 持仓成本) * 持仓数量
+                positionEntity.setProfitLossRatio(positionEntity.getProfitLoss() / positionEntity.getCostPrice() * 100);  //浮动盈亏率 = 浮动盈亏 / 持仓成本 * 100
+                positionServiceImpl.updatePosition(positionEntity);
             }
             currentIndex++;
 
-            futuresList.add(futures);
+            futuresEntityList.add(futuresEntity);
         }
-        return new GetFuturesDataResponse(futuresList);
+        return new GetFuturesDataResponse(futuresEntityList);
     }
 }
 

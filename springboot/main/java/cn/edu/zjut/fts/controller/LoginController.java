@@ -2,9 +2,9 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.request.LoginRequest;
 import cn.edu.zjut.fts.response.LoginResponse;
-import cn.edu.zjut.fts.entity.User;
+import cn.edu.zjut.fts.entity.UserEntity;
 
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ public class LoginController
 {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request)
@@ -27,13 +27,13 @@ public class LoginController
         String username = request.getUsername();
         String password = request.getPassword();
 
-        User selectUser = userService.getUserByUsername(username);
-        System.out.println("selectUser:" + selectUser);
+        UserEntity selectUserEntity = userServiceImpl.getUserByUsername(username);
+        System.out.println("selectUser:" + selectUserEntity);
 
-        if (selectUser != null && password.equals(selectUser.getPassword()))
+        if (selectUserEntity != null && password.equals(selectUserEntity.getPassword()))
         {
             isSuccess = true;
-            userID = selectUser.getUserId();
+            userID = selectUserEntity.getUserId();
         }
 
         return new LoginResponse(isSuccess, userID);

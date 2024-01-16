@@ -4,8 +4,8 @@ import cn.edu.zjut.fts.entity.*;
 
 import cn.edu.zjut.fts.request.GetAssetsRequest;
 import cn.edu.zjut.fts.response.GetAssetsResponse;
-import cn.edu.zjut.fts.service.PositionService;
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.service.PositionServiceImpl;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +19,10 @@ public class GetAssetsController
 {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
-    private PositionService positionService;
+    private PositionServiceImpl positionServiceImpl;
 
     @PostMapping("/getAssets")
     public GetAssetsResponse login(@RequestBody GetAssetsRequest request)
@@ -34,21 +34,21 @@ public class GetAssetsController
 
         //获取保证金
         GetAssetsResponse response = new GetAssetsResponse();
-        response.setDeposit(userService.getDeposit(userId));
-        response.setUsername(userService.getUsernameByUserId(userId));
+        response.setDeposit(userServiceImpl.getDeposit(userId));
+        response.setUsername(userServiceImpl.getUsernameByUserId(userId));
 
         //获取userid的position属性
         double initialCapital;
         double currentCapital = 0;
         double totalProfitLoss = 0;
         double totalProfitLossRatio;
-        List<Position> positionList = positionService.getPositionByUserId(userId);
-        for (Position position : positionList)
+        List<PositionEntity> positionEntityList = positionServiceImpl.getPositionByUserId(userId);
+        for (PositionEntity positionEntity : positionEntityList)
         {
-            currentCapital += position.getCurrentPrice() * position.getAmount();
-            totalProfitLoss += position.getProfitLoss();
+            currentCapital += positionEntity.getCurrentPrice() * positionEntity.getAmount();
+            totalProfitLoss += positionEntity.getProfitLoss();
         }
-        initialCapital = userService.getInitialCapital(userId);
+        initialCapital = userServiceImpl.getInitialCapital(userId);
         if (initialCapital != 0)
         {
             totalProfitLossRatio = totalProfitLoss / initialCapital * 100;

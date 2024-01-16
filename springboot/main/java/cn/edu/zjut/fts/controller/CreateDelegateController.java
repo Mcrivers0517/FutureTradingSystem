@@ -1,9 +1,9 @@
 package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.response.CreateDelegateResponse;
-import cn.edu.zjut.fts.entity.Delegate;
+import cn.edu.zjut.fts.entity.DelegateEntity;
 import cn.edu.zjut.fts.service.DelegateService;
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,7 @@ public class CreateDelegateController
     private DelegateService delegateService;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/createDelegate")
     public CreateDelegateResponse buyOrSell(@RequestBody CreateDelegateRequest request)
@@ -42,7 +42,7 @@ public class CreateDelegateController
         double delegatePrice = request.getDelegatePrice();
         String dateTimeString = request.getDateTimeString();
 
-        double Deposit = userService.getDeposit(userid);
+        double Deposit = userServiceImpl.getDeposit(userid);
         if (Deposit < amount * delegatePrice * 0.1)
         {
             return new CreateDelegateResponse(false);
@@ -68,20 +68,20 @@ public class CreateDelegateController
 
 
         // 1. 插入委托数据
-        Delegate delegate = new Delegate();
-        delegate.setFutureId(futureid);
-        delegate.setUserId(userid);
-        delegate.setAttribute(attribute + "2open");
-        delegate.setStatus("已委");
-        delegate.setAmount(amount);
-        delegate.setDelegatePrice(delegatePrice);
-        delegate.setDelegateTime(formattedDateTime);
-        delegateService.addDelegate(delegate);
+        DelegateEntity delegateEntity = new DelegateEntity();
+        delegateEntity.setFutureId(futureid);
+        delegateEntity.setUserId(userid);
+        delegateEntity.setAttribute(attribute + "2open");
+        delegateEntity.setStatus("已委");
+        delegateEntity.setAmount(amount);
+        delegateEntity.setDelegatePrice(delegatePrice);
+        delegateEntity.setDelegateTime(formattedDateTime);
+        delegateService.addDelegate(delegateEntity);
 
         //修改持仓资产
         double productvalue = amount * delegatePrice;
-        userService.updateInitialCapitalByUserID(userid, productvalue);
-        userService.updateDepositByUserID(userid, -25);
+        userServiceImpl.updateInitialCapitalByUserID(userid, productvalue);
+        userServiceImpl.updateDepositByUserID(userid, -25);
         return new CreateDelegateResponse(true);
     }
 }

@@ -1,69 +1,25 @@
 package cn.edu.zjut.fts.service;
 
-import cn.edu.zjut.fts.entity.Futures;
-import cn.edu.zjut.fts.mapper.FuturesMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import cn.edu.zjut.fts.entity.FuturesEntity;
 
 import java.util.List;
 
-@Service
-public class FuturesService
+public interface FuturesService
 {
 
-    private final FuturesMapper futuresMapper;
+    FuturesEntity getFuturesById(String tablename, int currentRow);
 
-    @Autowired
-    public FuturesService(FuturesMapper futuresMapper)
-    {
-        this.futuresMapper = futuresMapper;
-    }
+    List<String> getAllTableNames();
 
-    public Futures getFuturesById(String tablename, int currentRow)
-    {
-        // 调用FuturesMapper的selectAllByFutureAndId方法查询期货信息
-        return futuresMapper.selectAllByFutureAndId(tablename, currentRow);
-    }
+    boolean updateDailyOpenPrice(double dailyOpenPrice, int futureId);
 
-    public List<String> getAllTableNames()
-    {
-        // 调用FuturesMapper的selectAllTableName方法查询所有期货表的表名
-        return futuresMapper.selectAllTableName();
-    }
+    boolean updateDailyPrice(double dailyHighestPrice, double dailyLowestPrice, int futureId);
 
-    public boolean updateDailyOpenPrice(double dailyOpenPrice, int futureId)
-    {
-        // 调用FuturesMapper的updateDailyOpenPrice方法更新期货的日开盘价
-        return futuresMapper.updateDailyOpenPrice(dailyOpenPrice, futureId);
-    }
+    boolean updateCurrentPrice(double currentPrice, int futureId);
 
-    public boolean updateDailyPrice(double dailyHighestPrice, double dailyLowestPrice, int futureId)
-    {
-        // 调用FuturesMapper的updateDailyPrice方法更新期货的日最高价和日最低价
-        return futuresMapper.updateDailyPrice(dailyHighestPrice, dailyLowestPrice, futureId);
-    }
+    double getDailyOpenPriceByFutureId(int futureId);
 
-    public boolean updateCurrentPrice(double currentPrice, int futureId)
-    {
-        // 调用FuturesMapper的updateCurrentPrice方法更新期货的当前价格
-        return futuresMapper.updateCurrentPrice(currentPrice, futureId);
-    }
+    double getDailyHighestPriceByFutureId(int futureId);
 
-    public double getDailyOpenPriceByFutureId(int futureId)
-    {
-        // 调用FuturesMapper的selectDailyOpenPriceByFutureId方法查询期货的日开盘价
-        return futuresMapper.selectDailyOpenPriceByFutureId(futureId);
-    }
-
-    public double getDailyHighestPriceByFutureId(int futureId)
-    {
-        // 调用FuturesMapper的selectDailyHighestPriceByFutureId方法查询期货的日最高价
-        return futuresMapper.selectDailyHighestPriceByFutureId(futureId);
-    }
-
-    public double getDailyLowestPriceByFutureId(int futureId)
-    {
-        // 调用FuturesMapper的selectDailyLowestPriceByFutureId方法查询期货的日最低价
-        return futuresMapper.selectDailyLowestPriceByFutureId(futureId);
-    }
+    double getDailyLowestPriceByFutureId(int futureId);
 }

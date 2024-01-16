@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("position")
-public class Position
+public class PositionEntity
 {
 
     private int positionId;

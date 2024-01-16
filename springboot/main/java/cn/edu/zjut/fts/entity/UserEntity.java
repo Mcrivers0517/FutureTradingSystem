@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("transaction")
-
-public class Transaction
+@TableName("user")
+public class UserEntity
 {
-    private int transactionid;
-    private int delegateid;
-    private double serviceFee;
-    private String transactionTime;
+
+    private int userId;
+    private String username;
+    private String password;
+    private String avatarUrl;
 }

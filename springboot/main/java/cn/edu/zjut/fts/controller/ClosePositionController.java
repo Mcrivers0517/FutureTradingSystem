@@ -1,14 +1,14 @@
 package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.request.ClosePositionRequest;
-import cn.edu.zjut.fts.entity.Delegate;
-import cn.edu.zjut.fts.entity.Position;
-import cn.edu.zjut.fts.entity.Transaction;
+import cn.edu.zjut.fts.entity.DelegateEntity;
+import cn.edu.zjut.fts.entity.PositionEntity;
+import cn.edu.zjut.fts.entity.TransactionEntity;
 import cn.edu.zjut.fts.response.ClosePositionResponse;
 import cn.edu.zjut.fts.service.DelegateService;
-import cn.edu.zjut.fts.service.PositionService;
-import cn.edu.zjut.fts.service.TransactionService;
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.service.PositionServiceImpl;
+import cn.edu.zjut.fts.service.TransactionServiceImpl;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,13 +35,13 @@ public class ClosePositionController
     private DelegateService delegateService;
 
     @Autowired
-    private PositionService positionService;
+    private PositionServiceImpl positionServiceImpl;
 
     @Autowired
-    private TransactionService transactionService;
+    private TransactionServiceImpl transactionServiceImpl;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/closePosition")
     public ClosePositionResponse closePosition(@RequestBody ClosePositionRequest request)
@@ -71,32 +71,32 @@ public class ClosePositionController
             String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
 
             //获取持仓表中对应id的数据
-            Position position = positionService.getPositionById(positionId);
+            PositionEntity positionEntity = positionServiceImpl.getPositionById(positionId);
 //        System.out.println(position);
 
             //根据positionId找到对应的持仓记录对Amount进行减去closeAmount操作
-            positionService.updateAmountPositionById(positionId, closeAmount);
+            positionServiceImpl.updateAmountPositionById(positionId, closeAmount);
 
             //添加平仓的委托记录
-            Delegate delegate = new Delegate();
-            System.out.println("buy2open".equals(position.getAttribute()));
+            DelegateEntity delegateEntity = new DelegateEntity();
+            System.out.println("buy2open".equals(positionEntity.getAttribute()));
 
             //设置attribute
-            if ("buy2open".equals(position.getAttribute()))
+            if ("buy2open".equals(positionEntity.getAttribute()))
             {
-                delegate.setAttribute("buy2close");
+                delegateEntity.setAttribute("buy2close");
             }
             else
             {
-                delegate.setAttribute("sell2close");
+                delegateEntity.setAttribute("sell2close");
             }
             //设置status,amount,delegatePrice,delegateTime,FutureId,UserId
-            delegate.setStatus("已成");
-            delegate.setAmount(closeAmount);
-            delegate.setDelegatePrice(position.getCurrentPrice());
-            delegate.setDelegateTime(formattedDateTime);
-            delegate.setFutureId(position.getFutureId());
-            delegate.setUserId(position.getUserId());
+            delegateEntity.setStatus("已成");
+            delegateEntity.setAmount(closeAmount);
+            delegateEntity.setDelegatePrice(positionEntity.getCurrentPrice());
+            delegateEntity.setDelegateTime(formattedDateTime);
+            delegateEntity.setFutureId(positionEntity.getFutureId());
+            delegateEntity.setUserId(positionEntity.getUserId());
 
             //设置交割日期
             int dayOfMonth = date.getDayOfMonth();
@@ -106,34 +106,34 @@ public class ClosePositionController
                 // 如果 currentTime 的日期小于 20，设置 deliveryDate 为同月的第 20 天
                 LocalDate deliveryDate = date.withDayOfMonth(20);
                 String formattedDeliveryDate = deliveryDate.format(dataFormatter); // 格式化日期部分
-                delegate.setDeliveryDate(formattedDeliveryDate);
+                delegateEntity.setDeliveryDate(formattedDeliveryDate);
             }
             else
             {
                 // 如果 currentTime 的日期大于等于 20，设置 deliveryDate 为下一个月的第 20 天
                 LocalDate deliveryDate = date.plusMonths(1).withDayOfMonth(20);
                 String formattedDeliveryDate = deliveryDate.format(dataFormatter);
-                delegate.setDeliveryDate(formattedDeliveryDate);
+                delegateEntity.setDeliveryDate(formattedDeliveryDate);
             }
 
             //插入委托记录
-            System.out.println(delegate);
-            delegateService.addDelegate(delegate);
+            System.out.println(delegateEntity);
+            delegateService.addDelegate(delegateEntity);
 
             //更新成交记录
-            Transaction transaction = new Transaction();
-            transaction.setServiceFee(25);
-            transaction.setTransactionTime(formattedDateTime);
-            transaction.setDelegateid(delegateService.getDelegateIdByTime(delegate.getDelegateTime()));
-            System.out.println(transaction);
-            transactionService.addTransaction(transaction);
+            TransactionEntity transactionEntity = new TransactionEntity();
+            transactionEntity.setServiceFee(25);
+            transactionEntity.setTransactionTime(formattedDateTime);
+            transactionEntity.setDelegateid(delegateService.getDelegateIdByTime(delegateEntity.getDelegateTime()));
+            System.out.println(transactionEntity);
+            transactionServiceImpl.addTransaction(transactionEntity);
 
             //更新用户钱包
-            double userProfit = closeAmount * position.getProfitLoss() - 25;
-            double productProfit = closeAmount * position.getEntryPrice() * (-1);
+            double userProfit = closeAmount * positionEntity.getProfitLoss() - 25;
+            double productProfit = closeAmount * positionEntity.getEntryPrice() * (-1);
             System.out.println(userProfit + "   " + productProfit);
-            userService.updateDepositByUserID(position.getUserId(), userProfit);
-            userService.updateInitialCapitalByUserID(position.getUserId(), productProfit);
+            userServiceImpl.updateDepositByUserID(positionEntity.getUserId(), userProfit);
+            userServiceImpl.updateInitialCapitalByUserID(positionEntity.getUserId(), productProfit);
 
             return new ClosePositionResponse(true);
         }

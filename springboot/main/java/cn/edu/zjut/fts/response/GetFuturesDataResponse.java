@@ -1,6 +1,6 @@
 package cn.edu.zjut.fts.response;
 
-import cn.edu.zjut.fts.entity.Futures;
+import cn.edu.zjut.fts.entity.FuturesEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GetFuturesDataResponse
 {
-    List<Futures> response;
+    List<FuturesEntity> response;
 }

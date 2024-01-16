@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Futures
+public class FuturesEntity
 {
     private double price;
     private int volume;

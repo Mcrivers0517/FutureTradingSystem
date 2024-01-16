@@ -1,6 +1,6 @@
 package cn.edu.zjut.fts.response;
 
-import cn.edu.zjut.fts.entity.Delegate;
+import cn.edu.zjut.fts.entity.DelegateEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GetHistoricalDelegateResponse
 {
-    List<Delegate> response;
+    List<DelegateEntity> response;
 }

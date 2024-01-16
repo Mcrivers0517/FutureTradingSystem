@@ -1,11 +1,8 @@
 package cn.edu.zjut.fts.controller;
 
-import cn.edu.zjut.fts.entity.User;
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.entity.UserEntity;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.ApiOperation;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +24,7 @@ import java.nio.file.Paths;
 public class AvatarUploadController
 {
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/uploadAvatar")
     @ApiOperation(value = "上传文件并保存", notes = "测试上传功能")
@@ -60,7 +57,7 @@ public class AvatarUploadController
 
             System.out.println(avatarUrl);
 
-            int rowsAffected = userService.updateAvatarUrlByUsername(username, avatarUrl);
+            int rowsAffected = userServiceImpl.updateAvatarUrlByUsername(username, avatarUrl);
             if (rowsAffected > 0)
             {
                 System.out.println("success");
@@ -78,12 +75,12 @@ public class AvatarUploadController
 
     @PostMapping("/getUserAvatar")
     @ApiOperation(value = "获取用户头像", notes = "根据用户名获取用户头像")
-    public ResponseEntity<byte[]> getUserAvatar(@RequestBody User request)
+    public ResponseEntity<byte[]> getUserAvatar(@RequestBody UserEntity request)
     {
         try
         {
             String username = request.getUsername();
-            String avatarUrl = userService.getAvatarUrlByUsername(username);
+            String avatarUrl = userServiceImpl.getAvatarUrlByUsername(username);
 
             if (avatarUrl != null)
             {

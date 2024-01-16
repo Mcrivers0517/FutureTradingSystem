@@ -7,14 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("delegate")
-public class Delegate
+public class DelegateEntity
 {
     private int delegateId;
     private int futureId;

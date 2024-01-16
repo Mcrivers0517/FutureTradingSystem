@@ -2,7 +2,7 @@ package cn.edu.zjut.fts.controller;
 
 import cn.edu.zjut.fts.request.RegisterRequest;
 import cn.edu.zjut.fts.response.RegisterResponse;
-import cn.edu.zjut.fts.service.UserService;
+import cn.edu.zjut.fts.service.UserServiceImpl;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class RegisterController
 {
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody RegisterRequest request)
@@ -24,7 +24,7 @@ public class RegisterController
         String password = request.getPassword();
 
         // 直接保存用户信息到数据库
-        if (userService.registerUser(username, password) > 0)
+        if (userServiceImpl.registerUser(username, password) > 0)
         {
             return new RegisterResponse(true);
         }
