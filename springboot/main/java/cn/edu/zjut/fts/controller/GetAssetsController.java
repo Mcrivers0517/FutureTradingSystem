@@ -25,12 +25,10 @@ public class GetAssetsController
     private PositionServiceImpl positionServiceImpl;
 
     @PostMapping("/getAssets")
-    public GetAssetsResponse login(@RequestBody GetAssetsRequest request)
+    public GetAssetsResponse getAssets(@RequestBody GetAssetsRequest request)
     {
         //获取request属性
         int userId = request.getUserId();
-
-        System.out.println(request);
 
         //获取保证金
         GetAssetsResponse response = new GetAssetsResponse();

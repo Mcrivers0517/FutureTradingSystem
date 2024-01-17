@@ -7,7 +7,7 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "撤销委托订单模块")
+@Api(tags = "注册模块")
 @CrossOrigin
 @RestController
 public class RegisterController
@@ -24,11 +24,13 @@ public class RegisterController
         String password = request.getPassword();
 
         // 直接保存用户信息到数据库
-        if (userServiceImpl.registerUser(username, password) > 0)
+        try
         {
-            return new RegisterResponse(true);
+            userServiceImpl.registerUser(username, password);
+            System.out.println("test");
+            return new RegisterResponse(false);
         }
-        else
+        catch (Exception e)
         {
             return new RegisterResponse(false);
         }

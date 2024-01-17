@@ -29,5 +29,5 @@ public interface PositionMapper extends BaseMapper<PositionEntity>
     List<PositionEntity> getPositionByUserId(@Param("userId") int userId);
 
     @Select("select * from `position` where futureId = #{futureId}")
-    List<PositionEntity> selectAPositionsByFutureId(@Param("futureId") int currentIndex);
+    List<PositionEntity> selectPositionsByFutureId(@Param("futureId") int currentIndex);
 }

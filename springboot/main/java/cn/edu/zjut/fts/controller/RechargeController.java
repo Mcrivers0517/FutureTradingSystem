@@ -18,7 +18,6 @@ public class RechargeController
     @PostMapping("/recharge")
     public RechargeResponse recharge(@RequestBody RechargeRequest request)
     {
-        System.out.println(request);
         if (userServiceImpl.recharge(request.getUserId(), request.getRechargeAmount()) == 1)
         {
             return new RechargeResponse(true);

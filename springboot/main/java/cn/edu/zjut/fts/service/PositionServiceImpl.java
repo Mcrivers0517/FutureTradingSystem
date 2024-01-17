@@ -58,6 +58,6 @@ public class PositionServiceImpl implements PositionService
     public List<PositionEntity> getPositionsByFutureId(int futureId)
     {
         // 调用PositionMapper的selectAPositionsByFutureId方法查询特定期货的所有持仓信息
-        return positionMapper.selectAPositionsByFutureId(futureId);
+        return positionMapper.selectPositionsByFutureId(futureId);
     }
 }
