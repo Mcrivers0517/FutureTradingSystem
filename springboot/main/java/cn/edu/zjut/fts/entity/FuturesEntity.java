@@ -1,5 +1,6 @@
 package cn.edu.zjut.fts.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName("futures")
 public class FuturesEntity
 {
     private double price;

@@ -43,7 +43,6 @@ public class GetFuturesDataController
             throws ParseException
     {
 
-        //0.获取前端信息
         List<String> tableNames = futuresServiceImpl.getAllTableNames();
 
         System.out.println(request);
@@ -55,7 +54,7 @@ public class GetFuturesDataController
 
 
         // 使用 LocalDateTime 直接获取日期和时间部分
-        LocalDateTime localDateTime = completeDateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(); // 转换为 LocalDateTime
+        LocalDateTime localDateTime = completeDateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         LocalDate date = localDateTime.toLocalDate(); // 获取日期部分（年月日）
         LocalTime time = localDateTime.toLocalTime(); // 获取时间部分（时分秒）
@@ -68,10 +67,6 @@ public class GetFuturesDataController
         String formattedDate = date.format(dataFormatter); // 格式化日期部分
         String formattedTime = time.format(timeFormatter); // 格式化时间部分
         String formattedDateTime = localDateTime.format(dataTimeFormatter); // 格式化日期时间部分
-
-//        System.out.println("日期部分：" + formattedDate);
-//        System.out.println("时间部分：" + formattedTime);
-//        System.out.println("日期时间部分：" + formattedDateTime);
 
         //1.返回当前时间期货数据
 
@@ -138,10 +133,6 @@ public class GetFuturesDataController
             futuresEntity.setDailyChange(futuresEntity.getPrice() - futuresEntity.getDailyOpenPrice());
             futuresEntity.setDailyChangeRatio(futuresEntity.getDailyChange() / futuresEntity.getDailyOpenPrice());
 
-//            futures.setPrice(futures.getPrice());
-//            futures.setVolume(futures.getVolume());
-
-
             // 2.更新委托表
             //2.0获取成交当前价格，当前时间
             double currentPrice = futuresEntity.getPrice();
@@ -156,9 +147,6 @@ public class GetFuturesDataController
                 //2.3更新委托表
                 if (delegateEntity.getAttribute().equals("buy2open"))
                 {
-//                    System.out.println("DelegatePrice" + delegate.getDelegatePrice());
-//                    System.out.println("currentPrice" + currentPrice);
-
                     if (delegateEntity.getDelegatePrice() >= currentPrice)
                     {
                         delegateService.updateDelegateStatusToDone(delegateEntity.getDelegateId());    // 将符合条件的订单之状态设置为“已成”
@@ -240,9 +228,7 @@ public class GetFuturesDataController
                         positionEntity.setCostPrice(currentPrice);
                         positionEntity.setEntryDate(formattedDateTime);
                         positionEntity.setLastUpdated(formattedDateTime);
-//                        System.out.println("attribute:" + delegate.getAttribute());
                         positionEntity.setAttribute(delegateEntity.getAttribute());
-//                        System.out.println("position:" + position);
                         positionServiceImpl.insertPosition(positionEntity);
                     }
                 }

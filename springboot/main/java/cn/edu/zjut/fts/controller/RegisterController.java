@@ -28,7 +28,7 @@ public class RegisterController
         {
             userServiceImpl.registerUser(username, password);
             System.out.println("test");
-            return new RegisterResponse(false);
+            return new RegisterResponse(true);
         }
         catch (Exception e)
         {

@@ -17,7 +17,7 @@ public class CancelDelegateController
     private DelegateService delegateService;
 
     @PostMapping("/cancelDelegate")
-    public CancelDelegateResponse cancelOrder(@RequestBody CancelDelegateRequest request)
+    public CancelDelegateResponse cancelDelegate(@RequestBody CancelDelegateRequest request)
     {
         int delegateId = request.getDelegateId();
         String status = delegateService.getDelegateStatus(delegateId);

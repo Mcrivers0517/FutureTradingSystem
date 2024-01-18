@@ -31,7 +31,7 @@ public class CreateDelegateController
     private UserServiceImpl userServiceImpl;
 
     @PostMapping("/createDelegate")
-    public CreateDelegateResponse buyOrSell(@RequestBody CreateDelegateRequest request)
+    public CreateDelegateResponse createDelegate(@RequestBody CreateDelegateRequest request)
             throws ParseException
     {
         System.out.println(request);
