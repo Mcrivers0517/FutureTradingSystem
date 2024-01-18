@@ -207,12 +207,17 @@ export default {
     };
   },
   created() {
-    this.getPositions();
-    // this.getUserInfo();
-    this.getAssets();
-    setTimeout(() => {
-      this.fetchAvatar();
-    }, 100);
+    if (this.$store.state.activeUserId == -1) {
+      alert("您还没有登录，请先登录！");
+      this.$router.push("/Login");
+    } else {
+      this.getPositions();
+      // this.getUserInfo();
+      this.getAssets();
+      setTimeout(() => {
+        this.fetchAvatar();
+      }, 100);
+    }
   },
   methods: {
     closePosition(row) {
@@ -271,6 +276,8 @@ export default {
       this.closeAmount = value;
     },
     logout() {
+      this.$store.state.activeUserId = -1;
+
       this.$router.push("/Login");
     },
     handleSelect(index) {
@@ -328,25 +335,11 @@ export default {
       this.deposit = responseData.deposit;
       console.log("responseData", response.data);
     },
-    // async getUserInfo() {
-    //   try {
-    //     const response = await axios.get("localhost:5000/getUserInfo");
-    //     const responseData = response.data;
-    //     this.avatarUrl = responseData.avatarUrl; //用户头像url
-    //     this.username = responseData.username; //用户名
-    //     this.userid = responseData.userid; //用户id
-    //     this.totalAssets = responseData.totalAssets; //用户总资产
-    //     this.totalProfitLoss = response.totalProfitLoss; //今日盈亏
-    //   } catch (error) {
-    //     console.error("Data Acquisition Failure:", error);
-    //   }
-    // },
     handleAvatarSuccess(res, file) {
       this.avatarUrl = URL.createObjectURL(file.raw);
     },
     fetchAvatar() {
       // 发送请求到后端获取图像
-      console.log("---------------------------------------", this.username);
       axios
         .post(
           "/getUserAvatar",

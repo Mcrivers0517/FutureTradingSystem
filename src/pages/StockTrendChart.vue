@@ -163,7 +163,7 @@
                     native-type="submit"
                     @click="buy"
                     id="buyButton"
-                    >买入</el-button
+                    >买开</el-button
                   >
                 </div>
               </div>
@@ -197,7 +197,7 @@
                     native-type="submit"
                     @click="sell"
                     id="sellButton"
-                    >卖出</el-button
+                    >卖开</el-button
                   >
                 </div>
               </div>
@@ -326,17 +326,18 @@ export default {
     };
   },
   mounted() {
-    // console.log(
-    //   "times",
-    //   this.$store.state.chartData[this.$store.state.activeRowNumber].times
-    //     .length
-    // );
-    this.startPriceDataFetch();
+    if (this.$store.state.activeUserId != -1) {
+      this.startPriceDataFetch();
+    }
     document
       .getElementById("price-trend-chart")
       .addEventListener("wheel", this.handleMouseWheel);
   },
   created() {
+    if (this.$store.state.activeUserId == -1) {
+      alert("您还没有登录，请先登录！");
+      this.$router.push("/Login");
+    }
     if (
       this.$store.state.chartData[this.$store.state.activeRowNumber].times
         .length == 0
@@ -369,10 +370,6 @@ export default {
     }
     this.getCurrentDelegate();
     this.getHistoricalDelegate();
-    // console.log("accumulatedVolume", this.accumulatedVolume);
-    // this.getCurrentOrders();
-    // this.getHistoricalOrders();
-    // this.chartData.price = this.generateStockData()
   },
   methods: {
     getNextMinute(currentTime) {
@@ -396,6 +393,7 @@ export default {
     logout() {
       this.$store.state.tempVolume[this.$store.state.activeRowNumber] =
         this.accumulatedVolume;
+      this.$store.state.activeUserId = -1;
       clearInterval(this.timerId);
       this.$router.push("/Login");
     },
@@ -439,15 +437,15 @@ export default {
           }
         );
         console.log(response);
-        if (response.data.result == "撤销订单成功") {
+        if (response.data.response == "撤销订单成功") {
           console.log(111111);
-          alert(response.data.result);
+          alert(response.data.response);
           // 从 CurrentDelegateData 中移除对应的订单
           this.CurrentDelegateData = this.CurrentDelegateData.filter(
             (delegate) => delegate.delegateId !== row.delegateId
           );
         } else {
-          alert(response.data.result);
+          alert(response.data.response);
         }
       } catch (error) {
         console.error("Error during cancel operation:", error);
@@ -476,9 +474,9 @@ export default {
           payload
         );
 
-        console.log(response.data);
+        // console.log("1111111111", response.data.response.result);
 
-        if (response.data.result == false) {
+        if (response.data.response == false) {
           alert("保证金不足订单金额的10%，委托订单创建失败");
         } else {
           alert("订单创建成功");
@@ -707,7 +705,6 @@ export default {
       option.yAxis[0].max = maxPrice;
       option.yAxis[0].min = minPrice;
 
-      // 更新图表
       this.myChart.setOption(option);
     },
 
@@ -753,19 +750,12 @@ export default {
         this.dailyChangeRatio =
           this.$store.state.dailyChangeRatio[this.$store.state.activeRowNumber];
 
-        // console.log("222", this.$store.state.chartData[this.$store.state.activeRowNumber].price);
-
         let newPrice =
           this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
             .price[
             this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
               .price.length - 1
           ];
-
-        // console.log(
-        //   "111",
-        //   this.$store.state.dailyHighestPrice[this.$store.state.activeRowNumber]
-        // );
 
         // 获取新的交易量并累加
         let newVolume =
@@ -774,14 +764,6 @@ export default {
             this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
               .tradeVolume.length - 1
           ];
-        // console.log(
-        //   this.$store.state.chartData[this.$store.state.activeRowNumber]
-        //     .tradeVolume[
-        //     this.$store.state.chartData[this.$store.state.activeRowNumber]
-        //       .tradeVolume.length - 1
-        //   ]
-        // );
-
         this.accumulatedVolume += newVolume;
 
         // 每秒更新价格，每分钟更新时间和价格点
@@ -800,15 +782,6 @@ export default {
           // console.log(currentSecond);
           currentSecond++;
         } else {
-          // 一分钟结束，更新时间标签和价格点
-          // console.log(
-          //   this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
-          //     .times[
-          //     this.$store.state.chartSecondData[
-          //       this.$store.state.activeRowNumber
-          //     ].times.length - 1
-          //   ]
-          // );
           const newTime = this.getNextMinute(
             this.$store.state.chartSecondData[this.$store.state.activeRowNumber]
               .times[
@@ -1466,4 +1439,3 @@ export default {
   margin: 0 auto;
 }
 </style>
-

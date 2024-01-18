@@ -90,7 +90,8 @@ export default {
       axios.post("http://localhost:5000/register", request).then((response) => {
         const result = response.data;
         console.log(result);
-        if (result) {
+        console.log(result.response);
+        if (result.response) {
           alert("注册成功，请返回登录界面登录");
           this.$router.push("/Login");
         } else {

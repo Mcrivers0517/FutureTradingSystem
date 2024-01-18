@@ -83,6 +83,10 @@ export default {
     };
   },
   mounted() {
+    if (this.$store.state.activeUserId == -1) {
+      alert("您还没有登录，请先登录！");
+      this.$router.push("/Login");
+    }
     setTimeout(() => {
       this.getMarketData();
     }, 1500); // 等待1.5秒钟后调用 getMarketData 方法(等待this.$store.state.dailyChange 等属性正确初始化)
@@ -122,6 +126,8 @@ export default {
     },
 
     logout() {
+      this.$store.state.activeUserId = -1;
+
       this.$router.push("/Login");
     },
     handleSelect(index) {

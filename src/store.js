@@ -32,7 +32,7 @@ export default new Vuex.Store({
         dailyChangeRatio: [],
         tempVolume: [],
         activeRowNumber: 0,
-        activeUserId: 0,
+        activeUserId: -1,
         transacted: false,
         transactedDelegateId: 0,
     },

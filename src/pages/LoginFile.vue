@@ -74,15 +74,13 @@ export default {
     async login() {
       if (this.username === "" || this.password === "") {
         alert("用户名或密码不能为空，请填写完整！");
+        return;
       }
       const request = {
         username: this.username,
         password: this.password,
       };
       console.log(request);
-      // else {
-      //   this.$router.push("/");
-      // }
       axios
         .post("http://localhost:5000/login", request)
         .then((response) => {

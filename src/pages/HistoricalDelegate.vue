@@ -49,16 +49,25 @@
             height="600"
             :header-cell-style="{ 'text-align': 'center' }"
           >
-            <el-table-column prop="futureId" label="品种" align="center" width="80"> </el-table-column>
+            <el-table-column
+              prop="futureId"
+              label="品种"
+              align="center"
+              width="80"
+            >
+            </el-table-column>
             <el-table-column prop="delegateId" label="流水号" align="center">
             </el-table-column>
             <el-table-column prop="delegateTime" label="日期" align="center">
             </el-table-column>
-            <el-table-column prop="attribute" label="属性" align="center"> </el-table-column>
+            <el-table-column prop="attribute" label="属性" align="center">
+            </el-table-column>
             <el-table-column prop="delegatePrice" label="价格" align="center">
             </el-table-column>
-            <el-table-column prop="status" label="状态" align="center"> </el-table-column>
-            <el-table-column prop="amount" label="数量" align="center"> </el-table-column>
+            <el-table-column prop="status" label="状态" align="center">
+            </el-table-column>
+            <el-table-column prop="amount" label="数量" align="center">
+            </el-table-column>
             <el-table-column label="金额" align="center">
               <template slot-scope="scope">
                 {{ scope.row.delegatePrice * scope.row.amount }}
@@ -80,6 +89,10 @@ export default {
     };
   },
   mounted() {
+    if (this.$store.state.activeUserId == -1) {
+      alert("您还没有登录，请先登录！");
+      this.$router.push("/Login");
+    }
     this.getHistoricalDelegate();
   },
   methods: {
@@ -110,6 +123,8 @@ export default {
     },
 
     logout() {
+      this.$store.state.activeUserId = -1;
+
       this.$router.push("/Login");
     },
     handleSelect(index) {
